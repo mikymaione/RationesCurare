@@ -29,6 +29,20 @@ public class UserController {
         userRepository.deleteById(id);
     }
 
+    @PutMapping("/update")
+    public void update(@RequestParam Long id, @RequestParam String cognome, @RequestParam String nome, @RequestParam String email) {
+        Optional<UserEntity> o = userRepository.findById(id);
+
+        if (o.isPresent()) {
+            UserEntity u = o.get();
+            u.setCognome(cognome);
+            u.setNome(nome);
+            u.setEmail(email);
+            
+            userRepository.save(u);
+        }
+    }
+
     @PutMapping("/add")
     public void save(@RequestParam String cognome, @RequestParam String nome, @RequestParam String email) {
         userRepository.save(new UserEntity(cognome, nome, email));
