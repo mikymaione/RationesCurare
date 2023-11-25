@@ -1,17 +1,16 @@
 insert into DBInfo (
 	Nome,
-	Psw,	
-	Email,	
+	Psw,
 	SincronizzaDB,
 	UltimaModifica,
 	UltimoAggiornamentoDB,
-	Valuta
+	Valuta,
+	Email,
 ) values (
 	@Nome,
 	@Psw,	
-	@Email,	
 	@SincronizzaDB,
 	@UltimaModifica,
 	@UltimoAggiornamentoDB,
-	@Valuta
+	@Email
 )
