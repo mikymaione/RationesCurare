@@ -58,12 +58,16 @@ enum Queries {
 class QueryManager {
   static final _queries = <Queries, String>{};
 
-  static Future<String> getSql(BuildContext context, Queries query) async {
-    if (!_queries.containsKey(query)) {
-      final s = await DefaultAssetBundle.of(context).loadString('assets/sql/$query.sql');
-      _queries[query] = s;
-    }
+  static Future<String> getSql(BuildContext context, Queries? query) async {
+    if (query == null) {
+      throw UnimplementedError('Query');
+    } else {
+      if (!_queries.containsKey(query)) {
+        final s = await DefaultAssetBundle.of(context).loadString('assets/sql/$query.sql');
+        _queries[query] = s;
+      }
 
-    return _queries[query]!;
+      return _queries[query]!;
+    }
   }
 }
