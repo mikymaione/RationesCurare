@@ -13,6 +13,12 @@ enum Periodicita {
     required this.code,
     required this.label,
   });
+
+  factory Periodicita.fromCode(String code) => Periodicita.values
+      .where(
+        (e) => e.code == code,
+      )
+      .single;
 }
 
 class MovimentiTempo {
