@@ -34,4 +34,30 @@ class StoreMovimenti extends StoreBase<Movimenti> {
         e.data,
         e.macroArea,
       ];
+
+  Future<double> saldo({
+    required String tipo,
+    required String? descrizione,
+    required String? macroArea,
+    required bool usaSoldi,
+    required double soldiDa,
+    required double soldiA,
+    required bool usaData,
+    required double dataDa,
+    required double dataA,
+  }) async =>
+      db.select(
+        await QueryManager.getSql(Queries.Movimenti_Saldo),
+        [
+          tipo,
+          '%$descrizione%',
+          '%$macroArea%',
+          usaSoldi,
+          soldiDa,
+          soldiA,
+          usaData,
+          dataDa,
+          dataA,
+        ],
+      ).single['Saldo'];
 }
