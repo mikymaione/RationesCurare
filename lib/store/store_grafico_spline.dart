@@ -26,7 +26,7 @@ class StoreGraficoSpline extends StoreBase<Valute> {
           const [],
         )) ...[
           GraficoSpline(
-            mese: r['Mese'],
+            periodo: r['Mese'],
             soldi: r['Soldini_TOT'],
           ),
         ],

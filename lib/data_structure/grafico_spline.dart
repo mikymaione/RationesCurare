@@ -1,9 +1,9 @@
 class GraficoSpline {
-  final String mese;
+  final String periodo;
   final double soldi;
 
   const GraficoSpline({
-    required this.mese,
+    required this.periodo,
     required this.soldi,
   });
 }
