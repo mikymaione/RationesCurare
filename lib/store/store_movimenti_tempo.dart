@@ -1,10 +1,15 @@
 import 'package:rationes_curare/data_structure/movimenti_tempo.dart';
+import 'package:rationes_curare/store/query_manager.dart';
 import 'package:rationes_curare/store/store_base.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 class StoreMovimentiTempo extends StoreBase<MovimentiTempo> {
   const StoreMovimentiTempo({
     required super.db,
+    super.deleteQuery = Queries.Periodici_Elimina,
+    super.insertQuery = Queries.Periodici_Inserisci,
+    super.updateQuery = Queries.Periodici_Aggiorna,
+    super.listQuery = Queries.Periodici_Ricerca,
   });
 
   @override
