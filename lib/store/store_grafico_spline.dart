@@ -4,7 +4,7 @@ import 'package:rationes_curare/store/query_manager.dart';
 import 'package:rationes_curare/store/store_base.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-class StoreGraficoSpline extends StoreBase<Valute> {
+class StoreGraficoSpline extends StoreBase<Valute, String> {
   const StoreGraficoSpline({
     required super.db,
     super.deleteQuery,

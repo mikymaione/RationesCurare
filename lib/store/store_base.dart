@@ -1,7 +1,7 @@
 import 'package:rationes_curare/store/query_manager.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite;
 
-abstract class StoreBase<Entity> {
+abstract class StoreBase<Entity, idType> {
   final sqlite.Database db;
   final Queries? deleteQuery, insertQuery, updateQuery, getQuery, listQuery;
 
@@ -19,7 +19,7 @@ abstract class StoreBase<Entity> {
   List<Object?> entityToDb(Entity e);
 
   Future<void> delete(
-    int id,
+    idType id,
   ) async =>
       db.execute(
         await QueryManager.getSql(deleteQuery),
@@ -28,7 +28,7 @@ abstract class StoreBase<Entity> {
 
   Future<void> set(
     Entity e,
-    int? id,
+    idType? id,
   ) async =>
       db.execute(
         await QueryManager.getSql(id == null ? insertQuery : updateQuery),
@@ -41,7 +41,7 @@ abstract class StoreBase<Entity> {
       );
 
   Future<Entity> get(
-    int id,
+    idType id,
   ) async =>
       dbToEntity(
         db.select(

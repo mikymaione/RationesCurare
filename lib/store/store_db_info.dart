@@ -3,7 +3,7 @@ import 'package:rationes_curare/store/query_manager.dart';
 import 'package:rationes_curare/store/store_base.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-class StoreDbInfo extends StoreBase<DbInfo> {
+class StoreDbInfo extends StoreBase<DbInfo, String> {
   const StoreDbInfo({
     required super.db,
     super.deleteQuery,
