@@ -1,17 +1,17 @@
 class Movimenti {
-  final int id, idgiroconto, idmovimentitempo;
-  final String nome, tipo, descrizione, macroarea;
+  final int id, idGiroconto, idMovimentiTempo;
+  final String nome, tipo, descrizione, macroArea;
   final DateTime data;
   final double soldi;
 
   const Movimenti({
     required this.id,
-    required this.idgiroconto,
-    required this.idmovimentitempo,
+    required this.idGiroconto,
+    required this.idMovimentiTempo,
     required this.nome,
     required this.tipo,
     required this.descrizione,
-    required this.macroarea,
+    required this.macroArea,
     required this.data,
     required this.soldi,
   });
