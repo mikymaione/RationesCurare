@@ -1,9 +1,11 @@
-insert into Casse (
-	nome,
+insert into Casse (	
 	imgName,
-	Nascondi
-) values (
-	@nomenuovo,
+	valuta,
+	Nascondi,
+	nome
+) values (	
 	@imgName,
-	@Nascondi
+	@valuta,
+	@Nascondi,
+	@nome
 )
