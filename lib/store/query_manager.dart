@@ -1,8 +1,7 @@
 import 'package:flutter/services.dart' show rootBundle;
 
 enum Queries {
-  Aggiornamenti,
-  AggiornamentiDBUtente,
+  // Movimenti
   Movimenti_Inserisci,
   Movimenti_Aggiorna,
   Movimenti_AggiornaMacroAree,
@@ -22,34 +21,25 @@ enum Queries {
   Movimenti_GraficoTortaSaldo,
   Movimenti_GraficoSplineAnnuale,
   Movimenti_Data,
+
+  // Casse
   Casse_Ricerca,
   Casse_Elimina,
   Casse_Valute,
   Casse_Lista,
-  Casse_ListaEX,
   Casse_Inserisci,
   Casse_Aggiorna,
   Casse_Carica,
+
+  // Periodici
   Periodici_Dettaglio,
   Periodici_Ricerca,
-  Periodici_RicercaAccess,
   Periodici_Scadenza,
   Periodici_Elimina,
   Periodici_Inserisci,
   Periodici_Aggiorna,
-  Utenti_Lista,
-  Utenti_Inserisci,
-  Utenti_Aggiorna,
-  Utenti_Elimina,
-  Utenti_Dettaglio,
-  Utenti_ByPath,
-  Calendario_Ricerca,
-  Calendario_Inserisci,
-  Calendario_Aggiorna,
-  Calendario_AggiornaSerie,
-  Calendario_Elimina,
-  Calendario_EliminaSerie,
-  Calendario_Dettaglio,
+
+  // Db Info
   DBInfo_Dettaglio,
   DBInfo_Inserisci,
   DBInfo_Aggiorna,
@@ -60,7 +50,7 @@ class QueryManager {
 
   static Future<String> getSql(Queries? query) async {
     if (query == null) {
-      throw UnimplementedError('Query');
+      throw UnimplementedError('Query not defined');
     } else {
       if (!_queries.containsKey(query)) {
         final s = await rootBundle.loadString('assets/sql/$query.sql');

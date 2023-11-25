@@ -3,10 +3,12 @@ import 'package:rationes_curare/store/query_manager.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite;
 
 abstract class StoreBase<Entity, idType> extends DbBase {
+  final bool isAutoInc;
   final Queries? deleteQuery, insertQuery, updateQuery, getQuery, listQuery;
 
   const StoreBase({
     required super.db,
+    required this.isAutoInc,
     required this.deleteQuery,
     required this.insertQuery,
     required this.updateQuery,
@@ -34,7 +36,7 @@ abstract class StoreBase<Entity, idType> extends DbBase {
         await QueryManager.getSql(id == null ? insertQuery : updateQuery),
         entityToDb(e) +
             [
-              if (id != null) ...[
+              if (isAutoInc && id != null) ...[
                 id,
               ],
             ],

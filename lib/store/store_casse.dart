@@ -6,6 +6,7 @@ import 'package:sqlite3/sqlite3.dart';
 class StoreCasse extends StoreBase<Casse, String> {
   const StoreCasse({
     required super.db,
+    super.isAutoInc = false,
     super.deleteQuery = Queries.Casse_Elimina,
     super.insertQuery = Queries.Casse_Inserisci,
     super.updateQuery = Queries.Casse_Aggiorna,
@@ -23,10 +24,10 @@ class StoreCasse extends StoreBase<Casse, String> {
 
   @override
   List<Object?> entityToDb(Casse e) => [
-        e.nome,
         e.imgName,
         e.valuta,
         e.nascondi,
+        e.nome,
       ];
 
   Future<List<Casse>> ricerca({

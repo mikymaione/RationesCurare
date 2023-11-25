@@ -6,6 +6,7 @@ import 'package:sqlite3/sqlite3.dart';
 class StoreValute extends StoreBase<Valute, String> {
   const StoreValute({
     required super.db,
+    super.isAutoInc = false,
     super.deleteQuery,
     super.insertQuery,
     super.updateQuery,

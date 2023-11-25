@@ -6,6 +6,7 @@ import 'package:sqlite3/sqlite3.dart';
 class StoreMovimentiTempo extends StoreBase<MovimentiTempo, int> {
   const StoreMovimentiTempo({
     required super.db,
+    super.isAutoInc = true,
     super.deleteQuery = Queries.Periodici_Elimina,
     super.insertQuery = Queries.Periodici_Inserisci,
     super.updateQuery = Queries.Periodici_Aggiorna,

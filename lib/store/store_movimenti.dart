@@ -6,6 +6,7 @@ import 'package:sqlite3/sqlite3.dart';
 class StoreMovimenti extends StoreBase<Movimenti, int> {
   const StoreMovimenti({
     required super.db,
+    super.isAutoInc = true,
     super.deleteQuery = Queries.Movimenti_Elimina,
     super.insertQuery = Queries.Movimenti_Inserisci,
     super.updateQuery = Queries.Movimenti_Aggiorna,
