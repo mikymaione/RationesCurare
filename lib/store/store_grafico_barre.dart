@@ -1,24 +1,11 @@
 import 'package:rationes_curare/data_structure/grafico_barre.dart';
-import 'package:rationes_curare/data_structure/valute.dart';
+import 'package:rationes_curare/store/db_base.dart';
 import 'package:rationes_curare/store/query_manager.dart';
-import 'package:rationes_curare/store/store_base.dart';
-import 'package:sqlite3/sqlite3.dart';
 
-class StoreGraficoBarre extends StoreBase<Valute, String> {
+class StoreGraficoBarre extends DbBase {
   const StoreGraficoBarre({
     required super.db,
-    super.deleteQuery,
-    super.insertQuery,
-    super.updateQuery,
-    super.getQuery,
-    super.listQuery,
   });
-
-  @override
-  Valute dbToEntity(Row r) => throw UnimplementedError();
-
-  @override
-  List<Object?> entityToDb(Valute e) => throw UnimplementedError();
 
   Future<List<GraficoBarre>> graficoAnnuale({
     required String? descrizione,

@@ -1,12 +1,12 @@
+import 'package:rationes_curare/store/db_base.dart';
 import 'package:rationes_curare/store/query_manager.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite;
 
-abstract class StoreBase<Entity, idType> {
-  final sqlite.Database db;
+abstract class StoreBase<Entity, idType> extends DbBase {
   final Queries? deleteQuery, insertQuery, updateQuery, getQuery, listQuery;
 
   const StoreBase({
-    required this.db,
+    required super.db,
     required this.deleteQuery,
     required this.insertQuery,
     required this.updateQuery,
