@@ -9,6 +9,7 @@ class StoreMovimenti extends StoreBase<Movimenti> {
     super.deleteQuery = Queries.Movimenti_Elimina,
     super.insertQuery = Queries.Movimenti_Inserisci,
     super.updateQuery = Queries.Movimenti_Aggiorna,
+    super.getQuery = Queries.Movimenti_Dettaglio,
     super.listQuery = Queries.Movimenti_Ricerca,
   });
 
@@ -35,6 +36,31 @@ class StoreMovimenti extends StoreBase<Movimenti> {
         e.macroArea,
       ];
 
+  Future<void> ricerca({
+    required String tipo,
+    required String? descrizione,
+    required String? macroArea,
+    required bool usaSoldi,
+    required double soldiDa,
+    required double soldiA,
+    required bool usaData,
+    required DateTime dataDa,
+    required DateTime dataA,
+  }) async =>
+      await list(
+        [
+          tipo,
+          '%$descrizione%',
+          '%$macroArea%',
+          usaSoldi,
+          soldiDa,
+          soldiA,
+          usaData,
+          dataDa,
+          dataA,
+        ],
+      );
+
   Future<double> saldo({
     required String tipo,
     required String? descrizione,
@@ -43,8 +69,8 @@ class StoreMovimenti extends StoreBase<Movimenti> {
     required double soldiDa,
     required double soldiA,
     required bool usaData,
-    required double dataDa,
-    required double dataA,
+    required DateTime dataDa,
+    required DateTime dataA,
   }) async =>
       db.select(
         await QueryManager.getSql(Queries.Movimenti_Saldo),
@@ -60,4 +86,57 @@ class StoreMovimenti extends StoreBase<Movimenti> {
           dataA,
         ],
       ).single['Saldo'];
+
+  Future<void> movimentiPerCassa({
+    required String tipo,
+  }) async =>
+      db.select(
+        await QueryManager.getSql(Queries.Movimenti_Saldo),
+        [tipo],
+      ).single['Tot'];
+
+  Future<MovimentiDate> data() async {
+    final r = db.select(
+      await QueryManager.getSql(Queries.Movimenti_Data),
+      const [],
+    ).single;
+
+    return MovimentiDate(
+      minData: r['minData'],
+      maxData: r['maxData'],
+    );
+  }
+
+  Future<List<MovimentiMacroAreaAndDescrizione>> macroAreeAndDescrizioni() async => [
+        for (final r in db.select(
+          await QueryManager.getSql(Queries.Movimenti_GetMacroAree_E_Descrizioni),
+          const [],
+        )) ...[
+          MovimentiMacroAreaAndDescrizione(
+            macroArea: r['MacroArea'],
+            descrizione: r['descrizione'],
+          ),
+        ],
+      ];
+
+  Future<List<String>> descrizioni() async => [
+        for (final r in db.select(
+          await QueryManager.getSql(Queries.Movimenti_AutoCompleteSource),
+          const [],
+        )) ...[
+          r['descrizione'],
+        ],
+      ];
+
+  Future<List<String>> macroAree({
+    required bool useMacroArea,
+  }) async =>
+      [
+        for (final r in db.select(
+          await QueryManager.getSql(Queries.Movimenti_AutoCompleteSourceMA),
+          const [],
+        )) ...[
+          r['MacroArea'],
+        ],
+      ];
 }

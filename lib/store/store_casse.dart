@@ -9,6 +9,7 @@ class StoreCasse extends StoreBase<Casse> {
     super.deleteQuery = Queries.Casse_Elimina,
     super.insertQuery = Queries.Casse_Inserisci,
     super.updateQuery = Queries.Casse_Aggiorna,
+    super.getQuery = Queries.Casse_Carica,
     super.listQuery = Queries.Casse_Ricerca,
   });
 
@@ -27,4 +28,14 @@ class StoreCasse extends StoreBase<Casse> {
         e.valuta,
         e.nascondi,
       ];
+
+  Future<List<Casse>> ricerca({
+    required bool mostraTutte,
+  }) async =>
+      await list([mostraTutte]);
+
+  Future<List<Casse>> lista() async => await select(
+        Queries.Casse_Lista,
+        const [],
+      );
 }

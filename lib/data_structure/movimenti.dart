@@ -16,3 +16,21 @@ class Movimenti {
     required this.soldi,
   });
 }
+
+class MovimentiDate {
+  final DateTime minData, maxData;
+
+  const MovimentiDate({
+    required this.minData,
+    required this.maxData,
+  });
+}
+
+class MovimentiMacroAreaAndDescrizione {
+  final String macroArea, descrizione;
+
+  const MovimentiMacroAreaAndDescrizione({
+    required this.macroArea,
+    required this.descrizione,
+  });
+}

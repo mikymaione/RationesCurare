@@ -9,6 +9,7 @@ class StoreValute extends StoreBase<Valute> {
     super.deleteQuery,
     super.insertQuery,
     super.updateQuery,
+    super.getQuery,
     super.listQuery = Queries.Casse_Valute,
   });
 
@@ -23,4 +24,6 @@ class StoreValute extends StoreBase<Valute> {
         e.valuta,
         e.descrizione,
       ];
+
+  Future<List<Valute>> lista() async => await list(const []);
 }

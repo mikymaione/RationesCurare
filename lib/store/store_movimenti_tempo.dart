@@ -9,6 +9,7 @@ class StoreMovimentiTempo extends StoreBase<MovimentiTempo> {
     super.deleteQuery = Queries.Periodici_Elimina,
     super.insertQuery = Queries.Periodici_Inserisci,
     super.updateQuery = Queries.Periodici_Aggiorna,
+    super.getQuery = Queries.Periodici_Dettaglio,
     super.listQuery = Queries.Periodici_Ricerca,
   });
 
@@ -40,4 +41,19 @@ class StoreMovimentiTempo extends StoreBase<MovimentiTempo> {
         e.tipoGiorniMese.code,
         e.macroArea,
       ];
+
+  Future<List<MovimentiTempo>> ricerca() async => await list(const []);
+
+  Future<List<MovimentiTempo>> scadenza({
+    required DateTime dataDa,
+    required DateTime dataA,
+  }) async =>
+      await list(
+        [
+          dataDa,
+          dataA,
+          dataDa,
+          dataA,
+        ],
+      );
 }

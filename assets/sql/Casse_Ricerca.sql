@@ -2,6 +2,6 @@
 	*
 from Casse
 where
-	((@MostraTutte = 1) or (Nascondi = 0))
+	((@MostraTutte = true) or (Nascondi = 0))
 order by
 	Nome
