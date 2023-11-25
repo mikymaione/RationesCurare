@@ -1,5 +1,6 @@
 class GraficoTorta {
-  final String macroArea, soldi;
+  final String macroArea;
+  final double soldi;
 
   const GraficoTorta({
     required this.macroArea,
