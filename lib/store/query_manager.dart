@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 enum Queries {
   Aggiornamenti,
@@ -58,12 +58,12 @@ enum Queries {
 class QueryManager {
   static final _queries = <Queries, String>{};
 
-  static Future<String> getSql(BuildContext context, Queries? query) async {
+  static Future<String> getSql(Queries? query) async {
     if (query == null) {
       throw UnimplementedError('Query');
     } else {
       if (!_queries.containsKey(query)) {
-        final s = await DefaultAssetBundle.of(context).loadString('assets/sql/$query.sql');
+        final s = await rootBundle.loadString('assets/sql/$query.sql');
         _queries[query] = s;
       }
 
