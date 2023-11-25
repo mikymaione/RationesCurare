@@ -51,6 +51,7 @@ class StoreMovimenti extends StoreBase<Movimenti, int> {
       await list(
         [
           tipo,
+          tipo,
           '%$descrizione%',
           '%$macroArea%',
           usaSoldi,
@@ -77,6 +78,7 @@ class StoreMovimenti extends StoreBase<Movimenti, int> {
         await QueryManager.getSql(Queries.Movimenti_Saldo),
         [
           tipo,
+          tipo,
           '%$descrizione%',
           '%$macroArea%',
           usaSoldi,
@@ -92,7 +94,7 @@ class StoreMovimenti extends StoreBase<Movimenti, int> {
     required String tipo,
   }) async =>
       db.select(
-        await QueryManager.getSql(Queries.Movimenti_Saldo),
+        await QueryManager.getSql(Queries.Movimenti_MovimentiPerCassa),
         [tipo],
       ).single['Tot'];
 
