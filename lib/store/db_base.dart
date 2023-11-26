@@ -8,6 +8,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 import 'package:sqlite3/sqlite3.dart';
 
-mixin DbBase {
-  Database get db;
+abstract class DbBase {
+  final Database db;
+
+  const DbBase({
+    required this.db,
+  });
 }

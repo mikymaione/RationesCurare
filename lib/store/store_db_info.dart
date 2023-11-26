@@ -15,15 +15,10 @@ import 'package:rationes_curare/store/entity_to_db.dart';
 import 'package:rationes_curare/store/query_manager.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-final class StoreDbInfo with DbBase, EntityToDb<DbInfo>, DbToEntity<DbInfo>, DbSet<DbInfo, String>, DbGet<DbInfo, String> {
-  final Database database;
-
+final class StoreDbInfo extends DbBase with EntityToDb<DbInfo>, DbToEntity<DbInfo>, DbSet<DbInfo, String>, DbGet<DbInfo, String> {
   const StoreDbInfo({
-    required this.database,
+    required super.db,
   });
-
-  @override
-  Database get db => database;
 
   @override
   bool get isAutoInc => false;

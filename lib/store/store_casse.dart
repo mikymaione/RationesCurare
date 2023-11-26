@@ -18,15 +18,10 @@ import 'package:rationes_curare/store/entity_to_db.dart';
 import 'package:rationes_curare/store/query_manager.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-final class StoreCasse with DbBase, EntityToDb<Casse>, DbToEntity<Casse>, DbSet<Casse, String>, DbDelete<Casse, String>, DbGet<Casse, String>, DbSelect<Casse>, DbList<Casse> {
-  final Database database;
-
+final class StoreCasse extends DbBase with EntityToDb<Casse>, DbToEntity<Casse>, DbSet<Casse, String>, DbDelete<Casse, String>, DbGet<Casse, String>, DbSelect<Casse>, DbList<Casse> {
   const StoreCasse({
-    required this.database,
+    required super.db,
   });
-
-  @override
-  Database get db => database;
 
   @override
   bool get isAutoInc => false;

@@ -18,15 +18,10 @@ import 'package:rationes_curare/store/entity_to_db.dart';
 import 'package:rationes_curare/store/query_manager.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-final class StoreMovimenti with DbBase, EntityToDb<Movimenti>, DbToEntity<Movimenti>, DbSet<Movimenti, int>, DbDelete<Movimenti, int>, DbGet<Movimenti, int>, DbSelect<Movimenti>, DbList<Movimenti> {
-  final Database database;
-
+final class StoreMovimenti extends DbBase with EntityToDb<Movimenti>, DbToEntity<Movimenti>, DbSet<Movimenti, int>, DbDelete<Movimenti, int>, DbGet<Movimenti, int>, DbSelect<Movimenti>, DbList<Movimenti> {
   const StoreMovimenti({
-    required this.database,
+    required super.db,
   });
-
-  @override
-  Database get db => database;
 
   @override
   bool get isAutoInc => true;

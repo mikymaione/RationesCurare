@@ -9,17 +9,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 import 'package:rationes_curare/data_structure/grafico_torta.dart';
 import 'package:rationes_curare/store/db_base.dart';
 import 'package:rationes_curare/store/query_manager.dart';
-import 'package:sqlite3/sqlite3.dart';
 
-final class StoreGraficoTorta with DbBase {
-  final Database database;
-
+final class StoreGraficoTorta extends DbBase {
   const StoreGraficoTorta({
-    required this.database,
+    required super.db,
   });
-
-  @override
-  Database get db => database;
 
   Future<List<GraficoTorta>> grafico({
     required int sPos,

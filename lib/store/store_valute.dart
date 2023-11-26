@@ -14,15 +14,10 @@ import 'package:rationes_curare/store/db_to_entity.dart';
 import 'package:rationes_curare/store/query_manager.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-final class StoreValute with DbBase, DbToEntity<Valute>, DbSelect<Valute>, DbList<Valute> {
-  final Database database;
-
+final class StoreValute extends DbBase with DbToEntity<Valute>, DbSelect<Valute>, DbList<Valute> {
   const StoreValute({
-    required this.database,
+    required super.db,
   });
-
-  @override
-  Database get db => database;
 
   @override
   Queries get listQuery => Queries.Casse_Valute;
