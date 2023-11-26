@@ -6,17 +6,16 @@ Copyright (c) 2023 Michele Maione
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-import 'dart:typed_data';
+import 'package:sqlite3/common.dart' show CommonDatabase;
+import 'package:sqlite3/wasm.dart' show IndexedDbFileSystem, WasmSqlite3;
 
-class Casse {
-  final String nome, valuta;
-  final Uint8List imgName;
-  final int nascondi;
+Future<CommonDatabase> openSqliteDb(String folder, String name) async {
+  // Please download `sqlite3.wasm` from https://github.com/simolus3/sqlite3.dart/releases
+  // into the `web/` dir of your Flutter app. See `README.md` for details.
+  final sqlite = await WasmSqlite3.loadFromUrl(Uri.parse('sqlite3.wasm'));
+  final fileSystem = await IndexedDbFileSystem.open(dbName: name);
 
-  const Casse({
-    required this.nome,
-    required this.imgName,
-    required this.valuta,
-    required this.nascondi,
-  });
+  sqlite.registerVirtualFileSystem(fileSystem, makeDefault: true);
+
+  return sqlite.open(name);
 }

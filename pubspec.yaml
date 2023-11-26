@@ -22,7 +22,9 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.2
+  path_provider: ^2.1.1
   sqlite3: ^2.1.0
+  sqlite3_flutter_libs: ^0.5.18
 
 dev_dependencies:
   flutter_test:

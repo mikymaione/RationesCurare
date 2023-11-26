@@ -1,1 +1,1 @@
-flutter run -d web-server --web-port 9090
+flutter run -d windows
