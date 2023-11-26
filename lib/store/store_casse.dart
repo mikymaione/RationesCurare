@@ -7,20 +7,44 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 import 'package:rationes_curare/data_structure/Casse.dart';
+import 'package:rationes_curare/store/db_base.dart';
+import 'package:rationes_curare/store/db_delete.dart';
+import 'package:rationes_curare/store/db_get.dart';
+import 'package:rationes_curare/store/db_list.dart';
+import 'package:rationes_curare/store/db_select.dart';
+import 'package:rationes_curare/store/db_set.dart';
+import 'package:rationes_curare/store/db_to_entity.dart';
+import 'package:rationes_curare/store/entity_to_db.dart';
 import 'package:rationes_curare/store/query_manager.dart';
-import 'package:rationes_curare/store/store_base.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-class StoreCasse extends StoreBase<Casse, String> {
+final class StoreCasse with DbBase, EntityToDb<Casse>, DbToEntity<Casse>, DbSet<Casse, String>, DbDelete<Casse, String>, DbGet<Casse, String>, DbSelect<Casse>, DbList<Casse> {
+  final Database database;
+
   const StoreCasse({
-    required super.db,
-    super.isAutoInc = false,
-    super.deleteQuery = Queries.Casse_Elimina,
-    super.insertQuery = Queries.Casse_Inserisci,
-    super.updateQuery = Queries.Casse_Aggiorna,
-    super.getQuery = Queries.Casse_Carica,
-    super.listQuery = Queries.Casse_Ricerca,
+    required this.database,
   });
+
+  @override
+  Database get db => database;
+
+  @override
+  bool get isAutoInc => false;
+
+  @override
+  Queries get insertQuery => Queries.Casse_Inserisci;
+
+  @override
+  Queries get updateQuery => Queries.Casse_Aggiorna;
+
+  @override
+  Queries get deleteQuery => Queries.Casse_Elimina;
+
+  @override
+  Queries get getQuery => Queries.Casse_Carica;
+
+  @override
+  Queries get listQuery => Queries.Casse_Ricerca;
 
   @override
   Casse dbToEntity(Row r) => Casse(

@@ -7,20 +7,35 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 import 'package:rationes_curare/data_structure/db_info.dart';
+import 'package:rationes_curare/store/db_base.dart';
+import 'package:rationes_curare/store/db_get.dart';
+import 'package:rationes_curare/store/db_set.dart';
+import 'package:rationes_curare/store/db_to_entity.dart';
+import 'package:rationes_curare/store/entity_to_db.dart';
 import 'package:rationes_curare/store/query_manager.dart';
-import 'package:rationes_curare/store/store_base.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-class StoreDbInfo extends StoreBase<DbInfo, String> {
+final class StoreDbInfo with DbBase, EntityToDb<DbInfo>, DbToEntity<DbInfo>, DbSet<DbInfo, String>, DbGet<DbInfo, String> {
+  final Database database;
+
   const StoreDbInfo({
-    required super.db,
-    super.isAutoInc = false,
-    super.deleteQuery,
-    super.insertQuery = Queries.DBInfo_Inserisci,
-    super.updateQuery = Queries.DBInfo_Aggiorna,
-    super.getQuery = Queries.DBInfo_Dettaglio,
-    super.listQuery,
+    required this.database,
   });
+
+  @override
+  Database get db => database;
+
+  @override
+  bool get isAutoInc => false;
+
+  @override
+  Queries get insertQuery => Queries.DBInfo_Inserisci;
+
+  @override
+  Queries get updateQuery => Queries.DBInfo_Aggiorna;
+
+  @override
+  Queries get getQuery => Queries.DBInfo_Dettaglio;
 
   @override
   DbInfo dbToEntity(Row r) => DbInfo(

@@ -7,20 +7,53 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 import 'package:rationes_curare/data_structure/movimenti_tempo.dart';
+import 'package:rationes_curare/store/db_base.dart';
+import 'package:rationes_curare/store/db_delete.dart';
+import 'package:rationes_curare/store/db_get.dart';
+import 'package:rationes_curare/store/db_list.dart';
+import 'package:rationes_curare/store/db_select.dart';
+import 'package:rationes_curare/store/db_set.dart';
+import 'package:rationes_curare/store/db_to_entity.dart';
+import 'package:rationes_curare/store/entity_to_db.dart';
 import 'package:rationes_curare/store/query_manager.dart';
-import 'package:rationes_curare/store/store_base.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-class StoreMovimentiTempo extends StoreBase<MovimentiTempo, int> {
+final class StoreMovimentiTempo
+    with
+        DbBase,
+        EntityToDb<MovimentiTempo>,
+        DbToEntity<MovimentiTempo>,
+        DbSet<MovimentiTempo, int>,
+        DbDelete<MovimentiTempo, int>,
+        DbGet<MovimentiTempo, int>,
+        DbSelect<MovimentiTempo>,
+        DbList<MovimentiTempo> {
+  final Database database;
+
   const StoreMovimentiTempo({
-    required super.db,
-    super.isAutoInc = true,
-    super.deleteQuery = Queries.Periodici_Elimina,
-    super.insertQuery = Queries.Periodici_Inserisci,
-    super.updateQuery = Queries.Periodici_Aggiorna,
-    super.getQuery = Queries.Periodici_Dettaglio,
-    super.listQuery = Queries.Periodici_Ricerca,
+    required this.database,
   });
+
+  @override
+  Database get db => database;
+
+  @override
+  bool get isAutoInc => true;
+
+  @override
+  Queries get insertQuery => Queries.Periodici_Inserisci;
+
+  @override
+  Queries get updateQuery => Queries.Periodici_Aggiorna;
+
+  @override
+  Queries get deleteQuery => Queries.Periodici_Elimina;
+
+  @override
+  Queries get getQuery => Queries.Periodici_Dettaglio;
+
+  @override
+  Queries get listQuery => Queries.Periodici_Ricerca;
 
   @override
   MovimentiTempo dbToEntity(Row r) => MovimentiTempo(

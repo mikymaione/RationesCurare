@@ -9,11 +9,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 import 'package:rationes_curare/data_structure/grafico_barre.dart';
 import 'package:rationes_curare/store/db_base.dart';
 import 'package:rationes_curare/store/query_manager.dart';
+import 'package:sqlite3/sqlite3.dart';
 
-class StoreGraficoBarre extends DbBase {
+final class StoreGraficoBarre with DbBase {
+  final Database database;
+
   const StoreGraficoBarre({
-    required super.db,
+    required this.database,
   });
+
+  @override
+  Database get db => database;
 
   Future<List<GraficoBarre>> graficoAnnuale({
     required String? descrizione,

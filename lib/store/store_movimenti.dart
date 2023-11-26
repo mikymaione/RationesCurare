@@ -7,20 +7,44 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 import 'package:rationes_curare/data_structure/movimenti.dart';
+import 'package:rationes_curare/store/db_base.dart';
+import 'package:rationes_curare/store/db_delete.dart';
+import 'package:rationes_curare/store/db_get.dart';
+import 'package:rationes_curare/store/db_list.dart';
+import 'package:rationes_curare/store/db_select.dart';
+import 'package:rationes_curare/store/db_set.dart';
+import 'package:rationes_curare/store/db_to_entity.dart';
+import 'package:rationes_curare/store/entity_to_db.dart';
 import 'package:rationes_curare/store/query_manager.dart';
-import 'package:rationes_curare/store/store_base.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-class StoreMovimenti extends StoreBase<Movimenti, int> {
+final class StoreMovimenti with DbBase, EntityToDb<Movimenti>, DbToEntity<Movimenti>, DbSet<Movimenti, int>, DbDelete<Movimenti, int>, DbGet<Movimenti, int>, DbSelect<Movimenti>, DbList<Movimenti> {
+  final Database database;
+
   const StoreMovimenti({
-    required super.db,
-    super.isAutoInc = true,
-    super.deleteQuery = Queries.Movimenti_Elimina,
-    super.insertQuery = Queries.Movimenti_Inserisci,
-    super.updateQuery = Queries.Movimenti_Aggiorna,
-    super.getQuery = Queries.Movimenti_Dettaglio,
-    super.listQuery = Queries.Movimenti_Ricerca,
+    required this.database,
   });
+
+  @override
+  Database get db => database;
+
+  @override
+  bool get isAutoInc => true;
+
+  @override
+  Queries get insertQuery => Queries.Movimenti_Inserisci;
+
+  @override
+  Queries get updateQuery => Queries.Movimenti_Aggiorna;
+
+  @override
+  Queries get deleteQuery => Queries.Movimenti_Elimina;
+
+  @override
+  Queries get getQuery => Queries.Movimenti_Dettaglio;
+
+  @override
+  Queries get listQuery => Queries.Movimenti_Ricerca;
 
   @override
   Movimenti dbToEntity(Row r) => Movimenti(

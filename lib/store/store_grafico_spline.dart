@@ -9,11 +9,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 import 'package:rationes_curare/data_structure/grafico_spline.dart';
 import 'package:rationes_curare/store/db_base.dart';
 import 'package:rationes_curare/store/query_manager.dart';
+import 'package:sqlite3/sqlite3.dart';
 
-class StoreGraficoSpline extends DbBase {
+final class StoreGraficoSpline with DbBase {
+  final Database database;
+
   const StoreGraficoSpline({
-    required super.db,
+    required this.database,
   });
+
+  @override
+  Database get db => database;
 
   Future<List<GraficoSpline>> grafico() async => [
         for (final r in db.select(
