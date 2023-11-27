@@ -9,8 +9,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 import 'package:flutter/material.dart';
 import 'package:rationes_curare/data_structure/movimenti.dart';
 import 'package:rationes_curare/store/store_movimenti.dart';
+import 'package:rationes_curare/ui/base/generic_scrollable.dart';
 import 'package:rationes_curare/ui/base/msg.dart';
 import 'package:rationes_curare/ui/base/screen.dart';
+import 'package:rationes_curare/ui/base/sortable_grid.dart';
+import 'package:rationes_curare/utility/comparer.dart';
 import 'package:rationes_curare/utility/formatters.dart';
 import 'package:sqlite3/common.dart';
 
@@ -36,20 +39,49 @@ class BalanceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Screen(
-      title: 'Worklick - Casse',
-      body: FutureBuilder<List<MovimentiSaldoPerCassa>>(
-        future: load(context),
-        builder: (context, snapMovimentiSaldoPerCassa) => ListView(
-          children: [
-            if (snapMovimentiSaldoPerCassa.hasData) ...[
-              for (final c in snapMovimentiSaldoPerCassa.requireData) ...[
-                ListTile(
-                  title: Text(c.tipo),
-                  subtitle: Text(Formatters.doubleToMoney(c.tot)),
+      title: 'RationesCurare - Casse',
+      child: GenericScrollable(
+        scrollDirection: Axis.vertical,
+        child: FutureBuilder<List<MovimentiSaldoPerCassa>>(
+          future: load(context),
+          builder: (context, snapMovimentiSaldoPerCassa) => SortableGrid<MovimentiSaldoPerCassa, String>(
+            initialSortColumnIndexIndicator: 0,
+            initialSortAscendingIndicator: true,
+            items: snapMovimentiSaldoPerCassa.data ?? [],
+            onSort: (columnIndex, d, items) {
+              items.sort((a, b) {
+                // match with columns
+                switch (columnIndex) {
+                  case 1:
+                    return Comparer.compare<double>(a.tot, b.tot, (j, o) => j.compareTo(o)) * d;
+
+                  default: // also 0
+                    return Comparer.compare<String>(a.tipo, b.tipo, (j, o) => j.compareTo(o)) * d;
+                }
+              });
+            },
+            columns: const [
+              RcDataColumn(
+                title: ('Cassa'),
+              ),
+              RcDataColumn(
+                title: ('Saldo'),
+                isNumeric: true,
+              ),
+            ],
+            rows: (rows) => [
+              for (final c in rows) ...[
+                RcDataRow<String>(
+                  id: c.tipo,
+                  selected: false,
+                  cells: [
+                    RcDataCell(value: (c.tipo)),
+                    RcDataCell(value: (Formatters.doubleToMoney(c.tot))),
+                  ],
                 ),
               ],
             ],
-          ],
+          ),
         ),
       ),
     );

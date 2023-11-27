@@ -8,28 +8,38 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 import 'package:flutter/material.dart';
 
-class Screen extends StatelessWidget {
-  final String title;
+class GenericScrollable extends StatefulWidget {
+  final Axis scrollDirection;
   final Widget child;
-  final List<Widget>? actions;
 
-  const Screen({
+  const GenericScrollable({
     super.key,
-    required this.title,
+    required this.scrollDirection,
     required this.child,
-    this.actions,
   });
 
   @override
+  State<StatefulWidget> createState() => _GenericScrollableState();
+}
+
+class _GenericScrollableState extends State<GenericScrollable> {
+  final scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        actions: actions,
-      ),
-      body: SizedBox(
-        width: double.infinity,
-        child: child,
+    return Scrollbar(
+      thumbVisibility: true,
+      controller: scrollController,
+      child: SingleChildScrollView(
+        controller: scrollController,
+        scrollDirection: widget.scrollDirection,
+        child: widget.child,
       ),
     );
   }
