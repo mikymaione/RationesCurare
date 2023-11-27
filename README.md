@@ -1,7 +1,7 @@
 # <img src="http://www.maionemiky.it/images/RC.png" alt="logo" /> RationesCurare
 An open-source software for the management of the personal economy.
 
-## Minimum system requirements
+## Supported Platforms
 - Android 11
 - Microsoft Windows 10
 - macOS 11
