@@ -21,6 +21,7 @@ enum Queries {
   Movimenti_AutoCompleteSource,
   Movimenti_AutoCompleteSourceMA,
   Movimenti_MovimentiPerCassa,
+  Movimenti_SaldoPerCassa,
   Movimenti_GetMacroAree_E_Descrizioni,
   Movimenti_GraficoTorta,
   Movimenti_GraficoAnnuale,

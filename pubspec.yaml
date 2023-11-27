@@ -63,6 +63,7 @@ flutter:
     - assets/sql/Movimenti_GraficoTortaSaldo.sql
     - assets/sql/Movimenti_Inserisci.sql
     - assets/sql/Movimenti_MovimentiPerCassa.sql
+    - assets/sql/Movimenti_SaldoPerCassa.sql
     - assets/sql/Movimenti_Ricerca.sql
     - assets/sql/Movimenti_Saldo.sql
     - assets/sql/Periodici_Aggiorna.sql

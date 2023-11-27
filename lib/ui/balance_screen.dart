@@ -7,26 +7,27 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 import 'package:flutter/material.dart';
-import 'package:rationes_curare/data_structure/casse.dart';
-import 'package:rationes_curare/db/db.dart';
-import 'package:rationes_curare/store/store_casse.dart';
+import 'package:intl/intl.dart';
+import 'package:rationes_curare/data_structure/movimenti.dart';
+import 'package:rationes_curare/store/store_movimenti.dart';
 import 'package:rationes_curare/ui/base/msg.dart';
 import 'package:rationes_curare/ui/base/screen.dart';
+import 'package:sqlite3/common.dart';
 
-class BalanceScreen extends StatefulWidget {
-  const BalanceScreen({super.key});
+class BalanceScreen extends StatelessWidget {
+  final formatCurrency = NumberFormat.simpleCurrency();
+  final CommonDatabase db;
 
-  @override
-  State<StatefulWidget> createState() => _BalanceScreenState();
-}
+  BalanceScreen({
+    super.key,
+    required this.db,
+  });
 
-class _BalanceScreenState extends State<BalanceScreen> {
-  Future<List<Casse>> loadDb() async {
-    final db = await openDb('c:/db', 'db');
-    final store = StoreCasse(db: db);
+  Future<List<MovimentiSaldoPerCassa>> load(BuildContext context) async {
+    final store = StoreMovimenti(db: db);
 
     try {
-      return await store.ricerca(mostraTutte: false);
+      return await store.movimentiSaldoPerCassa(showEmpty: false);
     } catch (e) {
       Msg.showError(context, e);
       return const [];
@@ -37,14 +38,15 @@ class _BalanceScreenState extends State<BalanceScreen> {
   Widget build(BuildContext context) {
     return Screen(
       title: 'Worklick - Casse',
-      body: FutureBuilder<List<Casse>>(
-        future: loadDb(),
-        builder: (context, snapshot) => ListView(
+      body: FutureBuilder<List<MovimentiSaldoPerCassa>>(
+        future: load(context),
+        builder: (context, snapMovimentiSaldoPerCassa) => ListView(
           children: [
-            if (snapshot.hasData) ...[
-              for (final c in snapshot.requireData) ...[
+            if (snapMovimentiSaldoPerCassa.hasData) ...[
+              for (final c in snapMovimentiSaldoPerCassa.requireData) ...[
                 ListTile(
-                  title: Text(c.nome),
+                  title: Text(c.tipo),
+                  subtitle: Text(formatCurrency.format(c.tot)),
                 ),
               ],
             ],

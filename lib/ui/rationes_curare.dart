@@ -8,10 +8,22 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:rationes_curare/db/db.dart';
 import 'package:rationes_curare/ui/balance_screen.dart';
+import 'package:rationes_curare/ui/base/msg.dart';
+import 'package:sqlite3/common.dart';
 
 class RationesCurare extends StatelessWidget {
   const RationesCurare({super.key});
+
+  Future<CommonDatabase?> loadDb(BuildContext context) async {
+    try {
+      return await openDb('c:/db', 'db');
+    } catch (e) {
+      Msg.showError(context, e);
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +45,16 @@ class RationesCurare extends StatelessWidget {
       darkTheme: ThemeData(
         brightness: Brightness.dark,
       ),
-      home: const BalanceScreen(),
+      home: FutureBuilder<CommonDatabase?>(
+        future: loadDb(context),
+        builder: (context, snapCommonDatabase) => snapCommonDatabase.data == null
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : BalanceScreen(
+                db: snapCommonDatabase.data!,
+              ),
+      ),
     );
   }
 }

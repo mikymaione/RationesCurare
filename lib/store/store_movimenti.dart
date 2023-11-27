@@ -18,7 +18,8 @@ import 'package:rationes_curare/store/entity_to_db.dart';
 import 'package:rationes_curare/store/query_manager.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-final class StoreMovimenti extends DbBase with EntityToDb<Movimenti>, DbToEntity<Movimenti>, DbSet<Movimenti, int>, DbDelete<Movimenti, int>, DbGet<Movimenti, int>, DbSelect<Movimenti>, DbList<Movimenti> {
+final class StoreMovimenti extends DbBase
+    with EntityToDb<Movimenti>, DbToEntity<Movimenti>, DbSet<Movimenti, int>, DbDelete<Movimenti, int>, DbGet<Movimenti, int>, DbSelect<Movimenti>, DbList<Movimenti> {
   const StoreMovimenti({
     required super.db,
   });
@@ -64,7 +65,7 @@ final class StoreMovimenti extends DbBase with EntityToDb<Movimenti>, DbToEntity
         e.macroArea,
       ];
 
-  Future<void> ricerca({
+  Future<List<Movimenti>> ricerca({
     required String tipo,
     required String? descrizione,
     required String? macroArea,
@@ -117,13 +118,39 @@ final class StoreMovimenti extends DbBase with EntityToDb<Movimenti>, DbToEntity
         ],
       ).single['Saldo'];
 
-  Future<void> movimentiPerCassa({
+  Future<int> numeroMovimentiPerCassa({
     required String tipo,
   }) async =>
       db.select(
         await QueryManager.getSql(Queries.Movimenti_MovimentiPerCassa),
         [tipo],
       ).single['Tot'];
+
+  Future<List<MovimentiSaldoPerCassa>> movimentiSaldoPerCassa({required bool showEmpty}) async {
+    final items = await _movimentiSaldoPerCassaAll();
+
+    return showEmpty
+        ? items
+        : [
+            for (final i in items) ...[
+              if (i.tot.toInt() != 0) ...[
+                i,
+              ],
+            ],
+          ];
+  }
+
+  Future<List<MovimentiSaldoPerCassa>> _movimentiSaldoPerCassaAll() async => [
+        for (final r in db.select(
+          await QueryManager.getSql(Queries.Movimenti_SaldoPerCassa),
+          const [],
+        )) ...[
+          MovimentiSaldoPerCassa(
+            tot: r['Tot'],
+            tipo: r['Tipo'],
+          ),
+        ],
+      ];
 
   Future<MovimentiDate> data() async {
     final r = db.select(

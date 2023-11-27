@@ -25,6 +25,16 @@ class Movimenti {
   });
 }
 
+class MovimentiSaldoPerCassa {
+  final double tot;
+  final String tipo;
+
+  const MovimentiSaldoPerCassa({
+    required this.tot,
+    required this.tipo,
+  });
+}
+
 class MovimentiDate {
   final DateTime minData, maxData;
 
