@@ -7,18 +7,17 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:rationes_curare/data_structure/movimenti.dart';
 import 'package:rationes_curare/store/store_movimenti.dart';
 import 'package:rationes_curare/ui/base/msg.dart';
 import 'package:rationes_curare/ui/base/screen.dart';
+import 'package:rationes_curare/utility/formatters.dart';
 import 'package:sqlite3/common.dart';
 
 class BalanceScreen extends StatelessWidget {
-  final formatCurrency = NumberFormat.simpleCurrency();
   final CommonDatabase db;
 
-  BalanceScreen({
+  const BalanceScreen({
     super.key,
     required this.db,
   });
@@ -46,7 +45,7 @@ class BalanceScreen extends StatelessWidget {
               for (final c in snapMovimentiSaldoPerCassa.requireData) ...[
                 ListTile(
                   title: Text(c.tipo),
-                  subtitle: Text(formatCurrency.format(c.tot)),
+                  subtitle: Text(Formatters.doubleToMoney(c.tot)),
                 ),
               ],
             ],
