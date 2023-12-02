@@ -32,17 +32,9 @@ class BalanceScreen extends StatelessWidget {
 
     try {
       final movimenti = await store.movimentiSaldoPerCassa(showEmpty: false);
-      final saldo = await store.saldoAssoluto();
+//      final saldo = await store.saldoAssoluto();
 
-      final movimentiAndSaldo = [
-        ...movimenti,
-        MovimentiSaldoPerCassa(
-          tot: saldo,
-          tipo: '',
-        ),
-      ];
-
-      return movimentiAndSaldo;
+      return movimenti;
     } catch (e) {
       if (context.mounted) {
         Msg.showError(context, e);
@@ -63,13 +55,10 @@ class BalanceScreen extends StatelessWidget {
         child: FutureBuilder<List<MovimentiSaldoPerCassa>>(
           future: load(context),
           builder: (context, snap) => SortableGrid<MovimentiSaldoPerCassa, String>(
-            lastRowIsTotal: true,
             items: snap.data ?? [],
             initialSortAscendingIndicator: true,
             initialSortColumnIndexIndicator: 0,
             onSort: (columnIndex, d, items) {
-              final total = items.removeLast();
-
               items.sort((a, b) {
                 // match with columns
                 switch (columnIndex) {
@@ -80,8 +69,6 @@ class BalanceScreen extends StatelessWidget {
                     return Comparer.compare<String>(a.tipo, b.tipo, (j, o) => j.compareTo(o)) * d;
                 }
               });
-
-              items.add(total);
             },
             columns: const [
               RcDataColumn(
@@ -95,6 +82,7 @@ class BalanceScreen extends StatelessWidget {
             rows: (rows) => [
               for (final c in rows) ...[
                 RcDataRow<String>(
+                  context: context,
                   id: c.tipo,
                   onClick: () => Commons.navigate(
                     context: context,

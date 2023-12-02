@@ -23,11 +23,9 @@ class RcIconCell extends RcCell {
 
 class RcDataCell extends RcCell {
   final String value;
-  final double? minWidth;
 
   RcDataCell({
     required this.value,
-    this.minWidth,
   });
 }
 
@@ -40,19 +38,58 @@ class RcButtonCell extends RcCell {
 }
 
 class RcDataRow<idType> {
+  final BuildContext context;
+
   final idType id;
   final bool? selected;
   final Void0ParamCallbackFuture? onClick;
   final ValueChanged<bool?>? onSelectChanged;
   final List<RcCell> cells;
 
-  const RcDataRow({
+  RcDataRow({
+    required this.context,
     required this.id,
     required this.cells,
     this.onClick,
     this.selected,
     this.onSelectChanged,
   });
+
+  late final colorOdd = Theme.of(context).colorScheme.primary.withOpacity(0.02);
+  late final colorEven = Theme.of(context).colorScheme.primary.withOpacity(0.04);
+  late final colorTotal = Theme.of(context).colorScheme.primary.withOpacity(0.10);
+
+  late final colorOddM = _toMaterial(colorOdd);
+  late final colorEvenM = _toMaterial(colorEven);
+  late final colorTotalM = _toMaterial(colorTotal);
+
+  MaterialStateProperty<Color?> _toMaterial(Color c) => MaterialStateProperty.resolveWith<Color?>((states) => c);
+
+  DataRow toDataRow(int index) => DataRow(
+        selected: selected ?? false,
+        onSelectChanged: onSelectChanged,
+        color: index.isEven ? colorEvenM : colorOddM,
+        cells: [
+          for (final e in cells) ...[
+            if (e is RcIconCell) ...[
+              DataCell(
+                Icon(e.icon),
+              ),
+            ] else if (e is RcDataCell) ...[
+              DataCell(
+                Text(
+                  e.value,
+                ),
+                onTap: onClick == null ? null : () async => await onClick!(),
+              ),
+            ] else if (e is RcButtonCell) ...[
+              DataCell(
+                e.button,
+              ),
+            ],
+          ],
+        ],
+      );
 }
 
 class RcDataColumn {
@@ -65,9 +102,27 @@ class RcDataColumn {
   });
 }
 
+class AutoDataSource extends DataTableSource {
+  final List<RcDataRow> rows;
+
+  AutoDataSource(this.rows);
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => rows.length;
+
+  @override
+  int get selectedRowCount => 0;
+
+  @override
+  DataRow? getRow(int index) => rows[index].toDataRow(index);
+}
+
 class SortableGrid<X, idType> extends StatefulWidget {
   final int? initialSortColumnIndexIndicator;
-  final bool? initialSortAscendingIndicator, lastRowIsTotal;
+  final bool? initialSortAscendingIndicator;
 
   final List<RcDataColumn> columns;
   final Generic1ParamCallback<List<X>, List<RcDataRow<idType>>> rows;
@@ -82,7 +137,6 @@ class SortableGrid<X, idType> extends StatefulWidget {
     required this.items,
     this.initialSortColumnIndexIndicator,
     this.initialSortAscendingIndicator,
-    this.lastRowIsTotal,
     this.onSort,
   });
 
@@ -94,32 +148,28 @@ class _SortableGridState<X, idType> extends State<SortableGrid<X, idType>> {
   late int? sortColumnIndex = widget.initialSortColumnIndexIndicator;
   late bool? sortAscending = widget.initialSortAscendingIndicator;
 
-  MaterialStateProperty<Color?> _toMaterial(Color c) => MaterialStateProperty.resolveWith<Color?>((states) => c);
-
-  bool isTotalRow(int index, int length) => widget.lastRowIsTotal == true && index == length - 1;
-
   @override
   Widget build(BuildContext context) {
-    final rows = widget.rows(widget.items);
+    const dataRowHeight = 48.0;
 
-    final colorOdd = Theme.of(context).colorScheme.primary.withOpacity(0.02);
-    final colorEven = Theme.of(context).colorScheme.primary.withOpacity(0.04);
-    final colorTotal = Theme.of(context).colorScheme.primary.withOpacity(0.10);
+    final height = MediaQuery.of(context).size.height - 180;
+    final rowsPerPage = (height / dataRowHeight).floor();
 
-    final colorOddM = _toMaterial(colorOdd);
-    final colorEvenM = _toMaterial(colorEven);
-    final colorTotalM = _toMaterial(colorTotal);
-
-    return DataTable(
+    return PaginatedDataTable(
       sortColumnIndex: sortColumnIndex,
       sortAscending: sortAscending ?? true,
+      source: AutoDataSource(widget.rows(widget.items)),
+      dataRowMinHeight: dataRowHeight,
+      dataRowMaxHeight: dataRowHeight,
+      rowsPerPage: rowsPerPage,
+      columnSpacing: 24,
       columns: [
         for (final c in widget.columns) ...[
           DataColumn(
             label: Text(
               c.title,
             ),
-            numeric: true == c.isNumeric,
+            numeric: c.isNumeric == true,
             onSort: widget.onSort == null
                 ? null
                 : (columnIndex, ascending) => setState(() {
@@ -127,51 +177,6 @@ class _SortableGridState<X, idType> extends State<SortableGrid<X, idType>> {
                       sortAscending = ascending;
                       widget.onSort!(columnIndex, ascending ? 1 : -1, widget.items);
                     }),
-          ),
-        ],
-      ],
-      rows: [
-        for (var i = 0; i < rows.length; i++) ...[
-          DataRow(
-            selected: rows[i].selected ?? false,
-            onSelectChanged: rows[i].onSelectChanged,
-            color: isTotalRow(i, rows.length)
-                ? colorTotalM
-                : i.isEven
-                    ? colorEvenM
-                    : colorOddM,
-            cells: [
-              for (final e in rows[i].cells) ...[
-                if (e is RcIconCell) ...[
-                  DataCell(
-                    Icon(e.icon),
-                  ),
-                ] else if (e is RcDataCell) ...[
-                  DataCell(
-                    Container(
-                      constraints: e.minWidth == null ? null : BoxConstraints(minWidth: e.minWidth!),
-                      child: Text(
-                        e.value,
-                        style: isTotalRow(i, rows.length)
-                            ? const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              )
-                            : null,
-                      ),
-                    ),
-                    onTap: isTotalRow(i, rows.length)
-                        ? null
-                        : rows[i].onClick == null
-                            ? null
-                            : () async => await rows[i].onClick!(),
-                  ),
-                ] else if (e is RcButtonCell) ...[
-                  DataCell(
-                    e.button,
-                  ),
-                ],
-              ],
-            ],
           ),
         ],
       ],

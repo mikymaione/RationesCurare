@@ -33,8 +33,6 @@ class AccountContent extends StatelessWidget {
 
     try {
       final movimenti = await store.ricerca(
-        offset: 0,
-        limit: 10,
         tipo: movimentiSaldoPerCassa.tipo,
       );
 
@@ -59,46 +57,31 @@ class AccountContent extends StatelessWidget {
         child: FutureBuilder<List<Movimenti>>(
           future: load(context),
           builder: (context, snap) => SortableGrid<Movimenti, String>(
-            lastRowIsTotal: false,
             items: snap.data ?? [],
             initialSortAscendingIndicator: false,
-            initialSortColumnIndexIndicator: 3,
+            initialSortColumnIndexIndicator: 0,
             onSort: (columnIndex, d, items) {
-              final total = items.removeLast();
-
               items.sort((a, b) {
                 // match with columns
                 switch (columnIndex) {
                   case 1:
-                    return Comparer.compare<String>(a.tipo, b.tipo, (j, o) => j.compareTo(o)) * d;
-                  case 2:
                     return Comparer.compare<double>(a.soldi, b.soldi, (j, o) => j.compareTo(o)) * d;
-                  case 3:
-                    return Comparer.compare<DateTime>(a.data, b.data, (j, o) => j.compareTo(o)) * d;
-                  case 4:
+                  case 2:
                     return Comparer.compare<String>(a.macroArea, b.macroArea, (j, o) => j.compareTo(o)) * d;
-                  case 5:
+                  case 3:
                     return Comparer.compare<String>(a.descrizione, b.descrizione, (j, o) => j.compareTo(o)) * d;
                   default: // also 0
-                    return Comparer.compare<int>(a.id, b.id, (j, o) => j.compareTo(o)) * d;
+                    return Comparer.compare<DateTime>(a.data, b.data, (j, o) => j.compareTo(o)) * d;
                 }
               });
-
-              items.add(total);
             },
             columns: const [
               RcDataColumn(
-                title: ('ID'),
-              ),
-              RcDataColumn(
-                title: ('Cassa'),
+                title: ('Data'),
               ),
               RcDataColumn(
                 title: ('Importo'),
                 isNumeric: true,
-              ),
-              RcDataColumn(
-                title: ('Data'),
               ),
               RcDataColumn(
                 title: ('Macro-area'),
@@ -110,6 +93,7 @@ class AccountContent extends StatelessWidget {
             rows: (rows) => [
               for (final c in rows) ...[
                 RcDataRow<String>(
+                  context: context,
                   id: c.tipo,
                   onClick: () => Commons.navigate(
                     context: context,
@@ -120,17 +104,10 @@ class AccountContent extends StatelessWidget {
                   ),
                   cells: [
                     RcDataCell(
-                      value: '${c.id}',
-                    ),
-                    RcDataCell(
-                      value: c.tipo,
+                      value: Formatters.datetimeYMDHm(languageCode, c.data),
                     ),
                     RcDataCell(
                       value: Formatters.doubleToMoney(languageCode, c.soldi),
-                    ),
-                    RcDataCell(
-                      value: Formatters.datetimeYMDHm(languageCode, c.data),
-                      minWidth: 130,
                     ),
                     RcDataCell(
                       value: c.macroArea,

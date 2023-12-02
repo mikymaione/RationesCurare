@@ -13,9 +13,7 @@ mixin DbList<Entity> on DbSelect<Entity> {
   Queries get listQuery;
 
   Future<List<Entity>> list(
-    int offset,
-    int limit,
     List<Object?> parameters,
   ) async =>
-      await select(listQuery, offset, limit, parameters);
+      await select(listQuery, parameters);
 }

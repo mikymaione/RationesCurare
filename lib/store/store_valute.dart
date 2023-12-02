@@ -28,9 +28,5 @@ final class StoreValute extends DbBase with DbToEntity<Valute>, DbSelect<Valute>
         descrizione: r['descrizione'],
       );
 
-  Future<List<Valute>> lista({
-    required int offset,
-    required int limit,
-  }) async =>
-      await list(offset, limit, const []);
+  Future<List<Valute>> lista() async => await list(const []);
 }

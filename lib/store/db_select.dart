@@ -13,18 +13,14 @@ import 'package:rationes_curare/store/query_manager.dart';
 mixin DbSelect<Entity> on DbBase, DbToEntity<Entity> {
   Future<List<Entity>> select(
     Queries? query,
-    int offset,
-    int limit,
     List<Object?> parameters,
   ) async =>
       [
         for (final r in db.select(
-          await QueryManager.getSql(query) + _sqliteLimit(offset, limit),
+          await QueryManager.getSql(query),
           parameters,
         )) ...[
           dbToEntity(r),
         ],
       ];
-
-  String _sqliteLimit(int offset, int limit) => ' LIMIT ${((offset - 1) * limit)}, $limit';
 }
