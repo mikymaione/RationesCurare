@@ -71,8 +71,8 @@ class RcDataColumn {
 }
 
 class SortableGrid<X, idType> extends StatefulWidget {
-  final int initialSortColumnIndexIndicator;
-  final bool initialSortAscendingIndicator, lastRowIsTotal;
+  final int? initialSortColumnIndexIndicator;
+  final bool? initialSortAscendingIndicator, lastRowIsTotal;
 
   final List<RcDataColumn> columns;
   final Generic1ParamCallback<List<X>, List<RcDataRow<idType>>> rows;
@@ -82,12 +82,12 @@ class SortableGrid<X, idType> extends StatefulWidget {
 
   const SortableGrid({
     super.key,
-    required this.initialSortColumnIndexIndicator,
-    required this.initialSortAscendingIndicator,
     required this.columns,
     required this.rows,
     required this.items,
-    required this.lastRowIsTotal,
+    this.initialSortColumnIndexIndicator,
+    this.initialSortAscendingIndicator,
+    this.lastRowIsTotal,
     this.onSort,
   });
 
@@ -96,8 +96,8 @@ class SortableGrid<X, idType> extends StatefulWidget {
 }
 
 class _SortableGridState<X, idType> extends State<SortableGrid<X, idType>> {
-  late int sortColumnIndex = widget.initialSortColumnIndexIndicator;
-  late bool sortAscending = widget.initialSortAscendingIndicator;
+  late int? sortColumnIndex = widget.initialSortColumnIndexIndicator;
+  late bool? sortAscending = widget.initialSortAscendingIndicator;
 
   static const gridCellStyle = TextStyle();
 
@@ -106,6 +106,8 @@ class _SortableGridState<X, idType> extends State<SortableGrid<X, idType>> {
   );
 
   MaterialStateProperty<Color?> _toMaterial(Color c) => MaterialStateProperty.resolveWith<Color?>((states) => c);
+
+  bool isTotalRow(int index, int length) => widget.lastRowIsTotal == true && index == length - 1;
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +123,7 @@ class _SortableGridState<X, idType> extends State<SortableGrid<X, idType>> {
 
     return DataTable(
       sortColumnIndex: sortColumnIndex,
-      sortAscending: sortAscending,
+      sortAscending: sortAscending ?? true,
       columns: [
         for (final c in widget.columns) ...[
           DataColumn(
@@ -144,7 +146,7 @@ class _SortableGridState<X, idType> extends State<SortableGrid<X, idType>> {
           DataRow(
             selected: rows[i].selected,
             onSelectChanged: rows[i].onSelectChanged,
-            color: (i == rows.length - 1)
+            color: isTotalRow(i, rows.length)
                 ? colorTotalM
                 : i.isEven
                     ? colorEvenM
@@ -168,7 +170,7 @@ class _SortableGridState<X, idType> extends State<SortableGrid<X, idType>> {
                             ],
                             TextSpan(
                               text: e.value,
-                              style: (i == rows.length - 1)
+                              style: isTotalRow(i, rows.length)
                                   ? const TextStyle(
                                       fontWeight: FontWeight.bold,
                                     )
