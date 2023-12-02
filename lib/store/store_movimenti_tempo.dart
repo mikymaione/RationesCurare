@@ -70,13 +70,21 @@ final class StoreMovimentiTempo extends DbBase with EntityToDb<MovimentiTempo>, 
         e.macroArea,
       ];
 
-  Future<List<MovimentiTempo>> ricerca() async => await list(const []);
+  Future<List<MovimentiTempo>> ricerca({
+    required int offset,
+    required int limit,
+  }) async =>
+      await list(offset, limit, const []);
 
   Future<List<MovimentiTempo>> scadenza({
+    required int offset,
+    required int limit,
     required DateTime dataDa,
     required DateTime dataA,
   }) async =>
       await list(
+        offset,
+        limit,
         [
           dataDa,
           dataA,

@@ -58,9 +58,11 @@ final class StoreCasse extends DbBase with EntityToDb<Casse>, DbToEntity<Casse>,
       ];
 
   Future<List<Casse>> ricerca({
+    required int offset,
+    required int limit,
     required bool mostraTutte,
   }) async =>
-      await list([mostraTutte]);
+      await list(offset, limit, [mostraTutte]);
 
   Future<List<String>> lista() async => [
         for (final r in db.select(

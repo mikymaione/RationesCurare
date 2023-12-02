@@ -33,6 +33,8 @@ class AccountContent extends StatelessWidget {
 
     try {
       final movimenti = await store.ricerca(
+        offset: 0,
+        limit: 10,
         tipo: movimentiSaldoPerCassa.tipo,
       );
 

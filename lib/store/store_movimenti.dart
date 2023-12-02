@@ -67,6 +67,8 @@ final class StoreMovimenti extends DbBase
       ];
 
   Future<List<Movimenti>> ricerca({
+    required int offset,
+    required int limit,
     String? tipo,
     String? descrizione,
     String? macroArea,
@@ -78,6 +80,8 @@ final class StoreMovimenti extends DbBase
     DateTime? dataA,
   }) async =>
       await list(
+        offset,
+        limit,
         [
           tipo ?? 'Saldo',
           tipo ?? '',
