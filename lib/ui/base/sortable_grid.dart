@@ -23,16 +23,10 @@ class RcIconCell extends RcCell {
 
 class RcDataCell extends RcCell {
   final String value;
-  final WidgetSpan? leading;
   final Void0ParamCallbackFuture? onUrlClick;
-  final double? width;
-  final EdgeInsetsGeometry? padding;
 
   RcDataCell({
     required this.value,
-    this.width,
-    this.padding,
-    this.leading,
     this.onUrlClick,
   });
 }
@@ -159,36 +153,21 @@ class _SortableGridState<X, idType> extends State<SortableGrid<X, idType>> {
                   ),
                 ] else if (e is RcDataCell) ...[
                   DataCell(
-                    Container(
-                      margin: e.padding,
-                      width: e.width,
-                      child: Text.rich(
-                        TextSpan(
-                          children: [
-                            if (e.leading != null) ...[
-                              e.leading!,
-                            ],
-                            TextSpan(
-                              text: e.value,
-                              style: isTotalRow(i, rows.length)
-                                  ? const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    )
-                                  : null,
-                            ),
-                          ],
-                        ),
-                        textAlign: TextAlign.left,
-                        style: e.onUrlClick == null ? gridCellStyle : gridCellLinkStyle,
-                      ),
+                    Text(
+                      e.value,
+                      style: isTotalRow(i, rows.length)
+                          ? const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            )
+                          : e.onUrlClick == null
+                              ? gridCellStyle
+                              : gridCellLinkStyle,
                     ),
                     onTap: e.onUrlClick == null ? null : () async => await e.onUrlClick!(),
                   ),
                 ] else if (e is RcButtonCell) ...[
                   DataCell(
-                    Container(
-                      child: e.button,
-                    ),
+                    e.button,
                   ),
                 ],
               ],
