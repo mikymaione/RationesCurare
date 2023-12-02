@@ -13,7 +13,6 @@ import 'package:rationes_curare/ui/base/generic_scrollable.dart';
 import 'package:rationes_curare/ui/base/msg.dart';
 import 'package:rationes_curare/ui/base/screen.dart';
 import 'package:rationes_curare/ui/base/sortable_grid.dart';
-import 'package:rationes_curare/utility/comparer.dart';
 import 'package:rationes_curare/utility/formatters.dart';
 import 'package:sqlite3/common.dart';
 
@@ -32,15 +31,20 @@ class BalanceScreen extends StatelessWidget {
       final movimenti = await store.movimentiSaldoPerCassa(showEmpty: false);
       final saldo = await store.saldoAssoluto();
 
-      return [
+      final movimentiAndSaldo = [
         ...movimenti,
         MovimentiSaldoPerCassa(
           tot: saldo,
           tipo: '',
         ),
       ];
+
+      return movimentiAndSaldo;
     } catch (e) {
-      Msg.showError(context, e);
+      if (context.mounted) {
+        Msg.showError(context, e);
+      }
+
       return const [];
     }
   }
@@ -55,21 +59,7 @@ class BalanceScreen extends StatelessWidget {
           future: load(context),
           builder: (context, snapMovimentiSaldoPerCassa) => SortableGrid<MovimentiSaldoPerCassa, String>(
             lastRowIsTotal: true,
-            initialSortColumnIndexIndicator: 0,
-            initialSortAscendingIndicator: true,
             items: snapMovimentiSaldoPerCassa.data ?? [],
-            onSort: (columnIndex, d, items) {
-              items.sort((a, b) {
-                // match with columns
-                switch (columnIndex) {
-                  case 1:
-                    return Comparer.compare<double>(a.tot, b.tot, (j, o) => j.compareTo(o)) * d;
-
-                  default: // also 0
-                    return Comparer.compare<String>(a.tipo, b.tipo, (j, o) => j.compareTo(o)) * d;
-                }
-              });
-            },
             columns: const [
               RcDataColumn(
                 title: ('Cassa'),
