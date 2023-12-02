@@ -47,7 +47,7 @@ class RcButtonCell extends RcCell {
 
 class RcDataRow<idType> {
   final idType id;
-  final bool selected;
+  final bool? selected;
 
   final ValueChanged<bool?>? onSelectChanged;
   final List<RcCell> cells;
@@ -55,7 +55,7 @@ class RcDataRow<idType> {
   const RcDataRow({
     required this.id,
     required this.cells,
-    required this.selected,
+    this.selected,
     this.onSelectChanged,
   });
 }
@@ -144,7 +144,7 @@ class _SortableGridState<X, idType> extends State<SortableGrid<X, idType>> {
       rows: [
         for (var i = 0; i < rows.length; i++) ...[
           DataRow(
-            selected: rows[i].selected,
+            selected: rows[i].selected ?? false,
             onSelectChanged: rows[i].onSelectChanged,
             color: isTotalRow(i, rows.length)
                 ? colorTotalM
