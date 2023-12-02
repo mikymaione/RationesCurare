@@ -48,7 +48,7 @@ class RcButtonCell extends RcCell {
 class RcDataRow<idType> {
   final idType id;
   final bool selected;
-  final Color? color;
+
   final ValueChanged<bool?>? onSelectChanged;
   final List<RcCell> cells;
 
@@ -56,7 +56,6 @@ class RcDataRow<idType> {
     required this.id,
     required this.cells,
     required this.selected,
-    this.color,
     this.onSelectChanged,
   });
 }
@@ -73,9 +72,11 @@ class RcDataColumn {
 
 class SortableGrid<X, idType> extends StatefulWidget {
   final int initialSortColumnIndexIndicator;
-  final bool initialSortAscendingIndicator;
+  final bool initialSortAscendingIndicator, lastRowIsTotal;
+
   final List<RcDataColumn> columns;
   final Generic1ParamCallback<List<X>, List<RcDataRow<idType>>> rows;
+
   final DataColumnSortCallback<X>? onSort;
   final List<X> items;
 
@@ -86,6 +87,7 @@ class SortableGrid<X, idType> extends StatefulWidget {
     required this.columns,
     required this.rows,
     required this.items,
+    required this.lastRowIsTotal,
     this.onSort,
   });
 
@@ -103,8 +105,20 @@ class _SortableGridState<X, idType> extends State<SortableGrid<X, idType>> {
     decoration: TextDecoration.underline,
   );
 
+  MaterialStateProperty<Color?> _toMaterial(Color c) => MaterialStateProperty.resolveWith<Color?>((states) => c);
+
   @override
   Widget build(BuildContext context) {
+    final rows = widget.rows(widget.items);
+
+    final colorOdd = Theme.of(context).colorScheme.primary.withOpacity(0.01);
+    final colorEven = Theme.of(context).colorScheme.primary.withOpacity(0.02);
+    final colorTotal = Theme.of(context).colorScheme.primary.withOpacity(0.06);
+
+    final colorOddM = _toMaterial(colorOdd);
+    final colorEvenM = _toMaterial(colorEven);
+    final colorTotalM = _toMaterial(colorTotal);
+
     return DataTable(
       sortColumnIndex: sortColumnIndex,
       sortAscending: sortAscending,
@@ -126,13 +140,17 @@ class _SortableGridState<X, idType> extends State<SortableGrid<X, idType>> {
         ],
       ],
       rows: [
-        for (final r in widget.rows(widget.items)) ...[
+        for (var i = 0; i < rows.length; i++) ...[
           DataRow(
-            selected: r.selected,
-            onSelectChanged: r.onSelectChanged,
-            color: MaterialStateProperty.resolveWith<Color?>((states) => r.color),
+            selected: rows[i].selected,
+            onSelectChanged: rows[i].onSelectChanged,
+            color: (i == rows.length - 1)
+                ? colorTotalM
+                : i.isEven
+                    ? colorEvenM
+                    : colorOddM,
             cells: [
-              for (final e in r.cells) ...[
+              for (final e in rows[i].cells) ...[
                 if (e is RcIconCell) ...[
                   DataCell(
                     Icon(e.icon),
@@ -150,6 +168,11 @@ class _SortableGridState<X, idType> extends State<SortableGrid<X, idType>> {
                             ],
                             TextSpan(
                               text: e.value,
+                              style: (i == rows.length - 1)
+                                  ? const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    )
+                                  : null,
                             ),
                           ],
                         ),
@@ -161,7 +184,6 @@ class _SortableGridState<X, idType> extends State<SortableGrid<X, idType>> {
                   ),
                 ] else if (e is RcButtonCell) ...[
                   DataCell(
-                    // TODO - MM: is container necessary?
                     Container(
                       child: e.button,
                     ),

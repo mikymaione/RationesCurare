@@ -45,6 +45,7 @@ class BalanceScreen extends StatelessWidget {
         child: FutureBuilder<List<MovimentiSaldoPerCassa>>(
           future: load(context),
           builder: (context, snapMovimentiSaldoPerCassa) => SortableGrid<MovimentiSaldoPerCassa, String>(
+            lastRowIsTotal: true,
             initialSortColumnIndexIndicator: 0,
             initialSortAscendingIndicator: true,
             items: snapMovimentiSaldoPerCassa.data ?? [],
