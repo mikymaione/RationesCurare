@@ -54,15 +54,17 @@ class BalanceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final languageCode = Localizations.localeOf(context).languageCode;
+
     return Screen(
       title: 'RationesCurare - Casse',
       child: GenericScrollable(
         scrollDirection: Axis.vertical,
         child: FutureBuilder<List<MovimentiSaldoPerCassa>>(
           future: load(context),
-          builder: (context, snapMovimentiSaldoPerCassa) => SortableGrid<MovimentiSaldoPerCassa, String>(
+          builder: (context, snap) => SortableGrid<MovimentiSaldoPerCassa, String>(
             lastRowIsTotal: true,
-            items: snapMovimentiSaldoPerCassa.data ?? [],
+            items: snap.data ?? [],
             initialSortAscendingIndicator: true,
             initialSortColumnIndexIndicator: 0,
             onSort: (columnIndex, d, items) {
@@ -96,16 +98,17 @@ class BalanceScreen extends StatelessWidget {
                   id: c.tipo,
                   cells: [
                     RcDataCell(
-                      value: (c.tipo),
+                      value: c.tipo,
                       onUrlClick: () => Commons.navigate(
                         context: context,
                         builder: (context) => AccountContent(
-                          account: c.tipo,
+                          db: db,
+                          movimentiSaldoPerCassa: c,
                         ),
                       ),
                     ),
                     RcDataCell(
-                      value: Formatters.doubleToMoney(c.tot),
+                      value: Formatters.doubleToMoney(languageCode, c.tot),
                     ),
                   ],
                 ),
