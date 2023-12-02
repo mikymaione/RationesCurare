@@ -29,7 +29,16 @@ class BalanceScreen extends StatelessWidget {
     final store = StoreMovimenti(db: db);
 
     try {
-      return await store.movimentiSaldoPerCassa(showEmpty: false);
+      final movimenti = await store.movimentiSaldoPerCassa(showEmpty: false);
+      final saldo = await store.saldoAssoluto();
+
+      return [
+        ...movimenti,
+        MovimentiSaldoPerCassa(
+          tot: saldo,
+          tipo: '',
+        ),
+      ];
     } catch (e) {
       Msg.showError(context, e);
       return const [];
