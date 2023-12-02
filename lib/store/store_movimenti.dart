@@ -16,6 +16,7 @@ import 'package:rationes_curare/store/db_set.dart';
 import 'package:rationes_curare/store/db_to_entity.dart';
 import 'package:rationes_curare/store/entity_to_db.dart';
 import 'package:rationes_curare/store/query_manager.dart';
+import 'package:rationes_curare/utility/formatters.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 final class StoreMovimenti extends DbBase
@@ -44,15 +45,15 @@ final class StoreMovimenti extends DbBase
 
   @override
   Movimenti dbToEntity(Row r) => Movimenti(
-        id: r['id'],
-        idGiroconto: r['idGiroconto'],
-        idMovimentiTempo: r['idMovimentiTempo'],
-        nome: r['nome'],
-        tipo: r['tipo'],
-        descrizione: r['descrizione'],
-        macroArea: r['macroArea'],
-        data: r['data'],
-        soldi: r['soldi'],
+        id: r['ID'],
+        nome: r['Nome'],
+        data: Formatters.sqliteToDateTime(r['Data']),
+        tipo: r['Tipo'],
+        descrizione: r['Descrizione'],
+        macroArea: r['MacroArea'],
+        soldi: r['Soldi'],
+        idGiroconto: r['IDGiroconto'],
+        idMovimentoTempo: r['IDMovimentoTempo'],
       );
 
   @override
@@ -66,28 +67,28 @@ final class StoreMovimenti extends DbBase
       ];
 
   Future<List<Movimenti>> ricerca({
-    required String tipo,
-    required String? descrizione,
-    required String? macroArea,
-    required bool usaSoldi,
-    required double soldiDa,
-    required double soldiA,
-    required bool usaData,
-    required DateTime dataDa,
-    required DateTime dataA,
+    String? tipo,
+    String? descrizione,
+    String? macroArea,
+    bool? usaSoldi,
+    double? soldiDa,
+    double? soldiA,
+    bool? usaData,
+    DateTime? dataDa,
+    DateTime? dataA,
   }) async =>
       await list(
         [
-          tipo,
-          tipo,
-          '%$descrizione%',
-          '%$macroArea%',
-          usaSoldi,
-          soldiDa,
-          soldiA,
-          usaData,
-          dataDa,
-          dataA,
+          tipo ?? 'Saldo',
+          tipo ?? '',
+          Formatters.likeLR(descrizione ?? ''),
+          Formatters.likeLR(macroArea ?? ''),
+          usaSoldi ?? false,
+          soldiDa ?? 0,
+          soldiA ?? 0,
+          usaData ?? false,
+          dataDa ?? Formatters.dateTimeToSqliteNow(),
+          dataA ?? Formatters.dateTimeToSqliteNow(),
         ],
       );
 
