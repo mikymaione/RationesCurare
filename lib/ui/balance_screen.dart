@@ -10,17 +10,14 @@ import 'package:flutter/material.dart';
 import 'package:rationes_curare/data_structure/movimenti.dart';
 import 'package:rationes_curare/store/store_movimenti.dart';
 import 'package:rationes_curare/ui/account_content.dart';
-import 'package:rationes_curare/ui/base/generic_scrollable.dart';
 import 'package:rationes_curare/ui/base/msg.dart';
 import 'package:rationes_curare/ui/base/screen.dart';
-import 'package:rationes_curare/ui/base/sortable_grid.dart';
 import 'package:rationes_curare/utility/commons.dart';
-import 'package:rationes_curare/utility/comparer.dart';
 import 'package:rationes_curare/utility/formatters.dart';
-import 'package:sqlite3/common.dart';
+import 'package:sqlite3/common.dart' as sqlite;
 
 class BalanceScreen extends StatelessWidget {
-  final CommonDatabase db;
+  final sqlite.CommonDatabase db;
 
   const BalanceScreen({
     super.key,
@@ -32,9 +29,15 @@ class BalanceScreen extends StatelessWidget {
 
     try {
       final movimenti = await store.movimentiSaldoPerCassa(showEmpty: false);
-//      final saldo = await store.saldoAssoluto();
+      final saldo = await store.saldoAssoluto();
 
-      return movimenti;
+      return [
+        ...movimenti,
+        MovimentiSaldoPerCassa(
+          tipo: 'Totale',
+          tot: saldo,
+        ),
+      ];
     } catch (e) {
       if (context.mounted) {
         Msg.showError(context, e);
@@ -46,64 +49,57 @@ class BalanceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorOdd = Theme.of(context).colorScheme.primary.withOpacity(0.02);
+    final colorEven = Theme.of(context).colorScheme.primary.withOpacity(0.04);
+    final colorTotal = Theme.of(context).colorScheme.primary.withOpacity(0.10);
+
     final languageCode = Localizations.localeOf(context).languageCode;
 
     return Screen(
       title: 'RationesCurare - Casse',
-      child: GenericScrollable(
-        scrollDirection: Axis.vertical,
-        child: FutureBuilder<List<MovimentiSaldoPerCassa>>(
-          future: load(context),
-          builder: (context, snap) => SortableGrid<MovimentiSaldoPerCassa, String>(
-            items: snap.data ?? [],
-            initialSortAscendingIndicator: true,
-            initialSortColumnIndexIndicator: 0,
-            onSort: (columnIndex, d, items) {
-              items.sort((a, b) {
-                // match with columns
-                switch (columnIndex) {
-                  case 1:
-                    return Comparer.compare<double>(a.tot, b.tot, (j, o) => j.compareTo(o)) * d;
+      child: FutureBuilder<List<MovimentiSaldoPerCassa>>(
+        future: load(context),
+        builder: (context, snap) {
+          final rows = snap.data ?? [];
 
-                  default: // also 0
-                    return Comparer.compare<String>(a.tipo, b.tipo, (j, o) => j.compareTo(o)) * d;
-                }
-              });
-            },
-            columns: const [
-              RcDataColumn(
-                title: ('Cassa'),
-              ),
-              RcDataColumn(
-                title: ('Saldo'),
-                isNumeric: true,
-              ),
-            ],
-            rows: (rows) => [
-              for (final c in rows) ...[
-                RcDataRow<String>(
-                  context: context,
-                  id: c.tipo,
-                  onClick: () => Commons.navigate(
-                    context: context,
-                    builder: (context) => AccountContent(
-                      db: db,
-                      movimentiSaldoPerCassa: c,
+          return ListView.builder(
+            itemCount: rows.length,
+            itemBuilder: (context, index) => index == rows.length - 1
+                ? ListTile(
+                    tileColor: colorTotal,
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          Formatters.doubleToMoney(languageCode, rows[index].tot),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListTile(
+                    tileColor: index.isEven ? colorEven : colorOdd,
+                    onTap: () => Commons.navigate(
+                      context: context,
+                      builder: (context) => AccountContent(
+                        db: db,
+                        movimentiSaldoPerCassa: rows[index],
+                      ),
+                    ),
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(rows[index].tipo),
+                        Text(
+                          Formatters.doubleToMoney(languageCode, rows[index].tot),
+                        ),
+                      ],
                     ),
                   ),
-                  cells: [
-                    RcDataCell(
-                      value: c.tipo,
-                    ),
-                    RcDataCell(
-                      value: Formatters.doubleToMoney(languageCode, c.tot),
-                    ),
-                  ],
-                ),
-              ],
-            ],
-          ),
-        ),
+          );
+        },
       ),
     );
   }

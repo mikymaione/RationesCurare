@@ -9,20 +9,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 import 'package:flutter/material.dart';
 import 'package:rationes_curare/data_structure/movimenti.dart';
 import 'package:rationes_curare/store/store_movimenti.dart';
-import 'package:rationes_curare/ui/base/generic_scrollable.dart';
 import 'package:rationes_curare/ui/base/msg.dart';
 import 'package:rationes_curare/ui/base/screen.dart';
-import 'package:rationes_curare/ui/base/sortable_grid.dart';
-import 'package:rationes_curare/utility/commons.dart';
-import 'package:rationes_curare/utility/comparer.dart';
 import 'package:rationes_curare/utility/formatters.dart';
-import 'package:sqlite3/common.dart';
+import 'package:sqlite3/common.dart' as sqlite;
 
 class AccountContent extends StatelessWidget {
-  final CommonDatabase db;
+  final sqlite.CommonDatabase db;
   final MovimentiSaldoPerCassa movimentiSaldoPerCassa;
 
-  const AccountContent({
+  AccountContent({
     super.key,
     required this.db,
     required this.movimentiSaldoPerCassa,
@@ -32,11 +28,9 @@ class AccountContent extends StatelessWidget {
     final store = StoreMovimenti(db: db);
 
     try {
-      final movimenti = await store.ricerca(
+      return await store.ricerca(
         tipo: movimentiSaldoPerCassa.tipo,
       );
-
-      return movimenti;
     } catch (e) {
       if (context.mounted) {
         Msg.showError(context, e);
@@ -48,79 +42,52 @@ class AccountContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorOdd = Theme.of(context).colorScheme.primary.withOpacity(0.02);
+    final colorEven = Theme.of(context).colorScheme.primary.withOpacity(0.04);
+
     final languageCode = Localizations.localeOf(context).languageCode;
 
     return Screen(
       title: 'RationesCurare - ${movimentiSaldoPerCassa.tipo}',
-      child: GenericScrollable(
-        scrollDirection: Axis.vertical,
-        child: FutureBuilder<List<Movimenti>>(
-          future: load(context),
-          builder: (context, snap) => SortableGrid<Movimenti, String>(
-            items: snap.data ?? [],
-            initialSortAscendingIndicator: false,
-            initialSortColumnIndexIndicator: 0,
-            onSort: (columnIndex, d, items) {
-              items.sort((a, b) {
-                // match with columns
-                switch (columnIndex) {
-                  case 1:
-                    return Comparer.compare<double>(a.soldi, b.soldi, (j, o) => j.compareTo(o)) * d;
-                  case 2:
-                    return Comparer.compare<String>(a.macroArea, b.macroArea, (j, o) => j.compareTo(o)) * d;
-                  case 3:
-                    return Comparer.compare<String>(a.descrizione, b.descrizione, (j, o) => j.compareTo(o)) * d;
-                  default: // also 0
-                    return Comparer.compare<DateTime>(a.data, b.data, (j, o) => j.compareTo(o)) * d;
-                }
-              });
-            },
-            columns: const [
-              RcDataColumn(
-                title: ('Data'),
+      child: FutureBuilder<List<Movimenti>>(
+        future: load(context),
+        builder: (context, snap) {
+          final rows = snap.data ?? [];
+
+          return ListView.builder(
+            itemCount: rows.length,
+            itemBuilder: (context, index) => ListTile(
+              tileColor: index.isEven ? colorEven : colorOdd,
+              title: Text(
+                rows[index].macroArea,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
-              RcDataColumn(
-                title: ('Importo'),
-                isNumeric: true,
-              ),
-              RcDataColumn(
-                title: ('Macro-area'),
-              ),
-              RcDataColumn(
-                title: ('Descrizione'),
-              ),
-            ],
-            rows: (rows) => [
-              for (final c in rows) ...[
-                RcDataRow<String>(
-                  context: context,
-                  id: c.tipo,
-                  onClick: () => Commons.navigate(
-                    context: context,
-                    builder: (context) => AccountContent(
-                      db: db,
-                      movimentiSaldoPerCassa: movimentiSaldoPerCassa,
+              subtitle: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          rows[index].descrizione,
+                          style: TextStyle(
+                            fontSize: Theme.of(context).textTheme.labelLarge?.fontSize,
+                          ),
+                        ),
+                        Text(Formatters.datetimeYMDHm(languageCode, rows[index].data)),
+                      ],
                     ),
                   ),
-                  cells: [
-                    RcDataCell(
-                      value: Formatters.datetimeYMDHm(languageCode, c.data),
-                    ),
-                    RcDataCell(
-                      value: Formatters.doubleToMoney(languageCode, c.soldi),
-                    ),
-                    RcDataCell(
-                      value: c.macroArea,
-                    ),
-                    RcDataCell(
-                      value: c.descrizione,
-                    ),
-                  ],
-                ),
-              ],
-            ],
-          ),
-        ),
+                  Text(Formatters.doubleToMoney(languageCode, rows[index].soldi)),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
