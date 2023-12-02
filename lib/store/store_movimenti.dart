@@ -91,6 +91,11 @@ final class StoreMovimenti extends DbBase
         ],
       );
 
+  Future<double> saldoAssoluto() async => db.select(
+        await QueryManager.getSql(Queries.Movimenti_SaldoAssoluto),
+        const [],
+      ).single['Saldo'];
+
   Future<double> saldo({
     required String tipo,
     required String? descrizione,

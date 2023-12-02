@@ -16,6 +16,7 @@ enum Queries {
   Movimenti_AggiornaMacroAree,
   Movimenti_Ricerca,
   Movimenti_Saldo,
+  Movimenti_SaldoAssoluto,
   Movimenti_Dettaglio,
   Movimenti_Elimina,
   Movimenti_AutoCompleteSource,
