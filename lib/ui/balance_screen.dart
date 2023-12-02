@@ -15,6 +15,7 @@ import 'package:rationes_curare/ui/base/msg.dart';
 import 'package:rationes_curare/ui/base/screen.dart';
 import 'package:rationes_curare/ui/base/sortable_grid.dart';
 import 'package:rationes_curare/utility/commons.dart';
+import 'package:rationes_curare/utility/comparer.dart';
 import 'package:rationes_curare/utility/formatters.dart';
 import 'package:sqlite3/common.dart';
 
@@ -62,6 +63,24 @@ class BalanceScreen extends StatelessWidget {
           builder: (context, snapMovimentiSaldoPerCassa) => SortableGrid<MovimentiSaldoPerCassa, String>(
             lastRowIsTotal: true,
             items: snapMovimentiSaldoPerCassa.data ?? [],
+            initialSortAscendingIndicator: true,
+            initialSortColumnIndexIndicator: 0,
+            onSort: (columnIndex, d, items) {
+              final total = items.removeLast();
+
+              items.sort((a, b) {
+                // match with columns
+                switch (columnIndex) {
+                  case 1:
+                    return Comparer.compare<double>(a.tot, b.tot, (j, o) => j.compareTo(o)) * d;
+
+                  default: // also 0
+                    return Comparer.compare<String>(a.tipo, b.tipo, (j, o) => j.compareTo(o)) * d;
+                }
+              });
+
+              items.add(total);
+            },
             columns: const [
               RcDataColumn(
                 title: ('Cassa'),
@@ -86,7 +105,7 @@ class BalanceScreen extends StatelessWidget {
                       ),
                     ),
                     RcDataCell(
-                      value: (Formatters.doubleToMoney(c.tot)),
+                      value: Formatters.doubleToMoney(c.tot),
                     ),
                   ],
                 ),
