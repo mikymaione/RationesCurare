@@ -9,10 +9,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 import 'package:flutter/material.dart';
 import 'package:rationes_curare/data_structure/movimenti.dart';
 import 'package:rationes_curare/store/store_movimenti.dart';
+import 'package:rationes_curare/ui/account_content.dart';
 import 'package:rationes_curare/ui/base/generic_scrollable.dart';
 import 'package:rationes_curare/ui/base/msg.dart';
 import 'package:rationes_curare/ui/base/screen.dart';
 import 'package:rationes_curare/ui/base/sortable_grid.dart';
+import 'package:rationes_curare/utility/commons.dart';
 import 'package:rationes_curare/utility/formatters.dart';
 import 'package:sqlite3/common.dart';
 
@@ -73,10 +75,19 @@ class BalanceScreen extends StatelessWidget {
               for (final c in rows) ...[
                 RcDataRow<String>(
                   id: c.tipo,
-                  selected: false,
                   cells: [
-                    RcDataCell(value: (c.tipo)),
-                    RcDataCell(value: (Formatters.doubleToMoney(c.tot))),
+                    RcDataCell(
+                      value: (c.tipo),
+                      onUrlClick: () => Commons.navigate(
+                        context: context,
+                        builder: (context) => AccountContent(
+                          account: c.tipo,
+                        ),
+                      ),
+                    ),
+                    RcDataCell(
+                      value: (Formatters.doubleToMoney(c.tot)),
+                    ),
                   ],
                 ),
               ],
