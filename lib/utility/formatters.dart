@@ -9,9 +9,31 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 import 'package:intl/intl.dart';
 
 class Formatters {
-  static final _formatCurrency = NumberFormat.simpleCurrency();
+  static const _sqliteDateFormat = 'yyyy-MM-dd HH:mm:ss';
 
-  static String intToMoney(int i) => _formatCurrency.format(i);
+  static String intToMoney(String languageCode, int i) => NumberFormat.simpleCurrency(locale: languageCode).format(i);
 
-  static String doubleToMoney(double d) => _formatCurrency.format(d);
+  static String doubleToMoney(String languageCode, double d) => NumberFormat.simpleCurrency(locale: languageCode).format(d);
+
+  static DateTime sqliteToDateTime(String s) => DateFormat(_sqliteDateFormat).parse(s);
+
+  static String dateTimeToSqlite(DateTime d) => DateFormat(_sqliteDateFormat).format(d);
+
+  static String dateTimeToSqliteNow() => dateTimeToSqlite(DateTime.now());
+
+  static String datetimeYMMMMDHm(String languageCode, DateTime d) => DateFormat.yMMMMd(languageCode).add_Hm().format(d);
+
+  static String datetimeYMMMMDHms(String languageCode, DateTime d) => DateFormat.yMMMMd(languageCode).add_Hms().format(d);
+
+  static String datetimeYMMMMD(String languageCode, DateTime d) => DateFormat.yMMMMd(languageCode).format(d);
+
+  static String datetimeYMD(String languageCode, DateTime d) => DateFormat.yMd(languageCode).format(d);
+
+  static String datetimeYMDHm(String languageCode, DateTime d) => DateFormat.yMd(languageCode).add_Hm().format(d);
+
+  static String likeL(String s) => '%$s';
+
+  static String likeR(String s) => '$s%';
+
+  static String likeLR(String s) => likeL(likeR(s));
 }
