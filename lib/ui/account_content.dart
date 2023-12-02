@@ -111,16 +111,16 @@ class AccountContent extends StatelessWidget {
               for (final c in rows) ...[
                 RcDataRow<String>(
                   id: c.tipo,
+                  onClick: () => Commons.navigate(
+                    context: context,
+                    builder: (context) => AccountContent(
+                      db: db,
+                      movimentiSaldoPerCassa: movimentiSaldoPerCassa,
+                    ),
+                  ),
                   cells: [
                     RcDataCell(
                       value: '${c.id}',
-                      onUrlClick: () => Commons.navigate(
-                        context: context,
-                        builder: (context) => AccountContent(
-                          db: db,
-                          movimentiSaldoPerCassa: movimentiSaldoPerCassa,
-                        ),
-                      ),
                     ),
                     RcDataCell(
                       value: c.tipo,
@@ -130,6 +130,7 @@ class AccountContent extends StatelessWidget {
                     ),
                     RcDataCell(
                       value: Formatters.datetimeYMDHm(languageCode, c.data),
+                      minWidth: 130,
                     ),
                     RcDataCell(
                       value: c.macroArea,

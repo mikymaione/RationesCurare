@@ -96,16 +96,16 @@ class BalanceScreen extends StatelessWidget {
               for (final c in rows) ...[
                 RcDataRow<String>(
                   id: c.tipo,
+                  onClick: () => Commons.navigate(
+                    context: context,
+                    builder: (context) => AccountContent(
+                      db: db,
+                      movimentiSaldoPerCassa: c,
+                    ),
+                  ),
                   cells: [
                     RcDataCell(
                       value: c.tipo,
-                      onUrlClick: () => Commons.navigate(
-                        context: context,
-                        builder: (context) => AccountContent(
-                          db: db,
-                          movimentiSaldoPerCassa: c,
-                        ),
-                      ),
                     ),
                     RcDataCell(
                       value: Formatters.doubleToMoney(languageCode, c.tot),

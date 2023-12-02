@@ -23,11 +23,11 @@ class RcIconCell extends RcCell {
 
 class RcDataCell extends RcCell {
   final String value;
-  final Void0ParamCallbackFuture? onUrlClick;
+  final double? minWidth;
 
   RcDataCell({
     required this.value,
-    this.onUrlClick,
+    this.minWidth,
   });
 }
 
@@ -42,13 +42,14 @@ class RcButtonCell extends RcCell {
 class RcDataRow<idType> {
   final idType id;
   final bool? selected;
-
+  final Void0ParamCallbackFuture? onClick;
   final ValueChanged<bool?>? onSelectChanged;
   final List<RcCell> cells;
 
   const RcDataRow({
     required this.id,
     required this.cells,
+    this.onClick,
     this.selected,
     this.onSelectChanged,
   });
@@ -93,12 +94,6 @@ class _SortableGridState<X, idType> extends State<SortableGrid<X, idType>> {
   late int? sortColumnIndex = widget.initialSortColumnIndexIndicator;
   late bool? sortAscending = widget.initialSortAscendingIndicator;
 
-  static const gridCellStyle = TextStyle();
-
-  static const gridCellLinkStyle = TextStyle(
-    decoration: TextDecoration.underline,
-  );
-
   MaterialStateProperty<Color?> _toMaterial(Color c) => MaterialStateProperty.resolveWith<Color?>((states) => c);
 
   bool isTotalRow(int index, int length) => widget.lastRowIsTotal == true && index == length - 1;
@@ -107,9 +102,9 @@ class _SortableGridState<X, idType> extends State<SortableGrid<X, idType>> {
   Widget build(BuildContext context) {
     final rows = widget.rows(widget.items);
 
-    final colorOdd = Theme.of(context).colorScheme.primary.withOpacity(0.01);
-    final colorEven = Theme.of(context).colorScheme.primary.withOpacity(0.02);
-    final colorTotal = Theme.of(context).colorScheme.primary.withOpacity(0.06);
+    final colorOdd = Theme.of(context).colorScheme.primary.withOpacity(0.02);
+    final colorEven = Theme.of(context).colorScheme.primary.withOpacity(0.04);
+    final colorTotal = Theme.of(context).colorScheme.primary.withOpacity(0.10);
 
     final colorOddM = _toMaterial(colorOdd);
     final colorEvenM = _toMaterial(colorEven);
@@ -153,17 +148,22 @@ class _SortableGridState<X, idType> extends State<SortableGrid<X, idType>> {
                   ),
                 ] else if (e is RcDataCell) ...[
                   DataCell(
-                    Text(
-                      e.value,
-                      style: isTotalRow(i, rows.length)
-                          ? const TextStyle(
-                              fontWeight: FontWeight.bold,
-                            )
-                          : e.onUrlClick == null
-                              ? gridCellStyle
-                              : gridCellLinkStyle,
+                    Container(
+                      constraints: e.minWidth == null ? null : BoxConstraints(minWidth: e.minWidth!),
+                      child: Text(
+                        e.value,
+                        style: isTotalRow(i, rows.length)
+                            ? const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              )
+                            : null,
+                      ),
                     ),
-                    onTap: e.onUrlClick == null ? null : () async => await e.onUrlClick!(),
+                    onTap: isTotalRow(i, rows.length)
+                        ? null
+                        : rows[i].onClick == null
+                            ? null
+                            : () async => await rows[i].onClick!(),
                   ),
                 ] else if (e is RcButtonCell) ...[
                   DataCell(
