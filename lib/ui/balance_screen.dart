@@ -56,7 +56,7 @@ class BalanceScreen extends StatelessWidget {
     final languageCode = Localizations.localeOf(context).languageCode;
 
     return Screen(
-      title: 'RationesCurare - Casse',
+      title: 'RationesCurare',
       child: FutureBuilder<List<MovimentiSaldoPerCassa>>(
         future: load(context),
         builder: (context, snap) {

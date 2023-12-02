@@ -48,7 +48,7 @@ class AccountContent extends StatelessWidget {
     final languageCode = Localizations.localeOf(context).languageCode;
 
     return Screen(
-      title: 'RationesCurare - ${movimentiSaldoPerCassa.tipo}',
+      title: movimentiSaldoPerCassa.tipo,
       child: FutureBuilder<List<Movimenti>>(
         future: load(context),
         builder: (context, snap) {
