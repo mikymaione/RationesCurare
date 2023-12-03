@@ -58,6 +58,7 @@ class BalanceScreen extends StatelessWidget {
     return Screen(
       title: 'RationesCurare',
       child: FutureBuilder<List<MovimentiSaldoPerCassa>>(
+        initialData: const [],
         future: load(context),
         builder: (context, snap) {
           final rows = snap.data ?? [];

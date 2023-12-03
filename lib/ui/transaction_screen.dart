@@ -92,7 +92,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                FutureBuilder(
+                FutureBuilder<List<String>>(
+                  initialData: const [],
                   future: _autori(),
                   builder: (context, snapshot) => AutoCompleteEdit(
                     controller: cNome,

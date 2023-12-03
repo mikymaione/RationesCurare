@@ -52,6 +52,7 @@ class AccountContentScreen extends StatelessWidget {
     return Screen(
       title: movimentiSaldoPerCassa.tipo,
       child: FutureBuilder<List<Movimenti>>(
+        initialData: const [],
         future: load(context),
         builder: (context, snap) {
           final rows = snap.data ?? [];

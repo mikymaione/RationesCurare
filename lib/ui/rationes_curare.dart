@@ -11,7 +11,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:rationes_curare/db/db.dart';
 import 'package:rationes_curare/ui/balance_screen.dart';
 import 'package:rationes_curare/ui/base/msg.dart';
-import 'package:sqlite3/common.dart';
+import 'package:sqlite3/common.dart' show CommonDatabase;
 
 class RationesCurare extends StatelessWidget {
   const RationesCurare({super.key});
@@ -46,6 +46,7 @@ class RationesCurare extends StatelessWidget {
         brightness: Brightness.dark,
       ),
       home: FutureBuilder<CommonDatabase?>(
+        initialData: null,
         future: loadDb(context),
         builder: (context, snapCommonDatabase) => snapCommonDatabase.data == null
             ? const Center(
