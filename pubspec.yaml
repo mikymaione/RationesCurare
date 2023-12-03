@@ -48,6 +48,7 @@ flutter:
     - assets/sql/DBInfo_Inserisci.sql
     - assets/sql/Movimenti_Aggiorna.sql
     - assets/sql/Movimenti_AggiornaMacroAree.sql
+    - assets/sql/Movimenti_AutoCompleteAutori.sql
     - assets/sql/Movimenti_AutoCompleteSource.sql
     - assets/sql/Movimenti_AutoCompleteSourceMA.sql
     - assets/sql/Movimenti_Data.sql

@@ -191,6 +191,15 @@ final class StoreMovimenti extends DbBase
         ],
       ];
 
+  Future<List<String>> autori() async => [
+        for (final r in db.select(
+          await QueryManager.getSql(Queries.Movimenti_AutoCompleteAutori),
+          const [],
+        )) ...[
+          r['Nome'],
+        ],
+      ];
+
   Future<List<String>> macroAree({
     required bool useMacroArea,
   }) async =>
