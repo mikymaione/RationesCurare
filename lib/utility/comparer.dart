@@ -31,11 +31,16 @@ class Comparer {
     }
   }
 
-  static Iterable<String> whereListContainsIgnoreCase(List<String> list, String string) {
-    final lower = string.toLowerCase();
+  static Iterable<String> whereListContainsIgnoreCase(Iterable<String>? list, String string) {
+    if (string.isEmpty) {
+      return const [];
+    } else {
+      final lower = string.toLowerCase();
+      final items = list ?? const [];
 
-    return list.where(
-      (a) => a.toLowerCase().contains(lower),
-    );
+      return items.where(
+        (a) => a.toLowerCase().contains(lower),
+      );
+    }
   }
 }
