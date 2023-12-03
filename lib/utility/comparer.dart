@@ -39,7 +39,7 @@ class Comparer {
       final items = list ?? const [];
 
       return items.where(
-        (a) => a.toLowerCase().contains(lower),
+        (a) => a.isNotEmpty && a.toLowerCase().contains(lower),
       );
     }
   }

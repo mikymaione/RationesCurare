@@ -13,6 +13,7 @@ import 'package:rationes_curare/ui/base/auto_complete_edit.dart';
 import 'package:rationes_curare/ui/base/generic_scrollable.dart';
 import 'package:rationes_curare/ui/base/msg.dart';
 import 'package:rationes_curare/ui/base/screen.dart';
+import 'package:rationes_curare/utility/commons.dart';
 import 'package:rationes_curare/utility/generic_controller.dart';
 import 'package:sqlite3/common.dart' as sqlite;
 
@@ -32,21 +33,29 @@ class TransactionScreen extends StatefulWidget {
 
 class _TransactionScreenState extends State<TransactionScreen> {
   final formKey = GlobalKey<FormState>();
-  final cNome = GenericController<String>();
+  final cNome = TextEditingController();
+  final cDescrizione = TextEditingController();
+  final cMacroarea = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    Commons.printIfInDebug('initState');
 
     if (widget.transaction != null) {
       final t = widget.transaction!;
 
-      cNome.value = t.nome;
+      cNome.text = t.nome;
+      cDescrizione.text = t.descrizione;
+      cMacroarea.text = t.macroArea;
     }
   }
 
   @override
   void dispose() {
+    cNome.dispose();
+    cDescrizione.dispose();
+    cMacroarea.dispose();
     super.dispose();
   }
 
@@ -61,10 +70,52 @@ class _TransactionScreenState extends State<TransactionScreen> {
       return await store.autori();
     } catch (e) {
       if (context.mounted) {
-        Msg.showError(context, e);
+        Msg.showErrorMsg(context, 'Error loading authors: $e');
       }
 
       return const [];
+    }
+  }
+
+  Future<List<String>> _macroarea() async {
+    final store = StoreMovimenti(db: widget.db);
+
+    try {
+      return await store.macroAree();
+    } catch (e) {
+      if (context.mounted) {
+        Msg.showErrorMsg(context, 'Error loading macroareas: $e');
+      }
+
+      return const [];
+    }
+  }
+
+  Future<List<String>> _descrizioni() async {
+    final store = StoreMovimenti(db: widget.db);
+
+    try {
+      return await store.descrizioni();
+    } catch (e) {
+      if (context.mounted) {
+        Msg.showErrorMsg(context, 'Error loading descriptions: $e');
+      }
+
+      return const [];
+    }
+  }
+
+  Future<String?> _getMacroAreaByDescrizione(String descrizione) async {
+    final store = StoreMovimenti(db: widget.db);
+
+    try {
+      return await store.macroAreeAndDescrizioni(descrizione: descrizione);
+    } catch (e) {
+      if (context.mounted) {
+        Msg.showErrorMsg(context, 'Error loading macroareas by description: $e');
+      }
+
+      return null;
     }
   }
 
@@ -85,6 +136,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Autore
                 const Text(
                   'Autore',
                   style: TextStyle(
@@ -102,6 +154,50 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 ),
                 const SizedBox(height: 16),
 
+                // Descrizione
+                const Text(
+                  'Descrizione',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                FutureBuilder<List<String>>(
+                  initialData: const [],
+                  future: _descrizioni(),
+                  builder: (context, snapshot) => AutoCompleteEdit(
+                    controller: cDescrizione,
+                    items: snapshot.data,
+                    onSelected: (description) async {
+                      final maybeMacroArea = await _getMacroAreaByDescrizione(description);
+                      Commons.printIfInDebug('maybeMacroArea: $maybeMacroArea');
+
+                      setState(() {
+                        cMacroarea.text = maybeMacroArea ?? '';
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Macroarea
+                const Text(
+                  'Macroarea',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                FutureBuilder<List<String>>(
+                  initialData: const [],
+                  future: _macroarea(),
+                  builder: (context, snapshot) => AutoCompleteEdit(
+                    controller: cMacroarea,
+                    items: snapshot.data,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                //
                 // Buttons
                 const SizedBox(height: 16),
                 Row(

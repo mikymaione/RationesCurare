@@ -7,28 +7,42 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 import 'package:flutter/material.dart';
+import 'package:rationes_curare/utility/callbacks.dart';
 import 'package:rationes_curare/utility/comparer.dart';
-import 'package:rationes_curare/utility/generic_controller.dart';
 
 class AutoCompleteEdit extends StatelessWidget {
-  final GenericController<String> controller;
+  final TextEditingController controller;
   final Iterable<String>? items;
+  final Void1ParamCallback<String>? onSelected;
 
   const AutoCompleteEdit({
     super.key,
     required this.controller,
     required this.items,
+    this.onSelected,
   });
 
   @override
   Widget build(BuildContext context) {
     return Autocomplete<String>(
-      initialValue: TextEditingValue(text: controller.value ?? ''),
-      onSelected: (v) => controller.value = v,
+      onSelected: (v) {
+        controller.text = v;
+        onSelected?.call(v);
+      },
       optionsBuilder: (textEditingValue) => Comparer.whereListContainsIgnoreCase(
         items,
         textEditingValue.text,
       ),
+      fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) {
+        textEditingController.text = controller.text;
+
+        return TextFormField(
+          controller: textEditingController,
+          autofocus: true,
+          focusNode: focusNode,
+          onFieldSubmitted: (value) => onFieldSubmitted(),
+        );
+      },
     );
   }
 }
