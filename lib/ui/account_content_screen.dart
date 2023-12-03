@@ -11,6 +11,8 @@ import 'package:rationes_curare/data_structure/movimenti.dart';
 import 'package:rationes_curare/store/store_movimenti.dart';
 import 'package:rationes_curare/ui/base/msg.dart';
 import 'package:rationes_curare/ui/base/screen.dart';
+import 'package:rationes_curare/ui/transaction_screen.dart';
+import 'package:rationes_curare/utility/commons.dart';
 import 'package:rationes_curare/utility/formatters.dart';
 import 'package:sqlite3/common.dart' as sqlite;
 
@@ -58,6 +60,13 @@ class AccountContentScreen extends StatelessWidget {
             itemCount: rows.length,
             itemBuilder: (context, index) => ListTile(
               tileColor: index.isEven ? colorEven : colorOdd,
+              onTap: () => Commons.navigate(
+                context: context,
+                builder: (context) => TransactionScreen(
+                  db: db,
+                  transaction: rows[index],
+                ),
+              ),
               title: Text(
                 rows[index].macroArea,
                 style: TextStyle(
