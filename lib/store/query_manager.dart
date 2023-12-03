@@ -8,6 +8,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:rationes_curare/utility/commons.dart';
 
 enum Queries {
   // Movimenti
@@ -66,19 +67,13 @@ class QueryManager {
     } else {
       if (!_queries.containsKey(query)) {
         final filename = 'assets/sql/${query.name}.sql';
-
-        if (kDebugMode) {
-          print('Opening: $filename');
-        }
+        Commons.printIfInDebug('Opening: $filename');
 
         _queries[query] = await rootBundle.loadString(filename);
       }
 
       final s = _queries[query]!;
-
-      if (kDebugMode) {
-        print('SQL: $s');
-      }
+      Commons.printIfInDebug('SQL: $s');
 
       return s;
     }

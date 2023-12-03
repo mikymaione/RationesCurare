@@ -8,32 +8,25 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:rationes_curare/utility/commons.dart';
 import 'package:sqlite3/common.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 Future<CommonDatabase> openSqliteDb(String folder, String name) async {
-  final filename = await _getFile(folder, name);
+  Commons.printIfInDebug('Using Native Sqlite3');
 
-  if (kDebugMode) {
-    print('Opening DB: $filename');
-  }
+  final filename = await _getFile(folder, name);
+  Commons.printIfInDebug('Opening DB: $filename');
 
   try {
     final db = sqlite3.open(filename);
-
-    if (kDebugMode) {
-      print('Connection successfully to DB: $filename');
-    }
+    Commons.printIfInDebug('Connection successfully to DB: $filename');
 
     return db;
   } catch (e) {
-    if (kDebugMode) {
-      print('Can not open DB: $e');
-    }
-
+    Commons.printIfInDebug('Can not open DB: $e');
     rethrow;
   }
 }
