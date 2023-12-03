@@ -14,11 +14,11 @@ import 'package:rationes_curare/ui/base/screen.dart';
 import 'package:rationes_curare/utility/formatters.dart';
 import 'package:sqlite3/common.dart' as sqlite;
 
-class AccountContent extends StatelessWidget {
+class AccountContentScreen extends StatelessWidget {
   final sqlite.CommonDatabase db;
   final MovimentiSaldoPerCassa movimentiSaldoPerCassa;
 
-  AccountContent({
+  const AccountContentScreen({
     super.key,
     required this.db,
     required this.movimentiSaldoPerCassa,

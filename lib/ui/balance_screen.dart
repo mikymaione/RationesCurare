@@ -83,7 +83,7 @@ class BalanceScreen extends StatelessWidget {
                     tileColor: index.isEven ? colorEven : colorOdd,
                     onTap: () => Commons.navigate(
                       context: context,
-                      builder: (context) => AccountContent(
+                      builder: (context) => AccountContentScreen(
                         db: db,
                         movimentiSaldoPerCassa: rows[index],
                       ),
