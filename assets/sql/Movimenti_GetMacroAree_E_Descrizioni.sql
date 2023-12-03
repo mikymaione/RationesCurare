@@ -1,8 +1,8 @@
 ﻿select distinct
-	MacroArea,
-	descrizione
+	MacroArea
 from Movimenti
 where
-	MacroArea <> ''
+	descrizione = @descrizione
 order by
-	1, 2
+	1
+limit 1

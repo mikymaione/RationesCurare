@@ -170,17 +170,17 @@ final class StoreMovimenti extends DbBase
     );
   }
 
-  Future<List<MovimentiMacroAreaAndDescrizione>> macroAreeAndDescrizioni() async => [
+  Future<String?> macroAreeAndDescrizioni({
+    required String descrizione,
+  }) async =>
+      [
         for (final r in db.select(
           await QueryManager.getSql(Queries.Movimenti_GetMacroAree_E_Descrizioni),
-          const [],
+          [descrizione],
         )) ...[
-          MovimentiMacroAreaAndDescrizione(
-            macroArea: r['MacroArea'],
-            descrizione: r['descrizione'],
-          ),
+          r['MacroArea'],
         ],
-      ];
+      ].singleOrNull;
 
   Future<List<String>> descrizioni() async => [
         for (final r in db.select(
