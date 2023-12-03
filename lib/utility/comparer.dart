@@ -30,4 +30,12 @@ class Comparer {
       return compareCallback(a!, b!);
     }
   }
+
+  static Iterable<String> whereListContainsIgnoreCase(List<String> list, String string) {
+    final lower = string.toLowerCase();
+
+    return list.where(
+      (a) => a.toLowerCase().contains(lower),
+    );
+  }
 }
