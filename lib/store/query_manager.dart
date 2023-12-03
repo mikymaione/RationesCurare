@@ -19,6 +19,7 @@ enum Queries {
   Movimenti_SaldoAssoluto,
   Movimenti_Dettaglio,
   Movimenti_Elimina,
+  Movimenti_AutoCompleteAutori,
   Movimenti_AutoCompleteSource,
   Movimenti_AutoCompleteSourceMA,
   Movimenti_MovimentiPerCassa,
