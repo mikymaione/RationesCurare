@@ -33,6 +33,8 @@ class TransactionScreen extends StatefulWidget {
 class _TransactionScreenState extends State<TransactionScreen> {
   final formKey = GlobalKey<FormState>();
   final cNome = GenericController<String>();
+  final cDescrizione = GenericController<String>();
+  final cMacroarea = GenericController<String>();
 
   @override
   void initState() {
@@ -42,11 +44,16 @@ class _TransactionScreenState extends State<TransactionScreen> {
       final t = widget.transaction!;
 
       cNome.value = t.nome;
+      cDescrizione.value = t.descrizione;
+      cMacroarea.value = t.macroArea;
     }
   }
 
   @override
   void dispose() {
+    cNome.dispose();
+    cDescrizione.dispose();
+    cMacroarea.dispose();
     super.dispose();
   }
 
@@ -61,7 +68,33 @@ class _TransactionScreenState extends State<TransactionScreen> {
       return await store.autori();
     } catch (e) {
       if (context.mounted) {
-        Msg.showError(context, e);
+        Msg.showErrorMsg(context, 'Error loading authors: $e');
+      }
+
+      return const [];
+    }
+  }
+  Future<List<String>> _macroarea() async {
+    final store = StoreMovimenti(db: widget.db);
+
+    try {
+      return await store.macroAree();
+    } catch (e) {
+      if (context.mounted) {
+        Msg.showErrorMsg(context, 'Error loading macroareas: $e');
+      }
+
+      return const [];
+    }
+  }
+  Future<List<String>> _descrizioni() async {
+    final store = StoreMovimenti(db: widget.db);
+
+    try {
+      return await store.descrizioni();
+    } catch (e) {
+      if (context.mounted) {
+        Msg.showErrorMsg(context, 'Error loading descriptions: $e');
       }
 
       return const [];
@@ -85,6 +118,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Autore
                 const Text(
                   'Autore',
                   style: TextStyle(
@@ -102,6 +136,42 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 ),
                 const SizedBox(height: 16),
 
+                // Descrizione
+                const Text(
+                  'Descrizione',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                FutureBuilder<List<String>>(
+                  initialData: const [],
+                  future: _descrizioni(),
+                  builder: (context, snapshot) => AutoCompleteEdit(
+                    controller: cDescrizione,
+                    items: snapshot.data,
+                  ),
+                ),
+                const SizedBox(height: 16),
+              
+                // Macroarea
+                const Text(
+                  'Macroarea',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                FutureBuilder<List<String>>(
+                  initialData: const [],
+                  future: _macroarea(),
+                  builder: (context, snapshot) => AutoCompleteEdit(
+                    controller: cMacroarea,
+                    items: snapshot.data,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                //
                 // Buttons
                 const SizedBox(height: 16),
                 Row(
