@@ -18,7 +18,7 @@ class RationesCurare extends StatelessWidget {
 
   Future<CommonDatabase?> loadDb(BuildContext context) async {
     try {
-      return await openDb('./test_db/', 'db');
+      return await openDb('db');
     } catch (e) {
       Msg.showError(context, e);
       return null;
