@@ -9,10 +9,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 import 'package:flutter/material.dart';
 import 'package:rationes_curare/data_structure/movimenti.dart';
 import 'package:rationes_curare/store/store_movimenti.dart';
+import 'package:rationes_curare/ui/base/auto_complete_edit.dart';
 import 'package:rationes_curare/ui/base/generic_scrollable.dart';
 import 'package:rationes_curare/ui/base/msg.dart';
 import 'package:rationes_curare/ui/base/screen.dart';
-import 'package:rationes_curare/utility/comparer.dart';
+import 'package:rationes_curare/utility/generic_controller.dart';
 import 'package:sqlite3/common.dart' as sqlite;
 
 class TransactionScreen extends StatefulWidget {
@@ -31,10 +32,17 @@ class TransactionScreen extends StatefulWidget {
 
 class _TransactionScreenState extends State<TransactionScreen> {
   final formKey = GlobalKey<FormState>();
+  final cNome = GenericController<String>();
 
   @override
   void initState() {
     super.initState();
+
+    if (widget.transaction != null) {
+      final t = widget.transaction!;
+
+      cNome.value = t.nome;
+    }
   }
 
   @override
@@ -86,13 +94,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 const SizedBox(height: 8),
                 FutureBuilder(
                   future: _autori(),
-                  builder: (context, snapshot) => Autocomplete<String>(
-                    optionsBuilder: (textEditingValue) => snapshot.hasData && textEditingValue.text.isNotEmpty
-                        ? Comparer.whereListContainsIgnoreCase(
-                            snapshot.requireData,
-                            textEditingValue.text,
-                          )
-                        : const [],
+                  builder: (context, snapshot) => AutoCompleteEdit(
+                    controller: cNome,
+                    items: snapshot.data,
                   ),
                 ),
                 const SizedBox(height: 16),
