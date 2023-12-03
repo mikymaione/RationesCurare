@@ -13,8 +13,8 @@ import 'package:sqlite3/common.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 Future<CommonDatabase> openDb(String name) async {
-  final docsDir = await getApplicationDocumentsDirectory();
-  final rcDir = join(docsDir.path, 'RationesCurare');
+  final docsDir = await getDownloadsDirectory();
+  final rcDir = join(docsDir!.path, 'RationesCurare');
 
   Commons.printIfInDebug('RationesCurare directory: $rcDir');
 
