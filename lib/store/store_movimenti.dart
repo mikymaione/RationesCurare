@@ -187,7 +187,7 @@ final class StoreMovimenti extends DbBase
           await QueryManager.getSql(Queries.Movimenti_AutoCompleteSource),
           const [],
         )) ...[
-          r['descrizione'],
+          r['Descrizione'],
         ],
       ];
 
@@ -200,10 +200,7 @@ final class StoreMovimenti extends DbBase
         ],
       ];
 
-  Future<List<String>> macroAree({
-    required bool useMacroArea,
-  }) async =>
-      [
+  Future<List<String>> macroAree() async => [
         for (final r in db.select(
           await QueryManager.getSql(Queries.Movimenti_AutoCompleteSourceMA),
           const [],

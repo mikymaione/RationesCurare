@@ -1,5 +1,5 @@
 ﻿select distinct
-	descrizione
+	Descrizione
 from Movimenti
 order by
 	1
