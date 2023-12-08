@@ -38,7 +38,6 @@ class AutoCompleteEdit extends StatelessWidget {
 
         return TextFormField(
           controller: textEditingController,
-          autofocus: true,
           focusNode: focusNode,
           onFieldSubmitted: (value) => onFieldSubmitted(),
         );
