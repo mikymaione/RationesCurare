@@ -9,6 +9,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 import 'package:flutter/material.dart';
 import 'package:rationes_curare/data_structure/movimenti.dart';
 import 'package:rationes_curare/store/store_movimenti.dart';
+import 'package:rationes_curare/ui/MoneyField.dart';
 import 'package:rationes_curare/ui/base/auto_complete_edit.dart';
 import 'package:rationes_curare/ui/base/generic_scrollable.dart';
 import 'package:rationes_curare/ui/base/msg.dart';
@@ -33,7 +34,9 @@ class TransactionScreen extends StatefulWidget {
 
 class _TransactionScreenState extends State<TransactionScreen> {
   final formKey = GlobalKey<FormState>();
+
   final cNome = TextEditingController();
+  final cImporto = GenericController<double>();
   final cDescrizione = TextEditingController();
   final cMacroarea = TextEditingController();
 
@@ -46,6 +49,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
       final t = widget.transaction!;
 
       cNome.text = t.nome;
+      cImporto.value = t.soldi;
       cDescrizione.text = t.descrizione;
       cMacroarea.text = t.macroArea;
     }
@@ -54,8 +58,10 @@ class _TransactionScreenState extends State<TransactionScreen> {
   @override
   void dispose() {
     cNome.dispose();
+    cImporto.dispose();
     cDescrizione.dispose();
     cMacroarea.dispose();
+
     super.dispose();
   }
 
@@ -122,7 +128,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
   @override
   Widget build(BuildContext context) {
     final themeData = Theme.of(context);
-    final languageCode = Localizations.localeOf(context).languageCode;
 
     return Screen(
       title: 'Transaction',
@@ -151,6 +156,19 @@ class _TransactionScreenState extends State<TransactionScreen> {
                     controller: cNome,
                     items: snapshot.data,
                   ),
+                ),
+                const SizedBox(height: 16),
+
+                // Importo
+                const Text(
+                  'Importo',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                MoneyField(
+                  controller: cImporto,
                 ),
                 const SizedBox(height: 16),
 
