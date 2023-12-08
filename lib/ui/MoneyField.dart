@@ -38,7 +38,7 @@ class _MoneyFieldState extends State<MoneyField> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      initialValue: widget.controller.value == null ? null : formatter.formatDouble(widget.controller.value!),
+      initialValue: widget.controller.value == null ? null : formatter.format(widget.controller.value!.toStringAsFixed(2)),
       onChanged: (s) => widget.controller.value = formatter.getUnformattedValue().toDouble(),
       keyboardType: TextInputType.number,
       inputFormatters: [
