@@ -14,6 +14,7 @@ import 'package:rationes_curare/ui/base/auto_complete_edit.dart';
 import 'package:rationes_curare/ui/base/generic_scrollable.dart';
 import 'package:rationes_curare/ui/base/msg.dart';
 import 'package:rationes_curare/ui/base/screen.dart';
+import 'package:rationes_curare/ui/date_time_field.dart';
 import 'package:rationes_curare/utility/commons.dart';
 import 'package:rationes_curare/utility/generic_controller.dart';
 import 'package:sqlite3/common.dart' as sqlite;
@@ -37,6 +38,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
 
   final cNome = TextEditingController();
   final cImporto = GenericController<double>();
+  final cData = GenericController<DateTime>();
   final cDescrizione = TextEditingController();
   final cMacroarea = TextEditingController();
 
@@ -51,6 +53,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
       cNome.text = t.nome;
       cImporto.value = t.soldi;
       cDescrizione.text = t.descrizione;
+      cData.value = t.data;
       cMacroarea.text = t.macroArea;
     }
   }
@@ -60,6 +63,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
     cNome.dispose();
     cImporto.dispose();
     cDescrizione.dispose();
+    cData.dispose();
     cMacroarea.dispose();
 
     super.dispose();
@@ -169,6 +173,19 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 const SizedBox(height: 8),
                 MoneyField(
                   controller: cImporto,
+                ),
+                const SizedBox(height: 16),
+
+                // Data
+                const Text(
+                  'Data',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                DateTimeField(
+                  controller: cData,
                 ),
                 const SizedBox(height: 16),
 
