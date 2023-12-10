@@ -190,9 +190,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       final maybeMacroArea = await _getMacroAreaByDescrizione(description);
                       Commons.printIfInDebug('maybeMacroArea: $maybeMacroArea');
 
-                      setState(() {
-                        cMacroarea.text = maybeMacroArea ?? '';
-                      });
+                      setState(() => cMacroarea.text = maybeMacroArea ?? '');
                     },
                   ),
                 ),
