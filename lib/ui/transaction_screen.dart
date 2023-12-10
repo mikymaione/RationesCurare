@@ -139,119 +139,122 @@ class _TransactionScreenState extends State<TransactionScreen> {
         scrollDirection: Axis.vertical,
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Form(
-            key: formKey,
-            autovalidateMode: AutovalidateMode.always,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Autore
-                const Text(
-                  'Autore',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+          child: FocusTraversalGroup(
+            policy: OrderedTraversalPolicy(),
+            child: Form(
+              key: formKey,
+              autovalidateMode: AutovalidateMode.always,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Autore
+                  const Text(
+                    'Autore',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                FutureBuilder<List<String>>(
-                  initialData: const [],
-                  future: _autori(),
-                  builder: (context, snapshot) => AutoCompleteEdit(
-                    controller: cNome,
-                    items: snapshot.data,
+                  const SizedBox(height: 8),
+                  FutureBuilder<List<String>>(
+                    initialData: const [],
+                    future: _autori(),
+                    builder: (context, snapshot) => AutoCompleteEdit(
+                      controller: cNome,
+                      items: snapshot.data,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                // Importo
-                const Text(
-                  'Importo',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+                  // Importo
+                  const Text(
+                    'Importo',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                MoneyField(
-                  controller: cImporto,
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 8),
+                  MoneyField(
+                    controller: cImporto,
+                  ),
+                  const SizedBox(height: 16),
 
-                // Data
-                const Text(
-                  'Data',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+                  // Data
+                  const Text(
+                    'Data',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                DateTimeField(
-                  controller: cData,
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 8),
+                  DateTimeField(
+                    controller: cData,
+                  ),
+                  const SizedBox(height: 16),
 
-                // Descrizione
-                const Text(
-                  'Descrizione',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+                  // Descrizione
+                  const Text(
+                    'Descrizione',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                FutureBuilder<List<String>>(
-                  initialData: const [],
-                  future: _descrizioni(),
-                  builder: (context, snapshot) => AutoCompleteEdit(
-                    controller: cDescrizione,
-                    items: snapshot.data,
-                    onSelected: (description) async {
-                      final maybeMacroArea = await _getMacroAreaByDescrizione(description);
-                      Commons.printIfInDebug('maybeMacroArea: $maybeMacroArea');
+                  const SizedBox(height: 8),
+                  FutureBuilder<List<String>>(
+                    initialData: const [],
+                    future: _descrizioni(),
+                    builder: (context, snapshot) => AutoCompleteEdit(
+                      controller: cDescrizione,
+                      items: snapshot.data,
+                      onSelected: (description) async {
+                        final maybeMacroArea = await _getMacroAreaByDescrizione(description);
+                        Commons.printIfInDebug('maybeMacroArea: $maybeMacroArea');
 
-                      setState(() => cMacroarea.text = maybeMacroArea ?? '');
-                    },
+                        setState(() => cMacroarea.text = maybeMacroArea ?? '');
+                      },
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                // Macroarea
-                const Text(
-                  'Macroarea',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+                  // Macroarea
+                  const Text(
+                    'Macroarea',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                FutureBuilder<List<String>>(
-                  initialData: const [],
-                  future: _macroarea(),
-                  builder: (context, snapshot) => AutoCompleteEdit(
-                    controller: cMacroarea,
-                    items: snapshot.data,
+                  const SizedBox(height: 8),
+                  FutureBuilder<List<String>>(
+                    initialData: const [],
+                    future: _macroarea(),
+                    builder: (context, snapshot) => AutoCompleteEdit(
+                      controller: cMacroarea,
+                      items: snapshot.data,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                //
-                // Buttons
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    if (widget.transaction != null) ...[
-                      ElevatedButton(
-                        onPressed: () => _delete(),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: themeData.colorScheme.errorContainer,
+                  const SizedBox(height: 16),
+                  //
+                  // Buttons
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      if (widget.transaction != null) ...[
+                        ElevatedButton(
+                          onPressed: () => _delete(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: themeData.colorScheme.errorContainer,
+                          ),
+                          child: const Text('Elimina'),
                         ),
-                        child: const Text('Elimina'),
+                      ],
+                      const Spacer(),
+                      ElevatedButton(
+                        onPressed: () => _save(),
+                        child: const Text('Salva'),
                       ),
                     ],
-                    const Spacer(),
-                    ElevatedButton(
-                      onPressed: () => _save(),
-                      child: const Text('Salva'),
-                    ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
