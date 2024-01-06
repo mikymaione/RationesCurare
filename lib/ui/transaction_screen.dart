@@ -69,7 +69,35 @@ class _TransactionScreenState extends State<TransactionScreen> {
     super.dispose();
   }
 
-  void _save() {}
+  Future<void> _save() async {
+    try {
+      final id = widget.transaction?.id ?? -1;
+
+      final t = Movimenti(
+        id: id,
+        idGiroconto: null,
+        idMovimentoTempo: null,
+        nome: cNome.text,
+        tipo: 'TODO',
+        descrizione: cDescrizione.text,
+        macroArea: cMacroarea.text,
+        data: cData.value!,
+        soldi: cImporto.value!,
+      );
+
+      final store = StoreMovimenti(db: widget.db);
+      await store.set(t, id);
+
+      if (mounted) {
+        Msg.showOk(context, 'Saved');
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        Msg.showError(context, e);
+      }
+    }
+  }
 
   void _delete() {}
 
