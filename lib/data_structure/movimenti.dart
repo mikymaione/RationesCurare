@@ -7,16 +7,15 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 class Movimenti {
-  final int id;
-  final int? idGiroconto, idMovimentoTempo;
+  final int? id, idGiroconto, idMovimentoTempo;
   final String nome, tipo, descrizione, macroArea;
   final DateTime data;
   final double soldi;
 
   const Movimenti({
-    required this.id,
-    required this.idGiroconto,
-    required this.idMovimentoTempo,
+    this.id,
+    this.idGiroconto,
+    this.idMovimentoTempo,
     required this.nome,
     required this.tipo,
     required this.descrizione,
