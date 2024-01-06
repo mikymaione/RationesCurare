@@ -21,9 +21,11 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
+  collection: ^1.18.0
   cupertino_icons: ^1.0.2
   currency_text_input_formatter: ^2.1.10
   flutter_simple_calculator: ^2.2.4
+  intl: ^0.18.1
   path: ^1.8.3
   path_provider: ^2.1.1
   sqlite3: ^2.2.0
