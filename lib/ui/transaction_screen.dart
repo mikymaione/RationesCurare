@@ -9,12 +9,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 import 'package:flutter/material.dart';
 import 'package:rationes_curare/data_structure/movimenti.dart';
 import 'package:rationes_curare/store/store_movimenti.dart';
-import 'package:rationes_curare/ui/MoneyField.dart';
 import 'package:rationes_curare/ui/base/auto_complete_edit.dart';
 import 'package:rationes_curare/ui/base/generic_scrollable.dart';
 import 'package:rationes_curare/ui/base/msg.dart';
 import 'package:rationes_curare/ui/base/screen.dart';
 import 'package:rationes_curare/ui/date_time_field.dart';
+import 'package:rationes_curare/ui/money_field.dart';
 import 'package:rationes_curare/utility/commons.dart';
 import 'package:rationes_curare/utility/generic_controller.dart';
 import 'package:sqlite3/common.dart' as sqlite;
