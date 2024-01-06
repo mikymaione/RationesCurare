@@ -11,36 +11,28 @@ import 'package:rationes_curare/utility/callbacks.dart';
 
 class Comparer {
   //
-  static bool listAreUnorderedEquals<X>(List<X> a, List<X> b) {
-    final eq = const DeepCollectionEquality.unordered().equals;
+  static bool listAreUnorderedEquals<X>(List<X> a, List<X> b) => const DeepCollectionEquality.unordered().equals(a, b);
 
-    return eq(a, b);
-  }
-
-  static int boolCompare(bool? a, bool? b) => compare<bool>(a, b, (j, o) => j == o ? 0 : (true == j ? 1 : -1));
-
-  static int compare<X>(X? a, X? b, Generic2ParamCallback<X, X, int> compareCallback) {
-    if (a == null && b == null) {
-      return 0;
-    } else if (a == null && b != null) {
-      return 1;
-    } else if (a != null && b == null) {
-      return -1;
-    } else {
-      return compareCallback(a!, b!);
-    }
-  }
-
-  static Iterable<String> whereListContainsIgnoreCase(Iterable<String>? list, String string) {
-    if (string.isEmpty) {
-      return const [];
-    } else {
-      final lower = string.toLowerCase();
-      final items = list ?? const [];
-
-      return items.where(
-        (a) => a.isNotEmpty && a.toLowerCase().contains(lower),
+  static int boolCompare(bool? a, bool? b) => compare<bool>(
+        a,
+        b,
+        (j, o) => switch ((j, o)) {
+          (true, false) => -1,
+          (false, true) => 1,
+          _ => 0,
+        },
       );
-    }
-  }
+
+  static int compare<X>(X? a, X? b, Generic2ParamCallback<X, X, int> compareCallback) => switch ((a, b)) {
+        (null, null) => 0,
+        (null, _) => 1,
+        (_, null) => -1,
+        _ => compareCallback(a as X, b as X),
+      };
+
+  static Iterable<String> whereListContainsIgnoreCase(Iterable<String>? list, String string) => list == null || string.isEmpty
+      ? const []
+      : list.where(
+          (a) => a.isNotEmpty && a.toLowerCase().contains(string.toLowerCase()),
+        );
 }
