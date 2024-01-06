@@ -6,8 +6,10 @@ Copyright (c) 2023 Michele Maione
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+import 'package:dart_casing/dart_casing.dart';
 import 'package:flutter/material.dart';
 import 'package:rationes_curare/data_structure/movimenti.dart';
+import 'package:rationes_curare/store/store_casse.dart';
 import 'package:rationes_curare/store/store_movimenti.dart';
 import 'package:rationes_curare/ui/base/auto_complete_edit.dart';
 import 'package:rationes_curare/ui/base/generic_scrollable.dart';
@@ -37,6 +39,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
   final formKey = GlobalKey<FormState>();
 
   final cNome = TextEditingController();
+  final cCassa = GenericController<String>();
   final cImporto = GenericController<double>();
   final cData = GenericController<DateTime>();
   final cDescrizione = TextEditingController();
@@ -47,10 +50,13 @@ class _TransactionScreenState extends State<TransactionScreen> {
     super.initState();
     Commons.printIfInDebug('initState');
 
-    if (widget.transaction != null) {
+    if (widget.transaction == null) {
+      cData.value = DateTime.now();
+    } else {
       final t = widget.transaction!;
 
       cNome.text = t.nome;
+      cCassa.value = Casing.titleCase(t.tipo);
       cImporto.value = t.soldi;
       cDescrizione.text = t.descrizione;
       cData.value = t.data;
@@ -61,6 +67,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
   @override
   void dispose() {
     cNome.dispose();
+    cCassa.dispose();
     cImporto.dispose();
     cDescrizione.dispose();
     cData.dispose();
@@ -70,36 +77,50 @@ class _TransactionScreenState extends State<TransactionScreen> {
   }
 
   Future<void> _save() async {
-    try {
-      final id = widget.transaction?.id ?? -1;
-
-      final t = Movimenti(
-        id: id,
-        idGiroconto: null,
-        idMovimentoTempo: null,
-        nome: cNome.text,
-        tipo: 'TODO',
-        descrizione: cDescrizione.text,
-        macroArea: cMacroarea.text,
-        data: cData.value!,
-        soldi: cImporto.value!,
-      );
-
+    if (true == formKey.currentState?.validate()) {
       final store = StoreMovimenti(db: widget.db);
-      await store.set(t, id);
+      final id = widget.transaction?.id;
 
-      if (mounted) {
-        Msg.showOk(context, 'Saved');
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      if (mounted) {
-        Msg.showError(context, e);
+      try {
+        final t = Movimenti(
+          id: id,
+          nome: cNome.text,
+          tipo: cCassa.value!,
+          descrizione: cDescrizione.text,
+          macroArea: cMacroarea.text,
+          data: cData.value!,
+          soldi: cImporto.value!,
+        );
+
+        await store.set(t, id);
+
+        if (mounted) {
+          Msg.showOk(context, 'Saved');
+          Navigator.pop(context, true);
+        }
+      } catch (e) {
+        if (mounted) {
+          Msg.showError(context, e);
+        }
       }
     }
   }
 
   void _delete() {}
+
+  Future<List<String>> _casse() async {
+    final store = StoreCasse(db: widget.db);
+
+    try {
+      return await store.lista();
+    } catch (e) {
+      if (context.mounted) {
+        Msg.showErrorMsg(context, 'Error loading accounts: $e');
+      }
+
+      return const [];
+    }
+  }
 
   Future<List<String>> _autori() async {
     final store = StoreMovimenti(db: widget.db);
@@ -184,11 +205,39 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   ),
                   const SizedBox(height: 8),
                   FutureBuilder<List<String>>(
-                    initialData: const [],
                     future: _autori(),
                     builder: (context, snapshot) => AutoCompleteEdit(
+                      validator: (value) => cNome.text.isEmpty ? 'Campo obbligatorio' : null,
                       controller: cNome,
                       items: snapshot.data,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Cassa
+                  const Text(
+                    'Cassa',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  FutureBuilder<List<String>>(
+                    future: _casse(),
+                    builder: (context, snapshot) => DropdownButtonFormField<String>(
+                      validator: (value) => cCassa.value == null ? 'Campo obbligatorio' : null,
+                      value: cCassa.value,
+                      onChanged: (value) => cCassa.value = value,
+                      items: [
+                        if (snapshot.hasData) ...[
+                          for (final c in snapshot.requireData) ...[
+                            DropdownMenuItem(
+                              value: c,
+                              child: Text(c),
+                            ),
+                          ],
+                        ],
+                      ],
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -202,6 +251,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   ),
                   const SizedBox(height: 8),
                   MoneyField(
+                    validator: (value) => cImporto.value == null ? 'Campo obbligatorio' : null,
                     controller: cImporto,
                   ),
                   const SizedBox(height: 16),
@@ -215,6 +265,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   ),
                   const SizedBox(height: 8),
                   DateTimeField(
+                    validator: (value) => cData.value == null ? 'Campo obbligatorio' : null,
                     controller: cData,
                   ),
                   const SizedBox(height: 16),
@@ -228,9 +279,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   ),
                   const SizedBox(height: 8),
                   FutureBuilder<List<String>>(
-                    initialData: const [],
                     future: _descrizioni(),
                     builder: (context, snapshot) => AutoCompleteEdit(
+                      validator: (value) => cDescrizione.text.isEmpty ? 'Campo obbligatorio' : null,
                       controller: cDescrizione,
                       items: snapshot.data,
                       onSelected: (description) async {
@@ -252,9 +303,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   ),
                   const SizedBox(height: 8),
                   FutureBuilder<List<String>>(
-                    initialData: const [],
                     future: _macroarea(),
                     builder: (context, snapshot) => AutoCompleteEdit(
+                      validator: (value) => cMacroarea.text.isEmpty ? 'Campo obbligatorio' : null,
                       controller: cMacroarea,
                       items: snapshot.data,
                     ),
