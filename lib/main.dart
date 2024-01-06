@@ -10,5 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:rationes_curare/ui/rationes_curare.dart';
 
 void main() {
+  FlutterError.onError = (details) => FlutterError.presentError(details);
+
   runApp(const RationesCurare());
 }
