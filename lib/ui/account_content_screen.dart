@@ -16,7 +16,7 @@ import 'package:rationes_curare/utility/commons.dart';
 import 'package:rationes_curare/utility/formatters.dart';
 import 'package:sqlite3/common.dart' as sqlite;
 
-class AccountContentScreen extends StatelessWidget {
+class AccountContentScreen extends StatefulWidget {
   final sqlite.CommonDatabase db;
   final MovimentiSaldoPerCassa movimentiSaldoPerCassa;
 
@@ -26,12 +26,19 @@ class AccountContentScreen extends StatelessWidget {
     required this.movimentiSaldoPerCassa,
   });
 
-  Future<List<Movimenti>> load(BuildContext context) async {
-    final store = StoreMovimenti(db: db);
+  @override
+  State<StatefulWidget> createState() => _AccountContentScreenState();
+}
+
+class _AccountContentScreenState extends State<AccountContentScreen> {
+  var dataChanged = false;
+
+  Future<List<Movimenti>> load() async {
+    final store = StoreMovimenti(db: widget.db);
 
     try {
       return await store.ricerca(
-        tipo: movimentiSaldoPerCassa.tipo,
+        tipo: widget.movimentiSaldoPerCassa.tipo,
       );
     } catch (e) {
       if (context.mounted) {
@@ -39,6 +46,23 @@ class AccountContentScreen extends StatelessWidget {
       }
 
       return const [];
+    }
+  }
+
+  Future<void> _detail(Movimenti? transaction) async {
+    final saved = await Commons.navigate<bool>(
+      context: context,
+      builder: (context) => TransactionScreen(
+        db: widget.db,
+        transaction: transaction,
+      ),
+    );
+
+    if (true == saved) {
+      setState(() {
+        // reload db
+        dataChanged = true;
+      });
     }
   }
 
@@ -50,10 +74,10 @@ class AccountContentScreen extends StatelessWidget {
     final languageCode = Localizations.localeOf(context).languageCode;
 
     return Screen(
-      title: movimentiSaldoPerCassa.tipo,
+      title: widget.movimentiSaldoPerCassa.tipo,
+      onBack: () => dataChanged,
       child: FutureBuilder<List<Movimenti>>(
-        initialData: const [],
-        future: load(context),
+        future: load(),
         builder: (context, snap) {
           final rows = snap.data ?? [];
 
@@ -61,13 +85,7 @@ class AccountContentScreen extends StatelessWidget {
             itemCount: rows.length,
             itemBuilder: (context, index) => ListTile(
               tileColor: index.isEven ? colorEven : colorOdd,
-              onTap: () => Commons.navigate(
-                context: context,
-                builder: (context) => TransactionScreen(
-                  db: db,
-                  transaction: rows[index],
-                ),
-              ),
+              onTap: () => _detail(rows[index]),
               title: Text(
                 rows[index].macroArea,
                 style: TextStyle(

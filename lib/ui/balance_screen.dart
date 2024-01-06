@@ -17,7 +17,7 @@ import 'package:rationes_curare/utility/commons.dart';
 import 'package:rationes_curare/utility/formatters.dart';
 import 'package:sqlite3/common.dart' as sqlite;
 
-class BalanceScreen extends StatelessWidget {
+class BalanceScreen extends StatefulWidget {
   final sqlite.CommonDatabase db;
 
   const BalanceScreen({
@@ -25,8 +25,13 @@ class BalanceScreen extends StatelessWidget {
     required this.db,
   });
 
-  Future<List<MovimentiSaldoPerCassa>> load(BuildContext context) async {
-    final store = StoreMovimenti(db: db);
+  @override
+  State<StatefulWidget> createState() => _BalanceScreenState();
+}
+
+class _BalanceScreenState extends State<BalanceScreen> {
+  Future<List<MovimentiSaldoPerCassa>> load() async {
+    final store = StoreMovimenti(db: widget.db);
 
     try {
       final movimenti = await store.movimentiSaldoPerCassa(showEmpty: false);
@@ -48,6 +53,37 @@ class BalanceScreen extends StatelessWidget {
     }
   }
 
+  Future<void> _newTransaction() async {
+    final saved = await Commons.navigate<bool>(
+      context: context,
+      builder: (context) => TransactionScreen(
+        db: widget.db,
+      ),
+    );
+
+    if (true == saved) {
+      setState(() {
+        // reload db
+      });
+    }
+  }
+
+  Future<void> _detail(MovimentiSaldoPerCassa movimentiSaldoPerCassa) async {
+    final saved = await Commons.navigate(
+      context: context,
+      builder: (context) => AccountContentScreen(
+        db: widget.db,
+        movimentiSaldoPerCassa: movimentiSaldoPerCassa,
+      ),
+    );
+
+    if (true == saved) {
+      setState(() {
+        // reload db
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorOdd = Theme.of(context).colorScheme.primary.withOpacity(0.02);
@@ -62,17 +98,11 @@ class BalanceScreen extends StatelessWidget {
         // New Transaction
         IconButton(
           icon: const Icon(Icons.add),
-          onPressed: () => Commons.navigate(
-            context: context,
-            builder: (context) => TransactionScreen(
-              db: db,
-            ),
-          ),
+          onPressed: () => _newTransaction(),
         ),
       ],
       child: FutureBuilder<List<MovimentiSaldoPerCassa>>(
-        initialData: const [],
-        future: load(context),
+        future: load(),
         builder: (context, snap) {
           final rows = snap.data ?? [];
 
@@ -95,13 +125,7 @@ class BalanceScreen extends StatelessWidget {
                   )
                 : ListTile(
                     tileColor: index.isEven ? colorEven : colorOdd,
-                    onTap: () => Commons.navigate(
-                      context: context,
-                      builder: (context) => AccountContentScreen(
-                        db: db,
-                        movimentiSaldoPerCassa: rows[index],
-                      ),
-                    ),
+                    onTap: () => _detail(rows[index]),
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
