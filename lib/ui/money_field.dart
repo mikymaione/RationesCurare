@@ -14,10 +14,12 @@ import 'package:intl/intl.dart';
 
 class MoneyField extends StatefulWidget {
   final GenericController<double> controller;
+  final FormFieldValidator<String>? validator;
 
   const MoneyField({
     super.key,
     required this.controller,
+    this.validator,
   });
 
   @override
@@ -75,6 +77,7 @@ class _MoneyFieldState extends State<MoneyField> {
     setValue();
 
     return TextFormField(
+      validator: widget.validator,
       controller: textEditingController,
       onChanged: (s) => widget.controller.value = formatter.getUnformattedValue().toDouble(),
       keyboardType: TextInputType.number,

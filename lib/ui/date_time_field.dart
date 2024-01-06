@@ -12,10 +12,12 @@ import 'package:rationes_curare/utility/generic_controller.dart';
 
 class DateTimeField extends StatefulWidget {
   final GenericController<DateTime> controller;
+  final FormFieldValidator<String>? validator;
 
   const DateTimeField({
     super.key,
     required this.controller,
+    this.validator,
   });
 
   @override
@@ -54,6 +56,7 @@ class _DateTimeField extends State<DateTimeField> {
               final dt = d.add(Duration(hours: t.hour, minutes: t.minute));
 
               textEditingController.text = Formatters.datetimeYMDHHmm(languageCode, dt);
+              widget.controller.value = dt;
             }
           }
         }
@@ -67,12 +70,16 @@ class _DateTimeField extends State<DateTimeField> {
       textEditingController.text = Formatters.datetimeYMDHHmm(languageCode, widget.controller.value!);
     }
 
-    return TextField(
+    return TextFormField(
+      readOnly: true,
+      validator: widget.validator,
       controller: textEditingController,
-      decoration: const InputDecoration(
-        suffixIcon: Icon(Icons.calendar_month),
+      decoration: InputDecoration(
+        suffixIcon: IconButton(
+          icon: const Icon(Icons.calendar_month),
+          onPressed: () => showDateTimePicker(),
+        ),
       ),
-      onTap: () => showDateTimePicker(),
     );
   }
 }

@@ -14,12 +14,14 @@ class AutoCompleteEdit extends StatelessWidget {
   final TextEditingController controller;
   final Iterable<String>? items;
   final Void1ParamCallback<String>? onSelected;
+  final FormFieldValidator<String>? validator;
 
   const AutoCompleteEdit({
     super.key,
     required this.controller,
     required this.items,
     this.onSelected,
+    this.validator,
   });
 
   @override
@@ -37,9 +39,11 @@ class AutoCompleteEdit extends StatelessWidget {
         textEditingController.text = controller.text;
 
         return TextFormField(
+          validator: validator,
           controller: textEditingController,
           focusNode: focusNode,
           onFieldSubmitted: (value) => onFieldSubmitted(),
+          onChanged: (value) => controller.text = value,
         );
       },
     );
