@@ -18,6 +18,8 @@ class Formatters {
 
   static DateTime sqliteToDateTime(String s) => DateFormat(_sqliteDateFormat).parse(s);
 
+  static String dateTimeNullableToSqlite(DateTime? d) => d == null ? dateTimeToSqliteNow() : dateTimeToSqlite(d);
+
   static String dateTimeToSqlite(DateTime d) => DateFormat(_sqliteDateFormat).format(d);
 
   static String dateTimeToSqliteNow() => dateTimeToSqlite(DateTime.now());

@@ -62,7 +62,7 @@ final class StoreMovimenti extends DbBase
         e.tipo,
         e.descrizione,
         e.soldi,
-        e.data,
+        Formatters.dateTimeToSqlite(e.data),
         e.macroArea,
       ];
 
@@ -87,8 +87,8 @@ final class StoreMovimenti extends DbBase
           soldiDa ?? 0,
           soldiA ?? 0,
           usaData ?? false,
-          dataDa ?? Formatters.dateTimeToSqliteNow(),
-          dataA ?? Formatters.dateTimeToSqliteNow(),
+          Formatters.dateTimeNullableToSqlite(dataDa),
+          Formatters.dateTimeNullableToSqlite(dataA),
         ],
       );
 
