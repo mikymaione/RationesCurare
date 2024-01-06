@@ -12,6 +12,7 @@ import 'package:rationes_curare/store/store_movimenti.dart';
 import 'package:rationes_curare/ui/account_content_screen.dart';
 import 'package:rationes_curare/ui/base/msg.dart';
 import 'package:rationes_curare/ui/base/screen.dart';
+import 'package:rationes_curare/ui/transaction_screen.dart';
 import 'package:rationes_curare/utility/commons.dart';
 import 'package:rationes_curare/utility/formatters.dart';
 import 'package:sqlite3/common.dart' as sqlite;
@@ -57,6 +58,18 @@ class BalanceScreen extends StatelessWidget {
 
     return Screen(
       title: 'RationesCurare',
+      actions: [
+        // New Transaction
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: () => Commons.navigate(
+            context: context,
+            builder: (context) => TransactionScreen(
+              db: db,
+            ),
+          ),
+        ),
+      ],
       child: FutureBuilder<List<MovimentiSaldoPerCassa>>(
         initialData: const [],
         future: load(context),

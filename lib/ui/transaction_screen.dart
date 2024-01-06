@@ -26,7 +26,7 @@ class TransactionScreen extends StatefulWidget {
   const TransactionScreen({
     super.key,
     required this.db,
-    required this.transaction,
+    this.transaction,
   });
 
   @override
