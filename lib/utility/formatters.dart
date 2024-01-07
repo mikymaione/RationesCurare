@@ -43,4 +43,10 @@ class Formatters {
   static String likeR(String s) => '$s%';
 
   static String likeLR(String s) => likeL(likeR(s));
+
+  static String? nullIfEmpty(String? s) => s == null
+      ? null
+      : s.isEmpty
+          ? null
+          : s;
 }

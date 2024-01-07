@@ -7,7 +7,6 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 import 'package:confirm_dialog/confirm_dialog.dart';
-import 'package:dart_casing/dart_casing.dart';
 import 'package:flutter/material.dart';
 import 'package:rationes_curare/data_structure/movimenti.dart';
 import 'package:rationes_curare/store/store_casse.dart';
@@ -19,6 +18,7 @@ import 'package:rationes_curare/ui/base/screen.dart';
 import 'package:rationes_curare/ui/date_time_field.dart';
 import 'package:rationes_curare/ui/money_field.dart';
 import 'package:rationes_curare/utility/commons.dart';
+import 'package:rationes_curare/utility/formatters.dart';
 import 'package:rationes_curare/utility/generic_controller.dart';
 import 'package:sqlite3/common.dart' as sqlite;
 
@@ -60,7 +60,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
       final t = widget.transaction!;
 
       cNome.text = t.nome;
-      cCassa.value = Casing.titleCase(t.tipo);
+      cCassa.value = t.tipo;
       cImporto.value = t.soldi;
       cDescrizione.text = t.descrizione;
       cData.value = t.data;
@@ -236,6 +236,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                     future: _autori(),
                     builder: (context, snapshot) => AutoCompleteEdit(
                       validator: (value) => cNome.text.isEmpty ? 'Campo obbligatorio' : null,
+                      titleCase: true,
                       controller: cNome,
                       items: snapshot.data,
                       autofocus: true,
@@ -255,7 +256,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                     future: _casse(),
                     builder: (context, snapshot) => DropdownButtonFormField<String>(
                       validator: (value) => cCassa.value == null ? 'Campo obbligatorio' : null,
-                      value: cCassa.value,
+                      value: Formatters.nullIfEmpty(cCassa.value),
                       onChanged: (value) => cCassa.value = value,
                       items: [
                         if (snapshot.hasData) ...[
@@ -311,6 +312,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                     future: _descrizioni(),
                     builder: (context, snapshot) => AutoCompleteEdit(
                       validator: (value) => cDescrizione.text.isEmpty ? 'Campo obbligatorio' : null,
+                      titleCase: true,
                       controller: cDescrizione,
                       items: snapshot.data,
                       onSelected: (description) async {
@@ -335,6 +337,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                     future: _macroarea(),
                     builder: (context, snapshot) => AutoCompleteEdit(
                       validator: (value) => cMacroarea.text.isEmpty ? 'Campo obbligatorio' : null,
+                      titleCase: true,
                       controller: cMacroarea,
                       items: snapshot.data,
                     ),

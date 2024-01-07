@@ -6,6 +6,7 @@ Copyright (c) 2023 Michele Maione
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+import 'package:dart_casing/dart_casing.dart';
 import 'package:rationes_curare/data_structure/movimenti.dart';
 import 'package:rationes_curare/store/db_base.dart';
 import 'package:rationes_curare/store/db_delete.dart';
@@ -46,11 +47,11 @@ final class StoreMovimenti extends DbBase
   @override
   Movimenti dbToEntity(Row r) => Movimenti(
         id: r['ID'],
-        nome: r['Nome'],
+        nome: Casing.titleCase(r['Nome']),
         data: Formatters.sqliteToDateTime(r['Data']),
-        tipo: r['Tipo'],
-        descrizione: r['Descrizione'],
-        macroArea: r['MacroArea'],
+        tipo: r['Cassa'],
+        descrizione: Casing.titleCase(r['Descrizione']),
+        macroArea: Casing.titleCase(r['MacroArea']),
         soldi: r['Soldi'],
         idGiroconto: r['IDGiroconto'],
         idMovimentoTempo: r['IDMovimentoTempo'],
@@ -153,7 +154,7 @@ final class StoreMovimenti extends DbBase
         )) ...[
           MovimentiSaldoPerCassa(
             tot: r['Tot'],
-            tipo: r['Tipo'],
+            tipo: r['Cassa'],
           ),
         ],
       ];
@@ -178,7 +179,7 @@ final class StoreMovimenti extends DbBase
           await QueryManager.getSql(Queries.Movimenti_GetMacroAree_E_Descrizioni),
           [descrizione],
         )) ...[
-          r['MacroArea'],
+          Casing.titleCase(r['MacroArea']),
         ],
       ].singleOrNull;
 
@@ -187,7 +188,7 @@ final class StoreMovimenti extends DbBase
           await QueryManager.getSql(Queries.Movimenti_AutoCompleteSource),
           const [],
         )) ...[
-          r['Descrizione'],
+          Casing.titleCase(r['Descrizione']),
         ],
       ];
 
@@ -196,7 +197,7 @@ final class StoreMovimenti extends DbBase
           await QueryManager.getSql(Queries.Movimenti_AutoCompleteAutori),
           const [],
         )) ...[
-          r['Nome'],
+          Casing.titleCase(r['Nome']),
         ],
       ];
 
@@ -205,7 +206,7 @@ final class StoreMovimenti extends DbBase
           await QueryManager.getSql(Queries.Movimenti_AutoCompleteSourceMA),
           const [],
         )) ...[
-          r['MacroArea'],
+          Casing.titleCase(r['MacroArea']),
         ],
       ];
 }
