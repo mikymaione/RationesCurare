@@ -238,6 +238,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       validator: (value) => cNome.text.isEmpty ? 'Campo obbligatorio' : null,
                       controller: cNome,
                       items: snapshot.data,
+                      autofocus: true,
                     ),
                   ),
                   const SizedBox(height: 16),

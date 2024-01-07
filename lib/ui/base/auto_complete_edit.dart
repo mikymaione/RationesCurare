@@ -15,6 +15,7 @@ class AutoCompleteEdit extends StatelessWidget {
   final Iterable<String>? items;
   final Void1ParamCallback<String>? onSelected;
   final FormFieldValidator<String>? validator;
+  final bool autofocus;
 
   const AutoCompleteEdit({
     super.key,
@@ -22,6 +23,7 @@ class AutoCompleteEdit extends StatelessWidget {
     required this.items,
     this.onSelected,
     this.validator,
+    this.autofocus = false,
   });
 
   @override
@@ -39,6 +41,7 @@ class AutoCompleteEdit extends StatelessWidget {
         textEditingController.text = controller.text;
 
         return TextFormField(
+          autofocus: autofocus,
           validator: validator,
           controller: textEditingController,
           focusNode: focusNode,
