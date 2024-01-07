@@ -48,7 +48,7 @@ class AutoCompleteEdit extends StatelessWidget {
           controller: textEditingController,
           focusNode: focusNode,
           onFieldSubmitted: (v) => onFieldSubmitted(),
-          onChanged: (v) => titleCase ? Casing.titleCase(v) : v,
+          onChanged: (v) => controller.text = titleCase ? Casing.titleCase(v) : v,
         );
       },
     );
