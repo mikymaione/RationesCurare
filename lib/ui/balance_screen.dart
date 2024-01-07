@@ -12,7 +12,7 @@ import 'package:rationes_curare/store/store_movimenti.dart';
 import 'package:rationes_curare/ui/account_content_screen.dart';
 import 'package:rationes_curare/ui/base/msg.dart';
 import 'package:rationes_curare/ui/base/screen.dart';
-import 'package:rationes_curare/ui/transaction_screen.dart';
+import 'package:rationes_curare/ui/new_transaction_button.dart';
 import 'package:rationes_curare/utility/commons.dart';
 import 'package:rationes_curare/utility/formatters.dart';
 import 'package:sqlite3/common.dart' as sqlite;
@@ -30,6 +30,8 @@ class BalanceScreen extends StatefulWidget {
 }
 
 class _BalanceScreenState extends State<BalanceScreen> {
+  var dataChanged = false;
+
   Future<List<MovimentiSaldoPerCassa>> load() async {
     final store = StoreMovimenti(db: widget.db);
 
@@ -53,21 +55,6 @@ class _BalanceScreenState extends State<BalanceScreen> {
     }
   }
 
-  Future<void> _newTransaction() async {
-    final saved = await Commons.navigate<bool>(
-      context: context,
-      builder: (context) => TransactionScreen(
-        db: widget.db,
-      ),
-    );
-
-    if (true == saved) {
-      setState(() {
-        // reload db
-      });
-    }
-  }
-
   Future<void> _detail(MovimentiSaldoPerCassa movimentiSaldoPerCassa) async {
     final saved = await Commons.navigate(
       context: context,
@@ -78,9 +65,7 @@ class _BalanceScreenState extends State<BalanceScreen> {
     );
 
     if (true == saved) {
-      setState(() {
-        // reload db
-      });
+      setState(() => dataChanged = true);
     }
   }
 
@@ -94,11 +79,11 @@ class _BalanceScreenState extends State<BalanceScreen> {
 
     return Screen(
       title: 'RationesCurare',
+      onBack: () => dataChanged,
       actions: [
-        // New Transaction
-        IconButton(
-          icon: const Icon(Icons.add),
-          onPressed: () => _newTransaction(),
+        NewTransactionButton(
+          db: widget.db,
+          onSave: () => setState(() => dataChanged = true),
         ),
       ],
       child: FutureBuilder<List<MovimentiSaldoPerCassa>>(

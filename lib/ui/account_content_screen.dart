@@ -11,6 +11,7 @@ import 'package:rationes_curare/data_structure/movimenti.dart';
 import 'package:rationes_curare/store/store_movimenti.dart';
 import 'package:rationes_curare/ui/base/msg.dart';
 import 'package:rationes_curare/ui/base/screen.dart';
+import 'package:rationes_curare/ui/new_transaction_button.dart';
 import 'package:rationes_curare/ui/transaction_screen.dart';
 import 'package:rationes_curare/utility/commons.dart';
 import 'package:rationes_curare/utility/formatters.dart';
@@ -54,15 +55,13 @@ class _AccountContentScreenState extends State<AccountContentScreen> {
       context: context,
       builder: (context) => TransactionScreen(
         db: widget.db,
+        account: widget.movimentiSaldoPerCassa.tipo,
         transaction: transaction,
       ),
     );
 
     if (true == saved) {
-      setState(() {
-        // reload db
-        dataChanged = true;
-      });
+      setState(() => dataChanged = true);
     }
   }
 
@@ -76,6 +75,13 @@ class _AccountContentScreenState extends State<AccountContentScreen> {
     return Screen(
       title: widget.movimentiSaldoPerCassa.tipo,
       onBack: () => dataChanged,
+      actions: [
+        NewTransactionButton(
+          db: widget.db,
+          account: widget.movimentiSaldoPerCassa.tipo,
+          onSave: () => setState(() => dataChanged = true),
+        ),
+      ],
       child: FutureBuilder<List<Movimenti>>(
         future: load(),
         builder: (context, snap) {

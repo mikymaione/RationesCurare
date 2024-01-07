@@ -25,10 +25,12 @@ import 'package:sqlite3/common.dart' as sqlite;
 class TransactionScreen extends StatefulWidget {
   final sqlite.CommonDatabase db;
   final Movimenti? transaction;
+  final String? account;
 
   const TransactionScreen({
     super.key,
     required this.db,
+    required this.account,
     this.transaction,
   });
 
@@ -53,6 +55,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
 
     if (widget.transaction == null) {
       cData.value = DateTime.now();
+      cCassa.value = widget.account;
     } else {
       final t = widget.transaction!;
 
