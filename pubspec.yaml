@@ -9,7 +9,7 @@ description: "An open-source software for the management of the personal economy
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 20.23.1126+01
+version: 20.24.0107+01
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
@@ -28,6 +28,7 @@ dependencies:
   dart_casing: ^3.0.1
   flutter_simple_calculator: ^2.2.4
   intl: ^0.18.1
+  package_info_plus: ^5.0.1
   path: ^1.8.3
   path_provider: ^2.1.1
   sqlite3: ^2.2.0

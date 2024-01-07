@@ -7,6 +7,7 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rationes_curare/data_structure/movimenti.dart';
 import 'package:rationes_curare/store/store_movimenti.dart';
 import 'package:rationes_curare/ui/account_content_screen.dart';
@@ -69,6 +70,12 @@ class _BalanceScreenState extends State<BalanceScreen> {
     }
   }
 
+  Future<String> _getTitle() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+
+    return 'RationesCurare ${packageInfo.version}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorOdd = Theme.of(context).colorScheme.primary.withOpacity(0.02);
@@ -77,52 +84,56 @@ class _BalanceScreenState extends State<BalanceScreen> {
 
     final languageCode = Localizations.localeOf(context).languageCode;
 
-    return Screen(
-      title: 'RationesCurare',
-      onBack: () => dataChanged,
-      actions: [
-        NewTransactionButton(
-          db: widget.db,
-          onSave: () => setState(() => dataChanged = true),
-        ),
-      ],
-      child: FutureBuilder<List<MovimentiSaldoPerCassa>>(
-        future: load(),
-        builder: (context, snap) {
-          final rows = snap.data ?? [];
+    return FutureBuilder<String>(
+      initialData: 'RationesCurare',
+      future: _getTitle(),
+      builder: (context, snapshotVersion) => Screen(
+        title: snapshotVersion.requireData,
+        onBack: () => dataChanged,
+        actions: [
+          NewTransactionButton(
+            db: widget.db,
+            onSave: () => setState(() => dataChanged = true),
+          ),
+        ],
+        child: FutureBuilder<List<MovimentiSaldoPerCassa>>(
+          future: load(),
+          builder: (context, snap) {
+            final rows = snap.data ?? [];
 
-          return ListView.builder(
-            itemCount: rows.length,
-            itemBuilder: (context, index) => index == rows.length - 1
-                ? ListTile(
-                    tileColor: colorTotal,
-                    title: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          Formatters.doubleToMoney(languageCode, rows[index].tot),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
+            return ListView.builder(
+              itemCount: rows.length,
+              itemBuilder: (context, index) => index == rows.length - 1
+                  ? ListTile(
+                      tileColor: colorTotal,
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            Formatters.doubleToMoney(languageCode, rows[index].tot),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                    )
+                  : ListTile(
+                      tileColor: index.isEven ? colorEven : colorOdd,
+                      onTap: () => _detail(rows[index]),
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(rows[index].tipo),
+                          Text(
+                            Formatters.doubleToMoney(languageCode, rows[index].tot),
+                          ),
+                        ],
+                      ),
                     ),
-                  )
-                : ListTile(
-                    tileColor: index.isEven ? colorEven : colorOdd,
-                    onTap: () => _detail(rows[index]),
-                    title: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(rows[index].tipo),
-                        Text(
-                          Formatters.doubleToMoney(languageCode, rows[index].tot),
-                        ),
-                      ],
-                    ),
-                  ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
