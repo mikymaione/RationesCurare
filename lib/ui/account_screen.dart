@@ -7,31 +7,25 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 import 'package:flutter/material.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:rationes_curare/data_structure/movimenti.dart';
-import 'package:rationes_curare/store/store_movimenti.dart';
-import 'package:rationes_curare/ui/account_content_screen.dart';
-import 'package:rationes_curare/ui/account_screen.dart';
-import 'package:rationes_curare/ui/base/msg.dart';
-import 'package:rationes_curare/ui/base/screen.dart';
-import 'package:rationes_curare/ui/new_transaction_button.dart';
-import 'package:rationes_curare/utility/commons.dart';
-import 'package:rationes_curare/utility/formatters.dart';
+import 'package:flutter/widgets.dart';
+import 'package:rationes_curare/data_structure/casse.dart';
 import 'package:sqlite3/common.dart' as sqlite;
 
-class BalanceScreen extends StatefulWidget {
+class AccountScreen extends StatefulWidget {
   final sqlite.CommonDatabase db;
+  final Casse? account;
 
-  const BalanceScreen({
+  const AccountScreen({
     super.key,
     required this.db,
+    this.account,
   });
 
   @override
-  State<StatefulWidget> createState() => _BalanceScreenState();
+  State<StatefulWidget> createState() => _AccountScreenState();
 }
 
-class _BalanceScreenState extends State<BalanceScreen> {
+class _AccountScreenState extends State<AccountScreen> {
   var dataChanged = false;
 
   Future<List<MovimentiSaldoPerCassa>> load() async {
@@ -57,27 +51,7 @@ class _BalanceScreenState extends State<BalanceScreen> {
     }
   }
 
-  Future<void> _detail(MovimentiSaldoPerCassa movimentiSaldoPerCassa) async {
-    final saved = await Commons.navigate(
-      context: context,
-      builder: (context) => AccountContentScreen(
-        db: widget.db,
-        movimentiSaldoPerCassa: movimentiSaldoPerCassa,
-      ),
-    );
-
-    if (true == saved) {
-      setState(() => dataChanged = true);
-    }
-  }
-
-  Future<String> _getTitle() async {
-    final packageInfo = await PackageInfo.fromPlatform();
-
-    return 'RationesCurare ${packageInfo.version}';
-  }
-
-  Future<void> _accounts() async {
+  Future<void> _newAccount() async {
     final saved = await Commons.navigate(
       context: context,
       builder: (context) => AccountScreen(
@@ -106,13 +80,9 @@ class _BalanceScreenState extends State<BalanceScreen> {
         onBack: () => dataChanged,
         actions: [
           IconButton(
-            tooltip: 'Accounts',
-            icon: const Icon(Icons.wallet),
-            onPressed: () => _accounts(),
-          ),
-          NewTransactionButton(
-            db: widget.db,
-            onSave: () => setState(() => dataChanged = true),
+            tooltip: 'New Account',
+            icon: const Icon(Icons.add),
+            onPressed: () => _newAccount(),
           ),
         ],
         child: FutureBuilder<List<MovimentiSaldoPerCassa>>(
