@@ -13,7 +13,91 @@
 
 <PageTitle>RationesCurare - @account</PageTitle>
 
-<h2>@account</h2>
+<h2>@(account ?? "Balance")</h2>
+
+<!-- Filters Section -->
+<div>
+    <div>
+        <h3>Filters</h3>
+
+        <!-- Date From -->
+        <div class="bottomspace">
+            <label for="dateFrom">Date from:</label>
+            <input type="date" id="dateFrom" @bind="dateFrom" min="@minDate?.ToString("yyyy-MM-dd")" max="@maxDate?.ToString("yyyy-MM-dd")" />
+        </div>
+
+        <!-- Date To -->
+        <div class="bottomspace">
+            <label for="dateTo">Date to:</label>
+            <input type="date" id="dateTo" @bind="dateTo" min="@minDate?.ToString("yyyy-MM-dd")" max="@maxDate?.ToString("yyyy-MM-dd")" />
+        </div>
+
+        <!-- Amount From -->
+        <div class="bottomspace">
+            <label for="amountFrom">Amount from:</label>
+            <input type="number" id="amountFrom" @bind="amountFrom" step="0.01" min="@minAmount" max="@maxAmount" />
+        </div>
+
+        <!-- Amount To -->
+        <div class="bottomspace">
+            <label for="amountTo">Amount to:</label>
+            <input type="number" id="amountTo" @bind="amountTo" step="0.01" min="@minAmount" max="@maxAmount" />
+        </div>
+
+        <!-- Category -->
+        <div class="bottomspace">
+            <label for="category">Filter by category:</label>
+            <input type="text" id="category" list="categoryList" @bind="filterCategory" />
+            <datalist id="categoryList">
+                @if (categories != null)
+                {
+                    @foreach (var cat in categories)
+                    {
+                        <option value="@cat" />
+                    }
+                }
+            </datalist>
+        </div>
+
+        <!-- Description -->
+        <div class="bottomspace">
+            <label for="description">Filter by description:</label>
+            <input type="text" id="description" list="descriptionList" @bind="filterDescription" />
+            <datalist id="descriptionList">
+                @if (descriptions != null)
+                {
+                    @foreach (var desc in descriptions)
+                    {
+                        <option value="@desc" />
+                    }
+                }
+            </datalist>
+        </div>
+
+        <!-- Account -->
+        <div class="bottomspace">
+            <label for="filterAccount">Filter by account:</label>
+            <select id="filterAccount" @bind="filterAccount">
+                <option value="">«all accounts»</option>
+                @if (accounts != null)
+                {
+                    @foreach (var acc in accounts)
+                    {
+                        <option value="@acc">@acc</option>
+                    }
+                }
+            </select>
+        </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="divSpaceBetween">
+        <button @onclick="ApplyFilters">Apply filters</button>
+        <button @onclick="ClearFilters">Clear filters</button>
+    </div>
+</div>
+
+<h3>Transactions</h3>
 
 @if (items != null)
 {    
@@ -96,16 +180,33 @@
     private ElementReference scrollTrigger;
     private IDisposable? dotNetRef;
 
+    // Filter variables
+    private DateTime? dateFrom;
+    private DateTime? dateTo;
+    private double? amountFrom;
+    private double? amountTo;
+    private string? filterCategory;
+    private string? filterDescription;
+    private string? filterAccount;
+
+    // Min/Max values from database
+    private DateTime? minDate;
+    private DateTime? maxDate;
+    private double? minAmount;
+    private double? maxAmount;
+
+    // Filter options
+    private List<string> categories = new();
+    private List<string> descriptions = new();
+    private List<string> accounts = new();
+
     public void Dispose() =>
         dotNetRef?.Dispose();
 
     protected override async Task OnInitializedAsync()
     {
-        total = await Db.Movimentis
-            .Where(m => account == null || m.Tipo == account)
-            .Select(m => m.Soldi)
-            .SumAsync();
-     
+        await LoadFilterOptions();
+        await CalculateTotal();
         await LoadNextBatch();
     }
 
@@ -130,8 +231,35 @@
 
     private async Task LoadNextBatch()
     {
-        var nextBatch = await Db.Movimentis
-            .Where(m => account == null || m.Tipo == account)
+        // Apply base filter (account)
+        var query = Db.Movimentis.AsQueryable();
+
+        if (!string.IsNullOrEmpty(filterAccount))
+            query = query.Where(m => m.Tipo == filterAccount);
+
+        // Apply date filters
+        if (dateFrom.HasValue)
+            query = query.Where(m => m.Data >= dateFrom);
+
+        if (dateTo.HasValue)
+            query = query.Where(m => m.Data <= dateTo);
+
+        // Apply amount filters
+        if (amountFrom.HasValue)
+            query = query.Where(m => m.Soldi >= amountFrom);
+
+        if (amountTo.HasValue)
+            query = query.Where(m => m.Soldi <= amountTo);
+
+        // Apply category filter
+        if (!string.IsNullOrEmpty(filterCategory))
+            query = query.Where(m => m.MacroArea == filterCategory);
+
+        // Apply description filter
+        if (!string.IsNullOrEmpty(filterDescription))
+            query = query.Where(m => m.Descrizione.Contains(filterDescription));
+
+        var nextBatch = await query
             .OrderByDescending(m => m.Data)
             .Skip(items.Count) 
             .Take(pageSize)
@@ -141,6 +269,114 @@
             hasMoreItems = false;
 
         items.AddRange(nextBatch);
+    }
+
+    private async Task LoadFilterOptions()
+    {
+        filterAccount = account;
+
+        // Get base query
+        var baseQuery = Db.Movimentis.AsQueryable();
+        
+        // Load min/max dates
+        var dates = await baseQuery
+            .Select(m => m.Data)
+            .ToListAsync();
+
+        if (dates.Any())
+        {
+            minDate = dates.Min();
+            maxDate = dates.Max();
+        }
+
+        // Load min/max amounts
+        var amounts = await baseQuery
+            .Select(m => m.Soldi)
+            .ToListAsync();
+
+        if (amounts.Any())
+        {
+            minAmount = amounts.Min();
+            maxAmount = amounts.Max();
+        }
+
+        // Load unique categories
+        categories = await baseQuery
+            .Select(m => m.MacroArea)
+            .Where(m => !string.IsNullOrEmpty(m))
+            .Distinct()
+            .OrderBy(m => m)
+            .ToListAsync();
+
+        // Load unique descriptions
+        descriptions = await baseQuery
+            .Select(m => m.Descrizione)
+            .Where(m => !string.IsNullOrEmpty(m))
+            .Distinct()
+            .OrderBy(m => m)
+            .ToListAsync();
+
+        // Load all accounts
+        accounts = await Db.Movimentis
+            .Select(m => m.Tipo)
+            .Where(m => !string.IsNullOrEmpty(m))
+            .Distinct()
+            .OrderBy(m => m)
+            .ToListAsync();
+    }
+
+    private async Task CalculateTotal()
+    {
+        var query = Db.Movimentis.AsQueryable();
+                
+        if (!string.IsNullOrEmpty(filterAccount))
+            query = query.Where(m => m.Tipo == filterAccount);
+
+        if (dateFrom.HasValue)
+            query = query.Where(m => m.Data >= dateFrom);
+
+        if (dateTo.HasValue)
+            query = query.Where(m => m.Data <= dateTo);
+
+        if (amountFrom.HasValue)
+            query = query.Where(m => m.Soldi >= amountFrom);
+
+        if (amountTo.HasValue)
+            query = query.Where(m => m.Soldi <= amountTo);
+
+        if (!string.IsNullOrEmpty(filterCategory))
+            query = query.Where(m => m.MacroArea.Contains(filterCategory));
+
+        if (!string.IsNullOrEmpty(filterDescription))
+            query = query.Where(m => m.Descrizione.Contains(filterDescription));
+
+        total = await query
+            .Select(m => m.Soldi)
+            .SumAsync();
+    }
+
+    private async Task ApplyFilters()
+    {
+        items.Clear();
+        hasMoreItems = true;
+        await CalculateTotal();
+        await LoadNextBatch();
+    }
+
+    private async Task ClearFilters()
+    {
+        dateFrom = null;
+        dateTo = null;
+        amountFrom = null;
+        amountTo = null;
+        filterCategory = "";
+        filterDescription = "";
+        filterAccount = "";
+        
+        items.Clear();
+        hasMoreItems = true;
+        await CalculateTotal();
+        await LoadNextBatch();
     }
 
     private void Detail(int id) =>
