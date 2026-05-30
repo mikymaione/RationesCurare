@@ -70,6 +70,6 @@
     }
 
     private void Detail(string account) =>
-        NavigationManager.NavigateTo($"/content/{Uri.EscapeDataString(account)}");
+        NavigationManager.NavigateTo($"/transactions/{Uri.EscapeDataString(account)}");
 
 }
