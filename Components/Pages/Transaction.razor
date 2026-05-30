@@ -206,21 +206,26 @@ else
     {
         if (id > -1)
         {
-            var transaction = await Db.Movimentis.FindAsync(id.Value);
+            var confermato = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this transaction?");
 
-            if (transaction != null)
-            {
-                if (transaction.Idgiroconto > -1)
+            if (confermato)
+            {            
+                var transaction = await Db.Movimentis.FindAsync(id.Value);
+
+                if (transaction != null)
                 {
-                    var linkedTransaction = await Db.Movimentis.FindAsync(transaction.Idgiroconto.Value);
+                    if (transaction.Idgiroconto > -1)
+                    {
+                        var linkedTransaction = await Db.Movimentis.FindAsync(transaction.Idgiroconto.Value);
 
-                    if (linkedTransaction != null)
-                        Db.Movimentis.Remove(linkedTransaction);
+                        if (linkedTransaction != null)
+                            Db.Movimentis.Remove(linkedTransaction);
+                    }
+
+                    Db.Movimentis.Remove(transaction);
+                    await Db.SaveChangesAsync();
+                    NavigationManager.NavigateTo(returnUrl);
                 }
-
-                Db.Movimentis.Remove(transaction);
-                await Db.SaveChangesAsync();
-                NavigationManager.NavigateTo(returnUrl);
             }
         }
     }
