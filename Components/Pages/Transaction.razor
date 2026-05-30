@@ -52,7 +52,7 @@ else
 
     <div class="bottomspace">
         <label for="dateEdit">Date</label>
-        <input type="datetime-local" id="dateEdit" @bind="date" @bind:format="yyyy-MM-ddTHH:mm" required placeholder="Date the transaction was performed" />
+        <input type="datetime-local" id="dateEdit" @bind="date" required placeholder="Date the transaction was performed" />
     </div>
 
     <div class="bottomspace">
@@ -168,6 +168,16 @@ else
                 author = t.Nome;
             }
         }
+        else
+        {
+            fromAccount = null;
+            toAccount = null;
+            amount = null;
+            date = DateTime.Now;
+            description = null;
+            category = null;
+            author = null;
+        }
     }
 
     private async Task SaveTransaction()
@@ -177,7 +187,7 @@ else
             : new();
 
         t.Tipo = fromAccount;
-        t.Soldi = amount;
+        t.Soldi = amount.GetValueOrDefault();
         t.Data = date;
         t.Descrizione = description;
         t.MacroArea = category;
