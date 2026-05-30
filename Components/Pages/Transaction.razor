@@ -92,7 +92,7 @@ else
 </div>
 
 @code {
-    
+
     [Parameter]
     public int? id { get; set; }
 
@@ -206,26 +206,40 @@ else
     {
         if (id > -1)
         {
-            var confermato = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this transaction?");
+            var transaction = await Db.Movimentis.FindAsync(id.Value);
 
-            if (confermato)
-            {            
-                var transaction = await Db.Movimentis.FindAsync(id.Value);
-
-                if (transaction != null)
+            var confirmationMessage = transaction?.Idgiroconto > -1
+                ? "Are you sure you want to delete this internal transfer? Both linked transactions will be removed."
+                : "Are you sure you want to delete this transaction?";
+            
+            var confermato = await JS.InvokeAsync<bool>("confirm", confirmationMessage);
+            
+            if (confermato && transaction != null)
+            {
+                if (transaction.Idgiroconto > -1)
                 {
-                    if (transaction.Idgiroconto > -1)
+                    var linkedTransaction = await Db.Movimentis.FindAsync(transaction.Idgiroconto.Value);
+
+                    if (linkedTransaction != null)
                     {
-                        var linkedTransaction = await Db.Movimentis.FindAsync(transaction.Idgiroconto.Value);
+                        // Step 1: Break the circular foreign key references in the database
+                        transaction.Idgiroconto = null;
+                        linkedTransaction.Idgiroconto = null;
+                        
+                        // Push this change to the DB so the constraints are cleared
+                        await Db.SaveChangesAsync();
 
-                        if (linkedTransaction != null)
-                            Db.Movimentis.Remove(linkedTransaction);
+                        // Step 2: Now that they are completely independent, safe to delete
+                        Db.Movimentis.Remove(linkedTransaction);
                     }
-
-                    Db.Movimentis.Remove(transaction);
-                    await Db.SaveChangesAsync();
-                    NavigationManager.NavigateTo(returnUrl);
                 }
+
+                Db.Movimentis.Remove(transaction);
+                
+                // Save the deletions
+                await Db.SaveChangesAsync();
+                
+                NavigationManager.NavigateTo(returnUrl);
             }
         }
     }
