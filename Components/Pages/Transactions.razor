@@ -114,12 +114,20 @@
                 <tr @onclick="() => Detail(x.Id)">
                     <td>
                         <div>
-                            <span class="trLabelC">@GB.ToProperCase(x.Tipo)</span>
-                            <span class="trLabel">@x.MacroArea</span>
                             @if (x.Idgiroconto > 0)
                             {
-                                <span class="googleIcon fsInit" title="Transfer">currency_exchange</span>
+                                <span class="googleIcon fsInit moneyNeutro" title="Transfer">currency_exchange</span>
                             }
+                            else if (x.Soldi < 0)
+                            {
+                                <span class="googleIcon fsInit moneyBad" title="Expense">arrow_downward</span>
+                            }
+                            else
+                            {
+                                <span class="googleIcon fsInit moneyGood" title="Income">arrow_upward</span>
+                            }
+                            <span class="trLabelC">@GB.ToProperCase(x.Tipo)</span>
+                            <span class="trLabel">@x.MacroArea</span>                            
                         </div>
                         <div>
                             <small>@x.Descrizione</small>
