@@ -402,7 +402,7 @@ input:user-invalid {
 
 .myBtn {
     position: fixed;
-    bottom: 20px;
+    bottom: 24px;
     z-index: 99;
     font-size: xx-large !important;
     border: none !important;

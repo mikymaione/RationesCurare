@@ -11,9 +11,16 @@
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
 
-<PageTitle>RationesCurare - Transaction @id</PageTitle>
-
-<h2>Transaction @id</h2>
+@if (id == -1)
+{
+    <PageTitle>RationesCurare - New transaction</PageTitle>
+    <h2>New transaction</h2>
+}
+else
+{
+    <PageTitle>RationesCurare - Edit transaction @id</PageTitle>
+    <h2>Edit transaction @id</h2>
+}
 
 <div>
     <div class="bottomspace">
@@ -30,7 +37,7 @@
     <div class="bottomspace">
         <label for="toAccount">To account</label>
         <select id="toAccount" @bind="toAccount">
-            <option value="">«select account»</option>
+            <option value="">«no account»</option>
             @foreach (var acc in accounts)
             {
                 <option value="@acc">@GB.ToProperCase(acc)</option>
@@ -44,8 +51,8 @@
     </div>
 
     <div class="bottomspace">
-        <label for="date">Date</label>
-        <input type="datetime-local" id="date" @bind="date" @bind:format="yyyy-MM-ddTHH:mm" required placeholder="Date the transaction was performed" />
+        <label for="dateEdit">Date</label>
+        <input type="datetime-local" id="dateEdit" @bind="date" @bind:format="yyyy-MM-ddTHH:mm" required placeholder="Date the transaction was performed" />
     </div>
 
     <div class="bottomspace">
@@ -85,6 +92,7 @@
 </div>
 
 @code {
+    
     [Parameter]
     public int? id { get; set; }
 
@@ -95,7 +103,7 @@
     private string? fromAccount;
     private string? toAccount;
     private double? amount;
-    private DateTime? date;
+    private DateTime date = DateTime.Now;
     private string? description;
     private string? category;
     private string? author;
@@ -105,12 +113,15 @@
     {
         // Extract returnUrl from query string
         var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+
         if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("returnUrl", out var value))
-        {
             returnUrl = value.ToString();
-        }
 
         await LoadOptions();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
         await LoadTransaction();
     }
 
@@ -133,6 +144,7 @@
             .ToListAsync();
 
         accounts = await Db.Casses
+            .Where(c => c.Nascondi != true)
             .Select(c => c.Nome)
             .Where(m => !string.IsNullOrEmpty(m))
             .OrderBy(m => m)
@@ -141,9 +153,9 @@
 
     private async Task LoadTransaction()
     {
-        if (id.HasValue)
+        if (id > -1)
         {
-            var t = await Db.Movimentis.FindAsync(id.Value);
+            var t = await Db.Movimentis.FindAsync(id);
 
             if (t != null)
             {
@@ -160,54 +172,47 @@
 
     private async Task SaveTransaction()
     {
-        if (id == -1)
-        {
-            // Create new transaction
-            var movement = new Movimenti
-            {
-                Tipo = fromAccount ?? "",
-                Soldi = amount ?? 0,
-                Data = date ?? DateTime.Now,
-                Descrizione = description ?? "",
-                MacroArea = category ?? "",
-                Nome = author ?? ""
-            };
+        var t = id > -1
+            ? await Db.Movimentis.FindAsync(id.Value)
+            : new();
 
-            Db.Movimentis.Add(movement);
-            await Db.SaveChangesAsync();
-            NavigationManager.NavigateTo(returnUrl);
-        }
-        else if (id > -1 && id.HasValue)
-        {
-            // Update existing transaction
-            var transaction = await Db.Movimentis.FindAsync(id.Value);
-            if (transaction != null)
-            {
-                transaction.Tipo = fromAccount ?? "";
-                transaction.Soldi = amount ?? 0;
-                transaction.Data = date ?? DateTime.Now;
-                transaction.Descrizione = description ?? "";
-                transaction.MacroArea = category ?? "";
-                transaction.Nome = author ?? "";
+        t.Tipo = fromAccount;
+        t.Soldi = amount;
+        t.Data = date;
+        t.Descrizione = description;
+        t.MacroArea = category;
+        t.Nome = author;
 
-                Db.Movimentis.Update(transaction);
-                await Db.SaveChangesAsync();
-                NavigationManager.NavigateTo(returnUrl);
-            }
-        }
+        if (id > -1)
+            Db.Movimentis.Update(t);
+        else
+            Db.Movimentis.Add(t);
+
+        await Db.SaveChangesAsync();
+        NavigationManager.NavigateTo(returnUrl);
     }
 
     private async Task DeleteTransaction()
     {
-        if (id > -1 && id.HasValue)
+        if (id > -1)
         {
             var transaction = await Db.Movimentis.FindAsync(id.Value);
+
             if (transaction != null)
             {
+                if (transaction.Idgiroconto > -1)
+                {
+                    var linkedTransaction = await Db.Movimentis.FindAsync(transaction.Idgiroconto.Value);
+
+                    if (linkedTransaction != null)
+                        Db.Movimentis.Remove(linkedTransaction);
+                }
+
                 Db.Movimentis.Remove(transaction);
                 await Db.SaveChangesAsync();
                 NavigationManager.NavigateTo(returnUrl);
             }
         }
     }
+
 }
