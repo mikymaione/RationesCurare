@@ -11,7 +11,7 @@
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
 
-<PageTitle>RationesCurare - @account</PageTitle>
+<PageTitle>RationesCurare - @(account ?? "Balance")</PageTitle>
 
 <h2>@(account ?? "Balance")</h2>
 
@@ -118,7 +118,7 @@
                             <span class="trLabel">@x.MacroArea</span>
                             @if (x.Idgiroconto > 0)
                             {
-                                <span class="material-icons" title="Transfer">currency_exchange</span>
+                                <span class="googleIcon fsInit" title="Transfer">currency_exchange</span>
                             }
                         </div>
                         <div>
@@ -170,6 +170,8 @@
         observer.observe(element);
     };
 </script>
+
+<input class="myBtn googleIcon fsXXL" @onclick="NewTransaction" type="submit" title="New amount" value="local_atm" />
 
 @code {
 
@@ -384,6 +386,9 @@
     }
 
     private void Detail(int id) =>
-        NavigationManager.NavigateTo($"/content/{id}");
+        NavigationManager.NavigateTo($"/transactions/{id}?returnUrl={System.Web.HttpUtility.UrlEncode(NavigationManager.Uri)}");
+
+    private void NewTransaction() =>
+        NavigationManager.NavigateTo($"/transactions/-1?returnUrl={System.Web.HttpUtility.UrlEncode(NavigationManager.Uri)}");
 
 }

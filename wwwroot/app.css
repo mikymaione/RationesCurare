@@ -165,9 +165,12 @@ div.awesomplete li[aria-selected="true"] mark {
     }
 }
 
-.material-icons {
-    font-family: 'Material Icons';
+.fsInit {
     font-size: initial !important;
+}
+
+.fsXXL {
+    font-size: xx-large !important;
 }
 
 .menu {
@@ -315,7 +318,7 @@ div.awesomplete li[aria-selected="true"] mark {
     height: auto;
 }
 
-.required:after {
+div:has(:required) label::after {
     content: "٭";
     color: #F79E10;
 }
