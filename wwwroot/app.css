@@ -1,0 +1,429 @@
+/*
+RationesCurare - Gestione piccola contabilità
+Copyright (C) 2008 [MAIONE MIKΨ]
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. 
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. 
+You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/. 
+*/
+
+html {
+    scrollbar-color: #F79E10 Canvas;
+    accent-color: #F79E10;
+}
+
+.copyright {
+    text-align: justify;
+    text-justify: inter-character;
+    font-size: medium;
+}
+
+.mycolor {
+    background-color: #F79E10;
+}
+
+.mytextcolor {
+    color: #F79E10;
+}
+
+:focus-visible {
+    outline-color: #F79E10;
+}
+
+::selection {
+    background-color: #F79E10;
+}
+
+::marker {
+    color: #F79E10;
+}
+
+:is( ::-webkit-calendar-picker-indicator,
+    ::-webkit-clear-button,
+    ::-webkit-inner-spin-button,
+    ::-webkit-outer-spin-button) {
+    color: #F79E10;
+}
+
+.bottomspace {
+    margin-bottom: 1rem;
+}
+
+.nw {
+    white-space: nowrap;
+}
+
+body {
+    max-width: 745px;
+    margin: auto;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    font-family: 'Ubuntu Mono';
+    font-size: large;
+    accent-color: #F79E10;
+}
+
+thead {
+    background-color: black;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+tfoot {
+    background-color: black;
+    color: white;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f0f0f0;
+}
+
+tbody tr:hover {
+    background-color: #F79E10;
+}
+
+tbody tr {
+    cursor: pointer;
+}
+
+tbody tr a {
+    all: unset;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+tbody tr:hover {
+    color: black !important;
+    background-color: #F79E10 !important;
+}
+
+tbody tr:hover span {
+    color: black;
+}
+
+
+button {
+    font-family: 'Ubuntu Mono';
+}
+
+div.awesomplete {
+    display: inline;
+    margin-bottom: 0rem;
+}
+
+div.awesomplete ul {
+    width: calc(100vw - 30px);
+}
+
+div.awesomplete mark {
+    background: #F79E10;
+}
+
+div.awesomplete li:hover mark {
+    background: #F79E10;
+}
+
+div.awesomplete li[aria-selected="true"] mark {
+    background: #F79E10;
+}
+
+@media (prefers-color-scheme: dark) {
+
+    div.awesomplete ul,
+    div.awesomplete ul li {
+        background-color: #474747 !important;
+        color: #FFF !important;
+    }
+
+    div.awesomplete>ul:before {
+        background-color: #474747;
+    }
+}
+
+.menu {
+    display: flex;
+}
+
+.menu a {
+    display: inline-block;
+    list-style: none;
+    font-family: 'Material Icons';
+    font-size: xx-large;
+    text-decoration: none;
+}
+
+.menu a:not(:last-of-type) {
+    margin-right: 8px;
+}
+
+.menu a:last-of-type {
+    margin-left: auto;
+}
+
+.giustificato {
+    text-align: justify;
+    text-justify: inter-character;
+    hyphens: auto;
+}
+
+.noGiustificato {
+    text-align: start !important;
+    text-justify: none !important;
+    hyphens: none !important;
+}
+
+@media (prefers-color-scheme: light) {
+    body {
+        background: white;
+        color: black;
+    }
+
+    button {
+        background: #f0f0f0;
+        color: black;
+    }
+
+    input {
+        background: #f0f0f0;
+        color: black;
+    }
+
+    select {
+        background: #f0f0f0;
+        color: black;
+    }
+
+    .disab figcaption,
+    h2,
+    h3,
+    ruby {
+        color: #464453;
+    }
+
+    em,
+    a:link,
+    a:visited {
+        color: #F79E10;
+    }
+
+    a:active,
+    a:hover {
+        color: black;
+    }
+
+    .not-active {
+        text-decoration: none;
+        color: #464453 !important;
+    }
+
+    tr.trGrid:nth-child(odd) {
+        background-color: #f0f0f0;
+    }
+
+    .trLabelC {
+        color: #464453;
+        font-size: x-large;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background: #333;
+        color: #FFF;
+    }
+
+    button {
+        background: #474747;
+        color: #FFF;
+    }
+
+    input {
+        background: #474747;
+        color: #FFF;
+    }
+
+    select {
+        background: #474747;
+        color: #FFF;
+    }
+
+    .disab figcaption,
+    h2,
+    h3,
+    ruby {
+        color: #F2F2F2;
+    }
+
+    em,
+    a:link,
+    a:visited {
+        color: #F79E10;
+    }
+
+    a:active,
+    a:hover {
+        color: black;
+    }
+
+    .not-active {
+        text-decoration: none;
+        color: #FFF !important;
+    }
+
+    tr.trGrid:nth-child(odd) {
+        background-color: #474747;
+    }
+
+    .trLabelC {
+        color: white;
+        font-size: x-large;
+    }
+}
+
+.img-max-size {
+    max-width: 100%;
+    height: auto;
+}
+
+.required:after {
+    content: "٭";
+    color: #F79E10;
+}
+
+.noWidth {
+    width: auto !important;
+}
+
+button {
+    cursor: pointer;
+    box-sizing: border-box;
+    border: 1px outset #F79E10;
+    border-radius: 0;
+    font-size: large;
+}
+
+select {
+    font-size: medium;
+    font-family: 'Ubuntu Mono';
+    box-sizing: border-box;
+    width: 100%;
+}
+
+input {
+    font-size: medium;
+    font-family: 'Ubuntu Mono';
+    box-sizing: border-box;
+}
+
+input:not([type='submit']) {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+input[type='submit'] {
+    box-sizing: border-box;
+    cursor: pointer;
+    border: 1px outset #F79E10;
+    border-radius: 0;
+    font-size: large;
+}
+
+input[type='checkbox'] {
+    width: 1rem;
+    height: 1rem;
+}
+
+input[type="date"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    min-height: 1.5rem;
+}
+
+input[type="datetime-local"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    min-height: 1.5rem;
+}
+
+input:user-invalid {
+    background-color: #F79E10;
+}
+
+.descrizione {
+    width: 100%;
+}
+
+.trLabel {
+    color: #F79E10;
+    font-size: x-large;
+}
+
+.divSpaceBetween {
+    display: flex;
+    justify-content: space-between;
+}
+
+.googleIcon {
+    font-family: 'Material Icons';
+}
+
+.myBtn {
+    position: fixed;
+    bottom: 20px;
+    z-index: 99;
+    font-size: xx-large !important;
+    border: none !important;
+    outline: none;
+    background-color: #464453;
+    color: white;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 5px !important;
+    /* Support for all WebKit browsers. */
+    -webkit-font-smoothing: antialiased !important;
+    /* Support for Safari and Chrome. */
+    text-rendering: optimizeLegibility !important;
+    /* Support for Firefox. */
+    -moz-osx-font-smoothing: grayscale !important;
+    /* Support for IE. */
+    font-feature-settings: 'liga';
+}
+
+.myBtn:hover {
+    background-color: #F79E10;
+}
+
+@media (prefers-color-scheme: light) {
+    .moneyNeutro {
+        color: #000000;
+    }
+
+    .moneyGood {
+        color: #005000;
+    }
+
+    .moneyBad {
+        color: #640000;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .moneyNeutro {
+        color: #FFFFFF;
+    }
+
+    .moneyGood {
+        color: #DCFFDC;
+    }
+
+    .moneyBad {
+        color: #FFB4B4;
+    }
+}

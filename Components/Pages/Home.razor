@@ -1,0 +1,75 @@
+﻿@page "/"
+
+@using Microsoft.EntityFrameworkCore
+@using RationesCurare.Data
+@using RationesCurare.Functions
+@using RationesCurare.Models
+
+@rendermode InteractiveServer
+
+@inject AppDbContext Db
+@inject NavigationManager NavigationManager
+
+<PageTitle>RationesCurare - Balance</PageTitle>
+
+<h2>Balance</h2>
+
+@if (items != null)
+{
+    <table width="100%">
+        <thead>
+            <tr>
+                <th>Account</th>
+                <th>Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var x in items)
+            {
+                <tr @onclick="() => Detail(x.TipoCassa)">
+                    <td>
+                        @x.TipoCassa
+                    </td>
+                    <td align="right" class="@GB.ClassColoreImporto(x.Totale)">
+                        @GB.ToMoney(x.Totale)
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td></td>
+                <td class="nw" align="right">
+                    @GB.ToMoney(total)
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+}
+
+@code {
+    private List<Balance>? items;
+    private double total;
+
+    protected override async Task OnInitializedAsync()
+    {
+        items = await Db.Movimentis
+            .Where(m =>
+                m.Soldi != 0
+                && m.TipoNavigation.Nascondi != true
+            )
+            .GroupBy(m => m.Tipo)
+            .Select(g => new Balance
+            (
+                TipoCassa: g.Key,
+                Totale: g.Sum(m => m.Soldi)
+            ))
+            .ToListAsync();
+
+        total = items.Sum(r => r.Totale);
+    }
+
+    private void Detail(string account) =>
+        NavigationManager.NavigateTo($"/content/{Uri.EscapeDataString(account)}");
+
+}

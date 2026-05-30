@@ -1,0 +1,149 @@
+@page "/content/"
+@page "/content/{account}"
+
+@using Microsoft.EntityFrameworkCore
+@using RationesCurare.Data
+@using RationesCurare.Functions
+
+@rendermode InteractiveServer
+
+@inject AppDbContext Db
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+
+<PageTitle>RationesCurare - @account</PageTitle>
+
+<h2>@account</h2>
+
+@if (items != null)
+{    
+    <table width="100%">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var x in items)
+            {
+                <tr @onclick="() => Detail(x.Id)">
+                    <td>
+                        <div>
+                            <span class="trLabelC">@x.Tipo</span>
+                            <span class="trLabel">@x.MacroArea</span>
+                        </div>
+                        <div>
+                            <small>@x.Descrizione</small>
+                        </div>
+                        <div>
+                            <ruby>@GB.ToDateTime(x.Data)</ruby>
+                        </div>
+                    </td>
+                    <td align="right" class="nw @GB.ClassColoreImporto(x.Soldi)">
+                        @GB.ToMoney(x.Soldi)
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td></td>
+                <td class="nw" align="right">
+                    @GB.ToMoney(total)
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+    
+    @if (hasMoreItems)
+    {
+        <div @ref="scrollTrigger" style="height: 20px; background: transparent; text-align:center;">
+            <small>Loading...</small>
+        </div>
+    }    
+}
+
+<script>
+    window.setupScrollObserver = (element, dotNetHelper) => {
+        if (!element)
+            return;
+
+        const observer = new IntersectionObserver(async (entries) => {
+            if (entries[0].isIntersecting) {
+                await dotNetHelper.invokeMethodAsync('LoadMoreItemsFromJS');
+            }
+        }, {
+            root: null,
+            rootMargin: '0px',
+            threshold: 1.0
+        });
+
+        observer.observe(element);
+    };
+</script>
+
+@code {
+
+    [Parameter]
+    public string? account { get; set; }
+    
+    private List<Movimenti> items = new();
+    private double total;
+        
+    private int pageSize = 50; 
+    private bool hasMoreItems = true;
+    private ElementReference scrollTrigger;
+    private IDisposable? dotNetRef;
+
+    public void Dispose() =>
+        dotNetRef?.Dispose();
+
+    protected override async Task OnInitializedAsync()
+    {
+        total = await Db.Movimentis
+            .Where(m => account == null || m.Tipo == account)
+            .Select(m => m.Soldi)
+            .SumAsync();
+     
+        await LoadNextBatch();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            dotNetRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("setupScrollObserver", scrollTrigger, dotNetRef);
+        }
+    }
+
+    [JSInvokable]
+    public async Task LoadMoreItemsFromJS()
+    {
+        if (hasMoreItems)
+        {
+            await LoadNextBatch();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadNextBatch()
+    {
+        var nextBatch = await Db.Movimentis
+            .Where(m => account == null || m.Tipo == account)
+            .OrderByDescending(m => m.Data)
+            .Skip(items.Count) 
+            .Take(pageSize)
+            .ToArrayAsync();
+
+        if (nextBatch.Length < pageSize)
+            hasMoreItems = false;
+
+        items.AddRange(nextBatch);
+    }
+
+    private void Detail(int id) =>
+        NavigationManager.NavigateTo($"/content/{id}");
+
+}
