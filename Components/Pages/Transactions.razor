@@ -83,7 +83,7 @@
                 {
                     @foreach (var acc in accounts)
                     {
-                        <option value="@acc">@acc</option>
+                        <option value="@acc">@GB.ToProperCase(acc)</option>
                     }
                 }
             </select>
@@ -114,8 +114,12 @@
                 <tr @onclick="() => Detail(x.Id)">
                     <td>
                         <div>
-                            <span class="trLabelC">@x.Tipo</span>
+                            <span class="trLabelC">@GB.ToProperCase(x.Tipo)</span>
                             <span class="trLabel">@x.MacroArea</span>
+                            @if (x.Idgiroconto > 0)
+                            {
+                                <span class="material-icons" title="Transfer">currency_exchange</span>
+                            }
                         </div>
                         <div>
                             <small>@x.Descrizione</small>

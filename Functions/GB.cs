@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace RationesCurare.Functions;
 
 public static class GB
@@ -15,4 +17,10 @@ public static class GB
             : d > 0
                 ? "moneyGood"
                 : "moneyBad";
+
+    public static string ToProperCase(this string input) =>
+        string.IsNullOrWhiteSpace(input)
+            ? input
+            : CultureInfo.CurrentCulture.TextInfo.ToTitleCase(input.ToLower());
+
 }

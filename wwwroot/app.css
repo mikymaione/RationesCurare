@@ -120,8 +120,8 @@ button {
     width: 100%;
 }
 
-.div2Row > div {
-    flex: 1; 
+.div2Row>div {
+    flex: 1;
     display: flex;
     flex-direction: column;
 }
@@ -163,6 +163,11 @@ div.awesomplete li[aria-selected="true"] mark {
     div.awesomplete>ul:before {
         background-color: #474747;
     }
+}
+
+.material-icons {
+    font-family: 'Material Icons';
+    font-size: initial !important;
 }
 
 .menu {

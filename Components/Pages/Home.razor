@@ -28,7 +28,7 @@
             {
                 <tr @onclick="() => Detail(x.TipoCassa)">
                     <td>
-                        <span class="trLabelC">@x.TipoCassa</span>
+                        <span class="trLabelC">@GB.ToProperCase(x.TipoCassa)</span>
                     </td>
                     <td align="right" class="nw @GB.ClassColoreImporto(x.Totale)">
                         @GB.ToMoney(x.Totale)
