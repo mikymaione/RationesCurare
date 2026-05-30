@@ -57,7 +57,7 @@ else
 
     <div class="bottomspace">
         <label for="description">Description</label>
-        <input type="text" id="description" list="descriptionList" @bind="description" data-minchars="1" required autocomplete="off" placeholder="Operation Description" />
+        <input type="text" id="description" list="descriptionList" @bind="description" @onblur="OnDescriptionBlur" data-minchars="1" required autocomplete="off" placeholder="Operation Description" />
         <datalist id="descriptionList">
             @foreach (var desc in descriptions)
             {
@@ -222,6 +222,22 @@ else
                 await Db.SaveChangesAsync();
                 NavigationManager.NavigateTo(returnUrl);
             }
+        }
+    }
+
+    private async Task OnDescriptionBlur()
+    {
+        if (!string.IsNullOrWhiteSpace(description))
+        {
+            var suggestedCategory = await Db.Movimentis
+                .Where(m => m.Descrizione == description)
+                .GroupBy(m => m.MacroArea)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key)
+                .FirstOrDefaultAsync();
+
+            if (!string.IsNullOrWhiteSpace(suggestedCategory))
+                category = suggestedCategory;
         }
     }
 
