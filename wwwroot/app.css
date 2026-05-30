@@ -113,6 +113,24 @@ button {
     font-family: 'Ubuntu Mono';
 }
 
+.div2Row {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    width: 100%;
+}
+
+.div2Row > div {
+    flex: 1; 
+    display: flex;
+    flex-direction: column;
+}
+
+.div2Row input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
 div.awesomplete {
     display: inline;
     margin-bottom: 0rem;

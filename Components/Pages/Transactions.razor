@@ -20,34 +20,34 @@
     <div>
         <h3>Filters</h3>
 
-        <!-- Date From -->
-        <div class="bottomspace">
-            <label for="dateFrom">Date from:</label>
-            <input type="date" id="dateFrom" @bind="dateFrom" min="@minDate?.ToString("yyyy-MM-dd")" max="@maxDate?.ToString("yyyy-MM-dd")" />
+        <!-- Date -->
+        <div class="bottomspace div2Row">
+            <div>
+                <label for="dateFrom">Date from:</label>
+                <input type="date" id="dateFrom" @bind="dateFrom" min="@minDate?.ToString("yyyy-MM-dd")" max="@maxDate?.ToString("yyyy-MM-dd")" placeholder="Date the transaction was performed" />
+            </div>
+            <div>
+                <label for="dateTo">Date to:</label>
+                <input type="date" id="dateTo" @bind="dateTo" min="@minDate?.ToString("yyyy-MM-dd")" max="@maxDate?.ToString("yyyy-MM-dd")" placeholder="Date the transaction was performed" />
+            </div>
         </div>
 
-        <!-- Date To -->
-        <div class="bottomspace">
-            <label for="dateTo">Date to:</label>
-            <input type="date" id="dateTo" @bind="dateTo" min="@minDate?.ToString("yyyy-MM-dd")" max="@maxDate?.ToString("yyyy-MM-dd")" />
-        </div>
-
-        <!-- Amount From -->
-        <div class="bottomspace">
-            <label for="amountFrom">Amount from:</label>
-            <input type="number" id="amountFrom" @bind="amountFrom" step="0.01" min="@minAmount" max="@maxAmount" />
-        </div>
-
-        <!-- Amount To -->
-        <div class="bottomspace">
-            <label for="amountTo">Amount to:</label>
-            <input type="number" id="amountTo" @bind="amountTo" step="0.01" min="@minAmount" max="@maxAmount" />
+        <!-- Amount -->
+        <div class="bottomspace div2Row">
+            <div>
+                <label for="amountFrom">Amount from:</label>
+                <input type="number" id="amountFrom" @bind="amountFrom" step="0.01" min="@minAmount" max="@maxAmount" placeholder="Transaction amount in money" />
+            </div>
+            <div>
+                <label for="amountTo">Amount to:</label>
+                <input type="number" id="amountTo" @bind="amountTo" step="0.01" min="@minAmount" max="@maxAmount" placeholder="Transaction amount in money" />
+            </div>
         </div>
 
         <!-- Category -->
         <div class="bottomspace">
             <label for="category">Filter by category:</label>
-            <input type="text" id="category" list="categoryList" @bind="filterCategory" />
+            <input type="text" id="category" list="categoryList" @bind="filterCategory" placeholder="Category to which the transaction belongs" />
             <datalist id="categoryList">
                 @if (categories != null)
                 {
@@ -62,7 +62,7 @@
         <!-- Description -->
         <div class="bottomspace">
             <label for="description">Filter by description:</label>
-            <input type="text" id="description" list="descriptionList" @bind="filterDescription" />
+            <input type="text" id="description" list="descriptionList" @bind="filterDescription" placeholder="Transaction description" />
             <datalist id="descriptionList">
                 @if (descriptions != null)
                 {
@@ -77,7 +77,7 @@
         <!-- Account -->
         <div class="bottomspace">
             <label for="filterAccount">Filter by account:</label>
-            <select id="filterAccount" @bind="filterAccount">
+            <select id="filterAccount" @bind="filterAccount" placeholder="Account from which the transaction was performed" >
                 <option value="">«all accounts»</option>
                 @if (accounts != null)
                 {

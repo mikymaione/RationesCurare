@@ -28,9 +28,9 @@
             {
                 <tr @onclick="() => Detail(x.TipoCassa)">
                     <td>
-                        @x.TipoCassa
+                        <span class="trLabelC">@x.TipoCassa</span>
                     </td>
-                    <td align="right" class="@GB.ClassColoreImporto(x.Totale)">
+                    <td align="right" class="nw @GB.ClassColoreImporto(x.Totale)">
                         @GB.ToMoney(x.Totale)
                     </td>
                 </tr>
