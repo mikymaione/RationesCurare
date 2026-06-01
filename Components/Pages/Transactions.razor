@@ -163,7 +163,7 @@ else if (filterViewType == "monthly")
     private double itemsCount;
     private double total;
         
-    private int pageSize = 50;
+    private const int pageSize = 50;
     private bool hasMoreItems = false;
     private ElementReference scrollTrigger;
     private IDisposable? dotNetRef;
@@ -224,7 +224,7 @@ else if (filterViewType == "monthly")
         var query = Db.Movimentis.AsQueryable();
 
         if (!string.IsNullOrEmpty(filterAccount))
-            query = query.Where(m => m.Tipo == filterAccount);
+            query = query.Where(m => m.Tipo.ToLower() == filterAccount.ToLower());
 
         if (dateFrom.HasValue)
             query = query.Where(m => m.Data >= dateFrom);
@@ -239,10 +239,10 @@ else if (filterViewType == "monthly")
             query = query.Where(m => m.Soldi <= amountTo);
 
         if (!string.IsNullOrEmpty(filterCategory))
-            query = query.Where(m => m.MacroArea.Contains(filterCategory));
+            query = query.Where(m => m.MacroArea.ToLower().Contains(filterCategory.ToLower()));
 
         if (!string.IsNullOrEmpty(filterDescription))
-            query = query.Where(m => m.Descrizione.Contains(filterDescription));
+            query = query.Where(m => m.Descrizione.ToLower().Contains(filterDescription.ToLower()));
 
         // 2. Logica in base al View Type
         if (filterViewType == "all")
@@ -351,7 +351,7 @@ else if (filterViewType == "monthly")
         var query = Db.Movimentis.AsQueryable();
                 
         if (!string.IsNullOrEmpty(filterAccount))
-            query = query.Where(m => m.Tipo == filterAccount);
+            query = query.Where(m => m.Tipo.ToLower() == filterAccount.ToLower());
 
         if (dateFrom.HasValue)
             query = query.Where(m => m.Data >= dateFrom);
@@ -366,10 +366,10 @@ else if (filterViewType == "monthly")
             query = query.Where(m => m.Soldi <= amountTo);
 
         if (!string.IsNullOrEmpty(filterCategory))
-            query = query.Where(m => m.MacroArea.Contains(filterCategory));
+            query = query.Where(m => m.MacroArea.ToLower().Contains(filterCategory.ToLower()));
 
         if (!string.IsNullOrEmpty(filterDescription))
-            query = query.Where(m => m.Descrizione.Contains(filterDescription));
+            query = query.Where(m => m.Descrizione.ToLower().Contains(filterDescription.ToLower()));
 
         itemsCount = await query
             .CountAsync();
