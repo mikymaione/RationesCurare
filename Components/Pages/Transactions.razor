@@ -26,6 +26,7 @@
                 <option value="all">All Transactions</option>
                 <option value="monthly">Monthly Cash Flow</option>
                 <option value="annual">Annual Cash Flow</option>
+                <option value="trend">Account Balance Trend</option>
             </select>
         </div>
     </div>
@@ -123,6 +124,10 @@ else if (filterViewType == "annual")
 else if (filterViewType == "monthly")
 {
     <MonthlyCashFlowView cashFlowItems="@cashFlowItems" total="@total" />
+}
+else if (filterViewType == "trend")
+{
+    <AccountBalanceTrend cashFlowItems="@cashFlowItems" />
 }
 
 @if (hasMoreItems)
@@ -303,6 +308,34 @@ else if (filterViewType == "monthly")
                     Balance: x.Balance
                 ));
             
+            hasMoreItems = false;
+        }
+        else if (filterViewType == "trend")
+        {
+            var runningTotal = 0d;
+
+            var annualDataRaw = await query
+                .GroupBy(m => new { m.Data.Year })
+                .Select(g => new 
+                {
+                    Year = g.Key.Year,
+                    Balance = g.Sum(m => m.Soldi)
+                })
+                .OrderBy(g => g.Year)
+                .ToListAsync();
+
+            foreach (var x in annualDataRaw)
+            {
+                runningTotal += x.Balance;
+                
+                cashFlowItems.Add(new(
+                    Year: x.Year,
+                    Month: null,
+                    Balance: runningTotal
+                ));
+            }
+            
+            cashFlowItems.Reverse();
             hasMoreItems = false;
         }
     }
