@@ -5,6 +5,7 @@
 @using RationesCurare.Data
 @using RationesCurare.Functions
 @using RationesCurare.Models
+@using RationesCurare.Components.Widgets
 
 @rendermode InteractiveServer
 
@@ -111,130 +112,24 @@
 
 <h3>Transactions</h3>
 
-@if (items != null)
-{    
-    <table width="100%">
-        <thead>
-            <tr>
-                @if (filterViewType == "all")
-                {
-                    <th>Description</th>
-                    <th>Amount</th>
-                }
-                else if (filterViewType == "annual")
-                {
-                    <th>Year</th>
-                    <th>Balance</th>
-                }
-                else if (filterViewType == "monthly")
-                {
-                    <th>Year</th>
-                    <th>Month</th>
-                    <th>Balance</th>
-                }
-            </tr>
-        </thead>
-        <tbody>
-            @if (filterViewType == "all")
-            {
-                @foreach (var x in items)
-                {
-                    <tr @onclick="() => Detail(x.Id)" style="cursor:pointer;">
-                        <td>
-                            <div>
-                                @if (x.Idgiroconto > 0)
-                                {
-                                    <span class="googleIcon fsInit moneyNeutro" title="Transfer">currency_exchange</span>
-                                }
-                                else if (x.Soldi < 0)
-                                {
-                                    <span class="googleIcon fsInit moneyBad" title="Expense">arrow_downward</span>
-                                }
-                                else
-                                {
-                                    <span class="googleIcon fsInit moneyGood" title="Income">arrow_upward</span>
-                                }
-                                <span class="trLabelC">@GB.ToProperCase(x.Tipo)</span>
-                                <span class="trLabel">@x.MacroArea</span>                            
-                            </div>
-                            <div><small>@x.Descrizione</small></div>
-                            <div><ruby>@GB.ToDateTime(x.Data)</ruby></div>
-                        </td>
-                        <td align="right" class="nw @GB.ClassColoreImporto(x.Soldi)">
-                            @GB.ToMoney(x.Soldi)
-                        </td>
-                    </tr>
-                }
-            }
-            else if (filterViewType == "annual")
-            {
-                @foreach (var group in cashFlowItems)
-                {
-                    <tr>
-                        <td align="right">
-                            @group.Year
-                        </td>
-                        <td align="right" class="nw @GB.ClassColoreImporto(group.Balance)">
-                            @GB.ToMoney(group.Balance)
-                        </td>
-                    </tr>
-                }
-            }
-            else if (filterViewType == "monthly")
-            {
-                @foreach (var group in cashFlowItems)
-                {
-                    <tr>
-                        <td align="right">
-                            @group.Year
-                        </td>
-                        <td align="right">
-                            @group.Month?.ToString("D2")
-                        </td>
-                        <td align="right" class="nw @GB.ClassColoreImporto(group.Balance)">
-                            @GB.ToMoney(group.Balance)
-                        </td>
-                    </tr>
-                }
-            }
-        </tbody>
-        <tfoot>
-            @if (filterViewType == "all")
-            {
-                <tr>
-                    <td># @itemsCount</td>
-                    <td class="nw" align="right">
-                        @GB.ToMoney(total)
-                    </td>
-                </tr>
-            }
-            else if (filterViewType == "annual")
-            {
-                <tr>
-                    <td># @cashFlowItems.Count</td>
-                    <td class="nw" align="right">
-                        @GB.ToMoney(total)
-                    </td>
-                </tr>
-            }
-            else if (filterViewType == "monthly")
-            {
-                <tr>
-                    <td colspan="2"># @cashFlowItems.Count</td>
-                    <td class="nw" align="right">
-                        @GB.ToMoney(total)
-                    </td>
-                </tr>
-            }
-        </tfoot>
-    </table>
-    
-    @if (hasMoreItems)
-    {
-        <div @ref="scrollTrigger" style="height: 20px; background: transparent; text-align:center;">
-            <small>Loading...</small>
-        </div>
-    }    
+@if (filterViewType == "all")
+{
+    <TransactionsView items="@items" itemsCount="@itemsCount" total="@total" OnDetail="Detail" />
+}
+else if (filterViewType == "annual")
+{
+    <AnnualCashFlowView cashFlowItems="@cashFlowItems" total="@total" />
+}
+else if (filterViewType == "monthly")
+{
+    <MonthlyCashFlowView cashFlowItems="@cashFlowItems" total="@total" />
+}
+
+@if (hasMoreItems)
+{
+    <div @ref="scrollTrigger" style="height: 20px; background: transparent; text-align:center;">
+        <small>Loading...</small>
+    </div>
 }
 
 <script>
@@ -268,8 +163,8 @@
     private double itemsCount;
     private double total;
         
-    private int pageSize = 50; 
-    private bool hasMoreItems = true;
+    private int pageSize = 50;
+    private bool hasMoreItems = false;
     private ElementReference scrollTrigger;
     private IDisposable? dotNetRef;
 
@@ -358,8 +253,7 @@
                 .Take(pageSize)
                 .ToArrayAsync();
 
-            if (nextBatch.Length < pageSize)
-                hasMoreItems = false;
+            hasMoreItems = nextBatch.Length == pageSize;
 
             items.AddRange(nextBatch);
         }
@@ -417,29 +311,14 @@
     {
         filterAccount = account;
 
-        // Get base query
-        var baseQuery = Db.Movimentis.AsQueryable();
-        
-        // Load min/max dates
-        var dates = await baseQuery
-            .Select(m => m.Data)
-            .ToListAsync();
+        var baseQuery = Db.Movimentis.AsNoTracking();
 
-        if (dates.Any())
+        if (await baseQuery.AnyAsync())
         {
-            minDate = dates.Min();
-            maxDate = dates.Max();
-        }
-
-        // Load min/max amounts
-        var amounts = await baseQuery
-            .Select(m => m.Soldi)
-            .ToListAsync();
-
-        if (amounts.Any())
-        {
-            minAmount = amounts.Min();
-            maxAmount = amounts.Max();
+            minDate = await baseQuery.MinAsync(m => m.Data);
+            maxDate = await baseQuery.MaxAsync(m => m.Data);
+            minAmount = await baseQuery.MinAsync(m => (double?)m.Soldi);
+            maxAmount = await baseQuery.MaxAsync(m => (double?)m.Soldi);
         }
 
         // Load unique categories
