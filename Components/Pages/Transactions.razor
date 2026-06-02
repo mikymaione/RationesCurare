@@ -132,14 +132,7 @@ else if (filterViewType == "trend")
 }
 else if (filterViewType == "breakdown")
 {
-    <ExpenseBreakdown items="@breakdownItems" total="@total" />
-}
-
-@if (hasMoreItems)
-{
-    <div @ref="scrollTrigger" style="height: 20px; background: transparent; text-align:center;">
-        <small>Loading...</small>
-    </div>
+    <ExpenseBreakdown breakdownItems="@breakdownItems" total="@total" />
 }
 
 <script>
@@ -166,9 +159,7 @@ else if (filterViewType == "breakdown")
 @code {
 
     [Parameter]
-    public string? account { get; set; }
-
-    public record CategoryBreakdown(string Category, double Balance);
+    public string? account { get; set; }    
 
     private List<CashFlow> cashFlowItems = new();
     private List<CategoryBreakdown> breakdownItems = new();
@@ -362,10 +353,10 @@ else if (filterViewType == "breakdown")
                 runningTotal += x.Balance;
 
                 cashFlowItems.Add(new(
-                                    Year: x.Year,
-                                    Month: null,
-                                    Balance: runningTotal
-                                ));
+                    Year: x.Year,
+                    Month: null,
+                    Balance: runningTotal
+                ));
             }
 
             cashFlowItems.Reverse();

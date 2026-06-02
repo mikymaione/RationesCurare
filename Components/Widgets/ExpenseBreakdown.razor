@@ -1,7 +1,7 @@
 @using RationesCurare.Functions
-@using static RationesCurare.Components.Pages.Transactions
+@using RationesCurare.Models
 
-@if (items != null)
+@if (breakdownItems != null)
 { 
     <table style="width: 100%;">
         <thead>
@@ -11,7 +11,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in items)
+            @foreach (var item in breakdownItems)
             {
                 <tr>
                     <td>
@@ -25,7 +25,7 @@
         </tbody>
         <tfoot>
             <tr>
-                <td># @items.Count</td>
+                <td># @breakdownItems.Count</td>
                 <td class="nw" align="right">
                     @GB.ToMoney(total)
                 </td>
@@ -37,7 +37,7 @@
 @code {
 
     [Parameter]
-    public List<CategoryBreakdown>? items { get; set; }
+    public List<CategoryBreakdown>? breakdownItems { get; set; }
 
     [Parameter]
     public double total { get; set; }
