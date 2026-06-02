@@ -22,12 +22,11 @@
         <h3>View Type</h3>
         <div class="bottomspace">
             <label for="filterViewType">View type:</label>
-            <select id="filterViewType" @bind="filterViewType" @bind:after="ApplyFilters" placeholder="View type for the transactions">
-                <option value="all">All Transactions</option>
-                <option value="monthly">Monthly Cash Flow</option>
-                <option value="annual">Annual Cash Flow</option>
-                <option value="trend">Account Balance Trend</option>
-                <option value="breakdown">Expense breakdown</option>
+            <select id="filterViewType" @bind="filterViewType" @bind:after="ApplyFilters">
+                @foreach (var type in Enum.GetValues<ViewType>())
+                {
+                    <option value="@type">@type.GetDescription()</option>
+                }
             </select>
         </div>
     </div>
@@ -114,25 +113,37 @@
 
 <h3>Transactions</h3>
 
-@if (filterViewType == "all")
+@switch (filterViewType)
 {
-    <TransactionsView items="@items" itemsCount="@itemsCount" total="@total" OnDetail="Detail" />
+    case ViewType.All:
+        <TransactionsView items="@items" itemsCount="@itemsCount" total="@total" OnDetail="Detail" />
+        break;
+
+    case ViewType.Annual:
+        <AnnualCashFlowView cashFlowItems="@cashFlowItems" total="@total" />
+        break;
+
+    case ViewType.Monthly:
+        <MonthlyCashFlowView cashFlowItems="@cashFlowItems" total="@total" />
+        break;
+
+    case ViewType.Trend:
+        <AccountBalanceTrend cashFlowItems="@cashFlowItems" />
+        break;
+
+    case ViewType.Breakdown:
+        <ExpenseBreakdown breakdownItems="@breakdownItems" total="@total" />
+        break;
+
+    default:
+        throw new ArgumentOutOfRangeException(nameof(filterViewType), $"Unsupported view type: {filterViewType}");
 }
-else if (filterViewType == "annual")
+
+@if (hasMoreItems)
 {
-    <AnnualCashFlowView cashFlowItems="@cashFlowItems" total="@total" />
-}
-else if (filterViewType == "monthly")
-{
-    <MonthlyCashFlowView cashFlowItems="@cashFlowItems" total="@total" />
-}
-else if (filterViewType == "trend")
-{
-    <AccountBalanceTrend cashFlowItems="@cashFlowItems" />
-}
-else if (filterViewType == "breakdown")
-{
-    <ExpenseBreakdown breakdownItems="@breakdownItems" total="@total" />
+    <div @ref="scrollTrigger" style="height: 20px; background: transparent; text-align:center;">
+        <ruby class="copyright">Loading...</ruby>
+    </div>
 }
 
 <script>
@@ -173,7 +184,7 @@ else if (filterViewType == "breakdown")
     private IDisposable? dotNetRef;
 
     // Filter variables
-    private string filterViewType = "all";
+    private ViewType filterViewType = ViewType.All;
     private DateTime? dateFrom;
     private DateTime? dateTo;
     private double? amountFrom;
@@ -224,7 +235,6 @@ else if (filterViewType == "breakdown")
 
     private async Task LoadNextBatch()
     {
-        // 1. Query di base con i filtri applicati
         var query = Db.Movimentis.AsQueryable();
 
         if (!string.IsNullOrEmpty(filterAccount))
@@ -248,119 +258,122 @@ else if (filterViewType == "breakdown")
         if (!string.IsNullOrEmpty(filterDescription))
             query = query.Where(m => m.Descrizione.ToLower().Contains(filterDescription.ToLower()));
 
-        // 2. Logica in base al View Type
-        if (filterViewType == "all")
+        switch (filterViewType)
         {
-            var nextBatch = await query
-                .OrderByDescending(m => m.Data)
-                .Skip(items.Count)
-                .Take(pageSize)
-                .ToArrayAsync();
+            case ViewType.All:
+                var nextBatch = await query
+                    .OrderByDescending(m => m.Data)
+                    .Skip(items.Count)
+                    .Take(pageSize)
+                    .ToArrayAsync();
 
-            hasMoreItems = nextBatch.Length == pageSize;
+                hasMoreItems = nextBatch.Length == pageSize;
+                items.AddRange(nextBatch);
+                break;
 
-            items.AddRange(nextBatch);
-        }
-        else if (filterViewType == "monthly")
-        {
-            // Per evitare problemi di traduzione con il costruttore del record,
-            // proiettiamo prima su un tipo anonimo, lasciando eseguire il raggruppamento e la SUM a SQL.
-            var monthlyDataRaw = await query
-                .GroupBy(m => new { m.Data.Year, m.Data.Month })
-                .Select(g => new
+            case ViewType.Monthly:
+                // Project to an anonymous type first to avoid EF translation issues with record constructors,
+                // letting SQL handle the grouping and SUM.
+                var monthlyDataRaw = await query
+                    .GroupBy(m => new { m.Data.Year, m.Data.Month })
+                    .Select(g => new
+                    {
+                        Year = g.Key.Year,
+                        Month = g.Key.Month,
+                        Balance = g.Sum(m => m.Soldi)
+                    })
+                    .OrderByDescending(g => g.Year)
+                    .ThenByDescending(g => g.Month)
+                    .ToListAsync();
+
+                // Map the anonymous object to the CashFlow record in-memory
+                foreach (var x in monthlyDataRaw)
+                    cashFlowItems.Add(new(
+                        Year: x.Year,
+                        Month: x.Month,
+                        Balance: x.Balance
+                    ));
+
+                hasMoreItems = false;
+                break;
+
+            case ViewType.Breakdown:
+                var breakdownRaw = await query
+                    .Where(m => !string.IsNullOrEmpty(m.MacroArea))
+                    .GroupBy(m => m.MacroArea)
+                    .Select(g => new
+                    {
+                        Category = g.Key,
+                        Balance = g.Sum(m => m.Soldi)
+                    })
+                    .ToListAsync();
+
+                var breakdownSorted = breakdownRaw
+                    .Where(b => b.Balance != 0)
+                    .OrderByDescending(b => b.Balance)
+                    .ToList();
+
+                foreach (var x in breakdownSorted)
+                    breakdownItems.Add(new(
+                        Category: x.Category,
+                        Balance: x.Balance
+                    ));
+
+                hasMoreItems = false;
+                break;
+
+            case ViewType.Annual:
+                // Same safe approach for annual grouping
+                var annualDataRaw = await query
+                    .GroupBy(m => new { m.Data.Year })
+                    .Select(g => new
+                    {
+                        Year = g.Key.Year,
+                        Balance = g.Sum(m => m.Soldi)
+                    })
+                    .OrderByDescending(g => g.Year)
+                    .ToListAsync();
+
+                foreach (var x in annualDataRaw)                
+                    cashFlowItems.Add(new(
+                        Year: x.Year,
+                        Month: null,
+                        Balance: x.Balance
+                    ));                
+
+                hasMoreItems = false;
+                break;
+
+            case ViewType.Trend:
+                var runningTotal = 0d;
+
+                var trendDataRaw = await query
+                    .GroupBy(m => new { m.Data.Year })
+                    .Select(g => new
+                    {
+                        Year = g.Key.Year,
+                        Balance = g.Sum(m => m.Soldi)
+                    })
+                    .OrderBy(g => g.Year)
+                    .ToListAsync();
+
+                foreach (var x in trendDataRaw)
                 {
-                    Year = g.Key.Year,
-                    Month = g.Key.Month,
-                    Balance = g.Sum(m => m.Soldi)
-                })
-                .OrderByDescending(g => g.Year)
-                .ThenByDescending(g => g.Month)
-                .ToListAsync();
+                    runningTotal += x.Balance;
 
-            // Ora mappiamo in memoria l'oggetto anonimo sul record CashFlow
-            foreach (var x in monthlyDataRaw)
-                cashFlowItems.Add(new(
-                    Year: x.Year,
-                    Month: x.Month,
-                    Balance: x.Balance
-                ));
+                    cashFlowItems.Add(new(
+                        Year: x.Year,
+                        Month: null,
+                        Balance: runningTotal
+                    ));
+                }
 
-            hasMoreItems = false;
-        }
-        else if (filterViewType == "breakdown")
-        {
-            var breakdownRaw = await query
-                .Where(m => !string.IsNullOrEmpty(m.MacroArea))
-                .GroupBy(m => m.MacroArea)
-                .Select(g => new
-                {
-                    Category = g.Key,
-                    Balance = g.Sum(m => m.Soldi)
-                })
-                .ToListAsync();
+                cashFlowItems.Reverse();
+                hasMoreItems = false;
+                break;
 
-            var breakdownSorted = breakdownRaw
-                .Where(b => b.Balance != 0)
-                .OrderByDescending(b => b.Balance)
-                .ToList();
-
-            foreach (var x in breakdownSorted)
-                breakdownItems.Add(new(
-                    Category: x.Category,
-                    Balance: x.Balance
-                ));
-
-            hasMoreItems = false;
-        }
-        else if (filterViewType == "annual")
-        {
-            // Stesso approccio sicuro per il raggruppamento annuale
-            var annualDataRaw = await query
-                .GroupBy(m => new { m.Data.Year })
-                .Select(g => new
-                {
-                    Year = g.Key.Year,
-                    Balance = g.Sum(m => m.Soldi)
-                })
-                .OrderByDescending(g => g.Year)
-                .ToListAsync();
-
-            foreach (var x in annualDataRaw)
-                cashFlowItems.Add(new(
-                    Year: x.Year,
-                    Month: null,
-                    Balance: x.Balance
-                ));
-
-            hasMoreItems = false;
-        }
-        else if (filterViewType == "trend")
-        {
-            var runningTotal = 0d;
-
-            var annualDataRaw = await query
-                .GroupBy(m => new { m.Data.Year })
-                .Select(g => new
-                {
-                    Year = g.Key.Year,
-                    Balance = g.Sum(m => m.Soldi)
-                })
-                .OrderBy(g => g.Year)
-                .ToListAsync();
-
-            foreach (var x in annualDataRaw)
-            {
-                runningTotal += x.Balance;
-
-                cashFlowItems.Add(new(
-                    Year: x.Year,
-                    Month: null,
-                    Balance: runningTotal
-                ));
-            }
-
-            cashFlowItems.Reverse();
-            hasMoreItems = false;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(filterViewType), filterViewType, $"Unsupported view type: {filterViewType}");
         }
     }
 
@@ -473,5 +486,5 @@ else if (filterViewType == "breakdown")
 
     private void NewTransaction() =>
         NavigationManager.NavigateTo($"/transactions/-1?returnUrl={System.Web.HttpUtility.UrlEncode(NavigationManager.Uri)}");
-
+    
 }
