@@ -17,9 +17,9 @@
 
 <h2>@(account ?? "Balance")</h2>
 
+<h3>Settings & Filters</h3>
 <div>
-    <div>
-        <h3>View Type</h3>
+    <div>    
         <div class="bottomspace">
             <label for="filterViewType">View type:</label>
             <select id="filterViewType" @bind="filterViewType" @bind:after="ApplyFilters">
@@ -32,8 +32,6 @@
     </div>
    
     <div>
-        <h3>Filters</h3>
-
         <!-- Date -->
         <div class="bottomspace div2Row">
             <div>
