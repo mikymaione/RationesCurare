@@ -18,16 +18,23 @@
                         <div>
                             @if (x.Idgiroconto > 0)
                             {
-                                <span class="googleIcon fsInit moneyNeutro" title="Transfer">currency_exchange</span>
+                                iconClass = "moneyNeutro";
+                                iconTitle = "Transfer";
+                                iconName = "currency_exchange";
                             }
                             else if (x.Soldi < 0)
                             {
-                                <span class="googleIcon fsInit moneyBad" title="Expense">arrow_downward</span>
+                                iconClass = "moneyBad";
+                                iconTitle = "Expense";
+                                iconName = "arrow_downward";
                             }
                             else
                             {
-                                <span class="googleIcon fsInit moneyGood" title="Income">arrow_upward</span>
+                                iconClass = "moneyGood";
+                                iconTitle = "Income";
+                                iconName = "arrow_upward";
                             }
+                            <span class="googleIcon fsInit @iconClass" title="@iconTitle">@iconName</span>                            
                             <span class="trLabelC">@GB.ToProperCase(x.Tipo)</span>
                             <span class="trLabel">@x.MacroArea</span>                            
                         </div>
@@ -64,5 +71,7 @@
 
     [Parameter]
     public EventCallback<int> OnDetail { get; set; }
+
+    private string? iconClass, iconTitle, iconName;
 
 }
