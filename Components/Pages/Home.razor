@@ -50,6 +50,7 @@
 <input class="myBtn googleIcon fsXXL" @onclick="NewTransaction" type="submit" title="New amount" value="local_atm" />
 
 @code {
+
     private List<Balance>? items;
     private double total;
 
@@ -68,7 +69,9 @@
             ))
             .ToListAsync();
 
-        total = items.Sum(r => r.Totale);
+        total = await Db.Movimentis
+            .Select(m => m.Soldi)
+            .SumAsync();
     }
 
     private void Detail(string account) =>
