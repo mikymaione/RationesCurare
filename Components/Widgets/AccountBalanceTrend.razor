@@ -22,7 +22,15 @@
                     </td>
                 </tr>
             }
-        </tbody>        
+        </tbody>
+        <tfoot>
+             <tr>
+                <td># @cashFlowItems.Count</td>
+                <td class="nw" align="right">
+                    @GB.ToMoney(total)
+                </td>
+            </tr>
+        </tfoot>    
     </table>
 }
 
@@ -31,4 +39,7 @@
     [Parameter]
     public List<CashFlow>? cashFlowItems { get; set; }
 
+    [Parameter]
+    public double total { get; set; }
+    
 }
