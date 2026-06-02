@@ -1,0 +1,45 @@
+@using RationesCurare.Functions
+@using static RationesCurare.Components.Pages.Transactions
+
+@if (items != null)
+{ 
+    <table style="width: 100%;">
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in items)
+            {
+                <tr>
+                    <td>
+                        @GB.ToProperCase(item.Category)
+                    </td>
+                    <td align="right" class="nw @GB.ClassColoreImporto(item.Balance)">
+                        @GB.ToMoney(item.Balance)
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td># @items.Count</td>
+                <td class="nw" align="right">
+                    @GB.ToMoney(total)
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+}
+
+@code {
+
+    [Parameter]
+    public List<CategoryBreakdown>? items { get; set; }
+
+    [Parameter]
+    public double total { get; set; }
+
+}
