@@ -1,0 +1,63 @@
+@page "/accounts/"
+
+@using Microsoft.EntityFrameworkCore
+@using RationesCurare.Data
+@using RationesCurare.Functions
+
+@rendermode InteractiveServer
+
+@inject AppDbContext Db
+@inject NavigationManager NavigationManager
+
+<PageTitle>RationesCurare - Accounts Management</PageTitle>
+
+<h2>Accounts Management</h2>
+
+@if (items != null)
+{
+    <table width="100%">
+        <thead>
+            <tr>
+                <th>Account</th>
+                <th>Hide</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var x in items)
+            {
+                <tr @onclick="() => Detail(x.Nome)">
+                    <td>
+                        <span class="trLabelC">@GB.ToProperCase(x.Nome)</span>
+                    </td>
+                    <td>
+                        @x.Nascondi.GetValueOrDefault()
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td># @items.Count</td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+}
+
+@code {
+
+    private List<Casse>? items;
+
+    protected override async Task OnInitializedAsync()
+    {
+        items = await Db.Casses
+            .OrderBy(x => x.Nome.ToLower())
+            .ToListAsync();
+    }
+
+    private void Detail(string nome)
+    {
+        NavigationManager.NavigateTo($"/accounts/{nome}");
+    }
+
+}
