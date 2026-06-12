@@ -1,0 +1,120 @@
+@page "/accounts/{account}"
+
+@using RationesCurare.Data
+
+@rendermode InteractiveServer
+
+@inject AppDbContext Db
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+
+@if (NewRecord)
+{
+    <PageTitle>RationesCurare - New account</PageTitle>
+    <h2>New account</h2>
+}
+else
+{
+    <PageTitle>RationesCurare - Edit account @account</PageTitle>
+    <h2>Edit account @account</h2>
+}
+
+<div>
+    <div class="bottomspace">
+        <label for="Nome">Name</label>        
+        <input type="text" id="Nome" @bind="Nome" maxlength="255" autocomplete="on" required placeholder="Account name" disabled=@(!NewRecord) />
+    </div>
+
+    <div class="bottomspace">
+        <label for="Nascondi">Hide</label>
+        <select id="Nascondi" @bind="Nascondi" required>
+            <option value="false">False</option>
+            <option value="true">True</option>
+        </select>
+    </div>
+
+    <div class="divSpaceBetween">
+        <button @onclick="SaveAccount">Save</button>
+        @if (!NewRecord)
+        {
+            <button @onclick="DeleteAccount">Delete</button>
+        }
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public string? account { get; set; }
+
+    private string? Nome;
+    private string? Nascondi;
+    
+    private bool NascondiBool
+    {
+        get => Nascondi == "true";
+        set => Nascondi = value ? "true" : "false";
+    }
+
+    private bool NewRecord =>
+        string.IsNullOrEmpty(account);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadAccount();
+    }  
+
+    private async Task LoadAccount()
+    {
+        if (NewRecord)
+        {
+            Nome = null;
+            NascondiBool = false;
+        }
+        else
+        {
+            Casse a = await Db.Casses.FindAsync(account)
+                ?? throw new Exception($"Account {account} not found");
+            
+            Nome = a.Nome;
+            NascondiBool = a.Nascondi.GetValueOrDefault();
+        }
+    }
+
+    private async Task SaveAccount()
+    {
+        Casse a = NewRecord
+            ? new()
+            : await Db.Casses.FindAsync(account)            
+                ?? throw new Exception($"Account {account} not found");
+
+        if (NewRecord)
+            a.Nome = Nome ?? throw new Exception("Nome is required");
+        a.Nascondi = NascondiBool;
+
+        if (NewRecord)
+            Db.Casses.Add(a);
+        else
+            Db.Casses.Update(a);
+
+        await Db.SaveChangesAsync();
+        NavigationManager.NavigateTo("/accounts/");
+    }
+
+    private async Task DeleteAccount()
+    {
+        var confermato = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this account?");
+
+        if (confermato)
+        {
+            Casse a = await Db.Casses.FindAsync(account)
+                ?? throw new Exception($"Account {account} not found");
+
+            Db.Casses.Remove(a);
+
+            await Db.SaveChangesAsync();        
+            NavigationManager.NavigateTo("/accounts/");
+        }
+    }
+
+}
