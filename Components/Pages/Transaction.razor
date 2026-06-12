@@ -183,15 +183,15 @@ else
     private async Task SaveTransaction()
     {
         var t = id > -1
-            ? await Db.Movimentis.FindAsync(id.Value)
+            ? await Db.Movimentis.FindAsync(id.Value) ?? throw new Exception("Transaction not found")
             : new();
 
-        t.Tipo = fromAccount;
+        t.Tipo = fromAccount ?? throw new Exception("From account is required");
         t.Soldi = amount.GetValueOrDefault();
         t.Data = date;
-        t.Descrizione = description;
-        t.MacroArea = category;
-        t.Nome = author;
+        t.Descrizione = description ?? string.Empty;
+        t.MacroArea = category ?? string.Empty;
+        t.Nome = author ?? throw new Exception("Author is required");
 
         if (id > -1)
             Db.Movimentis.Update(t);
