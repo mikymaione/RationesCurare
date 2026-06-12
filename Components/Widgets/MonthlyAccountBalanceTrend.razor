@@ -1,0 +1,49 @@
+@using RationesCurare.Models
+@using RationesCurare.Functions
+
+@if (cashFlowItems != null)
+{    
+    <table width="100%">
+        <thead>
+            <tr>
+                <th>Year</th>
+                <th>Month</th>
+                <th>Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in cashFlowItems)
+            {
+                <tr>
+                    <td align="right">
+                        @item.Year
+                    </td>
+                    <td align="right">
+                        @item.Month
+                    </td>
+                    <td align="right" class="nw @GB.ClassColoreImporto(item.Balance)">
+                        @GB.ToMoney(item.Balance)
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+             <tr>
+                <td colspan="2"># @cashFlowItems.Count</td>
+                <td class="nw" align="right">
+                    @GB.ToMoney(total)
+                </td>
+            </tr>
+        </tfoot>    
+    </table>
+}
+
+@code {
+
+    [Parameter]
+    public List<CashFlow>? cashFlowItems { get; set; }
+
+    [Parameter]
+    public double total { get; set; }
+    
+}

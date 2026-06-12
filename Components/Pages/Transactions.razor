@@ -113,23 +113,27 @@
 
 @switch (filterViewType)
 {
-    case ViewType.All:
+    case ViewType.AllTransactions:
         <TransactionsView items="@items" itemsCount="@itemsCount" total="@total" OnDetail="Detail" />
         break;
 
-    case ViewType.Annual:
+    case ViewType.AnnualCashFlow:
         <AnnualCashFlowView cashFlowItems="@cashFlowItems" total="@total" />
         break;
 
-    case ViewType.Monthly:
+    case ViewType.MonthlyCashFlow:
         <MonthlyCashFlowView cashFlowItems="@cashFlowItems" total="@total" />
         break;
 
-    case ViewType.Trend:
-        <AccountBalanceTrend cashFlowItems="@cashFlowItems" total="@total" />
+    case ViewType.AnnualAccountBalanceTrend:
+        <AnnualAccountBalanceTrend cashFlowItems="@cashFlowItems" total="@total" />
         break;
 
-    case ViewType.Breakdown:
+    case ViewType.MonthlyAccountBalanceTrend:
+        <MonthlyAccountBalanceTrend cashFlowItems="@cashFlowItems" total="@total" />
+        break;
+
+    case ViewType.ExpenseBreakdown:
         <ExpenseBreakdown breakdownItems="@breakdownItems" total="@total" />
         break;
 
@@ -182,7 +186,7 @@
     private IDisposable? dotNetRef;
 
     // Filter variables
-    private ViewType filterViewType = ViewType.All;
+    private ViewType filterViewType = ViewType.AllTransactions;
     private DateTime? dateFrom;
     private DateTime? dateTo;
     private double? amountFrom;
@@ -258,7 +262,7 @@
 
         switch (filterViewType)
         {
-            case ViewType.All:
+            case ViewType.AllTransactions:
                 var nextBatch = await query
                     .OrderByDescending(m => m.Data)
                     .Skip(items.Count)
@@ -269,7 +273,7 @@
                 items.AddRange(nextBatch);
                 break;
 
-            case ViewType.Monthly:
+            case ViewType.MonthlyCashFlow:
                 // Project to an anonymous type first to avoid EF translation issues with record constructors,
                 // letting SQL handle the grouping and SUM.
                 var monthlyDataRaw = await query
@@ -295,7 +299,7 @@
                 hasMoreItems = false;
                 break;
 
-            case ViewType.Breakdown:
+            case ViewType.ExpenseBreakdown:
                 var breakdownRaw = await query
                     .Where(m => !string.IsNullOrEmpty(m.MacroArea))
                     .GroupBy(m => m.MacroArea)
@@ -320,7 +324,7 @@
                 hasMoreItems = false;
                 break;
 
-            case ViewType.Annual:
+            case ViewType.AnnualCashFlow:
                 // Same safe approach for annual grouping
                 var annualDataRaw = await query
                     .GroupBy(m => new { m.Data.Year })
@@ -342,7 +346,7 @@
                 hasMoreItems = false;
                 break;
 
-            case ViewType.Trend:
+            case ViewType.AnnualAccountBalanceTrend:
                 var runningTotal = 0d;
 
                 var trendDataRaw = await query
@@ -363,6 +367,36 @@
                         Year: x.Year,
                         Month: null,
                         Balance: runningTotal
+                    ));
+                }
+
+                cashFlowItems.Reverse();
+                hasMoreItems = false;
+                break;
+
+            case ViewType.MonthlyAccountBalanceTrend:
+                var runningTotalMonthly = 0d;
+
+                var trendMonthlyDataRaw = await query
+                    .GroupBy(m => new { m.Data.Year, m.Data.Month })
+                    .Select(g => new
+                    {
+                        Year = g.Key.Year,
+                        Month = g.Key.Month,
+                        Balance = g.Sum(m => m.Soldi)
+                    })
+                    .OrderBy(g => g.Year)
+                    .ThenBy(g => g.Month)
+                    .ToListAsync();
+
+                foreach (var x in trendMonthlyDataRaw)
+                {
+                    runningTotalMonthly += x.Balance;
+
+                    cashFlowItems.Add(new(
+                        Year: x.Year,
+                        Month: x.Month,
+                        Balance: runningTotalMonthly
                     ));
                 }
 

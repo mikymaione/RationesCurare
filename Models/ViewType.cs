@@ -5,17 +5,20 @@ namespace RationesCurare.Models;
 public enum ViewType
 {
     [Description("All Transactions")]
-    All,
+    AllTransactions,
 
     [Description("Monthly Cash Flow")]
-    Monthly,
+    MonthlyCashFlow,
 
     [Description("Annual Cash Flow")]
-    Annual,
+    AnnualCashFlow,
 
-    [Description("Account Balance Trend")]
-    Trend,
+    [Description("Monthly Account Balance Trend")]
+    MonthlyAccountBalanceTrend,
+    
+    [Description("Annual Account Balance Trend")]
+    AnnualAccountBalanceTrend,
 
-    [Description("Expense breakdown")]
-    Breakdown
+    [Description("Expense Breakdown")]
+    ExpenseBreakdown
 }
