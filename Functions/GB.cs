@@ -10,6 +10,11 @@ public static class GB
     public static string? ToMoney(double? d) =>
         d?.ToString("C2");
 
+    public static string? MoneyDirection(double d, bool isTransfer) =>
+        d < 0 
+            ? "from"
+            : isTransfer ? "to" : "in";
+
     public static string ClassColoreImporto(double? d) =>
         d == null
         || Math.Round(d.GetValueOrDefault(), 2) == 0

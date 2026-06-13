@@ -89,6 +89,20 @@ else
             <button @onclick="DeleteTransaction">Delete</button>
         }
     </div>
+    
+    @if (amount.HasValue && amount != 0)
+    {
+        <h3>Summary</h3>
+        @if (!string.IsNullOrEmpty(fromAccount) && !string.IsNullOrEmpty(toAccount))
+        {
+            <p>@GB.ToMoney(amount) @GB.MoneyDirection(amount.GetValueOrDefault(), isTransfer: true) @fromAccount</p>
+            <p>@GB.ToMoney(-amount) @GB.MoneyDirection(-amount.GetValueOrDefault(), isTransfer: true) @toAccount</p>
+        }
+        else if (!string.IsNullOrEmpty(fromAccount))
+        {
+            <p>@GB.ToMoney(amount) @GB.MoneyDirection(amount.GetValueOrDefault(), isTransfer: false) @fromAccount</p>
+        }
+    }
 </div>
 
 @code {
