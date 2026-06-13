@@ -23,10 +23,19 @@
         <div class="bottomspace">
             <label for="filterViewType">View type:</label>
             <select id="filterViewType" @bind="filterViewType" @bind:after="ApplyFilters">
-                @foreach (var type in Enum.GetValues<ViewType>())
-                {
-                    <option value="@type">@type.GetDescription()</option>
-                }
+                <option value="@ViewType.AllTransactions">All Transactions</option>
+
+                <option value="@ViewType.ExpenseBreakdown">Expense Breakdown</option>
+
+                <optgroup label="Cash Flow">
+                    <option value="@ViewType.AnnualCashFlow">Annual Cash Flow</option>
+                    <option value="@ViewType.MonthlyCashFlow">Monthly Cash Flow</option>
+                </optgroup>
+
+                <optgroup label="Account Balance Trend">
+                    <option value="@ViewType.AnnualAccountBalanceTrend">Annual Account Balance Trend</option>
+                    <option value="@ViewType.MonthlyAccountBalanceTrend">Monthly Account Balance Trend</option>
+                </optgroup>
             </select>
         </div>
     </div>
