@@ -44,6 +44,8 @@
     </table>
 }
 
+<input class="myBtn googleIcon fsXXL" @onclick="NewAccount" type="submit" title="New account" value="account_balance_wallet" />
+
 @code {
 
     private List<Casse>? items;
@@ -60,4 +62,6 @@
         NavigationManager.NavigateTo($"/accounts/{nome}");
     }
 
+    private void NewAccount() =>
+        Detail("-1");
 }
