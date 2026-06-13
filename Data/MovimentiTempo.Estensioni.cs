@@ -8,13 +8,13 @@ public partial class MovimentiTempo
     public string Periodo_H =>
         TipoGiorniMese switch
         { 
-            "G" => "Giornaliero",
-            "M" => "Mensile",
-            "B" => "Bimestrale",
-            "T" => "Trimestrale",
-            "Q" => "Quadrimestrale",
-            "S" => "Semestrale",
-            "A" => "Annuale",
+            "G" => "Daily",
+            "M" => "Monthly",
+            "B" => "Bimonthly",
+            "T" => "Quarterly",
+            "Q" => "Four-monthly",
+            "S" => "Semi-annual",
+            "A" => "Annual",
             _ => "NaN"
         };
 }
