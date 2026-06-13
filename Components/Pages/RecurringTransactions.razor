@@ -1,0 +1,68 @@
+@page "/recurring"
+
+@using Microsoft.EntityFrameworkCore
+@using RationesCurare.Data
+@using RationesCurare.Functions
+
+@rendermode InteractiveServer
+
+@inject AppDbContext Db
+@inject NavigationManager NavigationManager
+
+<PageTitle>RationesCurare - Recurring transaction management</PageTitle>
+
+<h2>Recurring Transaction Management</h2>
+
+@if (items != null)
+{
+    <table width="100%">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var x in items)
+            {
+                <tr @onclick="() => Detail(x.Id)" style="cursor:pointer;">
+                    <td>
+                        <div>
+                            <span class="trLabelC">@GB.ToProperCase(x.Tipo)</span>
+                            <span class="trLabel">@x.MacroArea</span>
+                        </div>
+                        <div><small>@x.Descrizione</small></div>
+                        <div><ruby>@GB.ToDateTime(x.GiornoDelMese)</ruby> - @x.Periodo_H</div>
+                    </td>
+                    <td align="right" class="nw @GB.ClassColoreImporto(x.Soldi)">
+                        @GB.ToMoney(x.Soldi)
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td># @items.Count</td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+}
+
+<input class="myBtn googleIcon fsXXL" @onclick="NewRecurringTransaction" type="submit" title="New recurring transaction" value="update" />
+
+@code {
+    private List<MovimentiTempo>? items;
+
+    protected override async Task OnInitializedAsync() =>
+        items = await Db.MovimentiTempos
+            .OrderBy(x => x.GiornoDelMese)
+            .ToListAsync();
+
+    private void Detail(int id) =>
+        NavigationManager.NavigateTo($"/recurring/{id}");
+
+    private void NewRecurringTransaction() =>
+        Detail(-1);
+
+}

@@ -50,17 +50,14 @@
 
     private List<Casse>? items;
 
-    protected override async Task OnInitializedAsync()
-    {
+    protected override async Task OnInitializedAsync() =>
         items = await Db.Casses
             .OrderBy(x => x.Nome.ToLower())
             .ToListAsync();
-    }
+    
 
-    private void Detail(string nome)
-    {
+    private void Detail(string nome) =>
         NavigationManager.NavigateTo($"/accounts/{nome}");
-    }
 
     private void NewAccount() =>
         Detail("-1");
