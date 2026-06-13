@@ -13,9 +13,9 @@
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
 
-<PageTitle>RationesCurare - @(account ?? "Balance")</PageTitle>
+<PageTitle>RationesCurare - @TheTitle</PageTitle>
 
-<h2>@(account ?? "Balance")</h2>
+<h2>@TheTitle</h2>
 
 <h3>Settings & Filters</h3>
 <div>
@@ -182,6 +182,11 @@
 
     [Parameter]
     public string? account { get; set; }    
+
+    string TheTitle =>
+        string.IsNullOrEmpty(account)
+            ? "Balance"
+            : $"Balance of {account}";
 
     private List<CashFlow> cashFlowItems = new();
     private List<CategoryBreakdown> breakdownItems = new();
