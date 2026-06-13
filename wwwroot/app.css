@@ -318,8 +318,8 @@ div.awesomplete li[aria-selected="true"] mark {
     height: auto;
 }
 
-div:has(:required) label::after {
-    content: "٭";
+.form-group:has(:required) label::after {
+    content: "*";
     color: #F79E10;
 }
 

@@ -23,7 +23,7 @@ else
 }
 
 <div>
-    <div class="bottomspace">
+    <div class="form-group bottomspace">
         <label for="fromAccount">From account</label>
         <select id="fromAccount" @bind="fromAccount" required>
             <option value="">«select account»</option>
@@ -34,7 +34,7 @@ else
         </select>
     </div>
 
-    <div class="bottomspace">
+    <div class="form-group bottomspace">
         <label for="toAccount">To account</label>
         <select id="toAccount" @bind="toAccount">
             <option value="">«no account»</option>
@@ -45,19 +45,19 @@ else
         </select>
     </div>
 
-    <div class="bottomspace">
+    <div class="form-group bottomspace">
         <label for="amount">Transaction amount</label>
         <input type="number" id="amount" @bind="amount" step="0.01" min="-10000000" max="10000000" required placeholder="Transaction amount in money" />
     </div>
 
-    <div class="bottomspace">
+    <div class="form-group bottomspace">
         <label for="dateEdit">Date</label>
         <input type="datetime-local" id="dateEdit" @bind="date" required placeholder="Date the transaction was performed" />
     </div>
 
-    <div class="bottomspace">
+    <div class="form-group bottomspace">
         <label for="description">Description</label>
-        <input type="text" id="description" list="descriptionList" @bind="description" @onblur="OnDescriptionBlur" data-minchars="1" required autocomplete="off" placeholder="Operation Description" />
+        <input type="text" id="description" list="descriptionList" @bind="description" @onblur="OnDescriptionBlur" data-minchars="1" required="@(string.IsNullOrEmpty(toAccount))" autocomplete="off" placeholder="Operation Description" />
         <datalist id="descriptionList">
             @foreach (var desc in descriptions)
             {
@@ -66,9 +66,9 @@ else
         </datalist>
     </div>
 
-    <div class="bottomspace">
+    <div class="form-group bottomspace">
         <label for="category">Category</label>
-        <input type="text" id="category" list="categoryList" @bind="category" data-minchars="1" maxlength="250" required autocomplete="off" placeholder="Category to which the transaction belongs" />
+        <input type="text" id="category" list="categoryList" @bind="category" data-minchars="1" maxlength="250" required="@(string.IsNullOrEmpty(toAccount))" autocomplete="off" placeholder="Category to which the transaction belongs" />
         <datalist id="categoryList">
             @foreach (var cat in categories)
             {
@@ -77,7 +77,7 @@ else
         </datalist>
     </div>
 
-    <div class="bottomspace">
+    <div class="form-group bottomspace">
         <label for="author">Author</label>
         <input type="text" id="author" @bind="author" maxlength="255" autocomplete="on" required placeholder="Author of the transaction" />
     </div>
@@ -169,7 +169,9 @@ else
     {
         if (id > -1)
         {
-            Movimenti t = await Db.Movimentis.FindAsync(id)
+            Movimenti t = await Db.Movimentis
+                .Include(m => m.IdgirocontoNavigation)
+                .FirstOrDefaultAsync(m => m.Id == id.Value)
                 ?? throw new Exception("Transaction not found");
             
             fromAccount = t.Tipo;
@@ -195,7 +197,9 @@ else
     private async Task SaveTransaction()
     {
         Movimenti t = id > -1
-            ? await Db.Movimentis.FindAsync(id.Value)
+            ? await Db.Movimentis
+                .Include(m => m.IdgirocontoNavigation)
+                .FirstOrDefaultAsync(m => m.Id == id.Value)
                 ?? throw new Exception("Transaction not found")
             : new();
 
@@ -206,9 +210,62 @@ else
         t.MacroArea = category ?? string.Empty;
         t.Nome = author ?? throw new Exception("Author is required");
 
-        if (id > -1)
-            Db.Movimentis.Update(t);
+        if (!string.IsNullOrEmpty(toAccount))
+        {
+            // Gestione Giroconto: creiamo o aggiorniamo il secondo movimento collegato
+            Movimenti t2 = t.IdgirocontoNavigation ?? new();
+
+            t2.Tipo = toAccount;
+            t2.Soldi = -t.Soldi; // Importo opposto
+            t2.Data = t.Data;
+            t2.Descrizione = t.Descrizione;
+            t2.MacroArea = t.MacroArea;
+            t2.Nome = t.Nome;
+
+            if (t2.Id == 0)
+            {
+                // Per evitare l'errore di dipendenza circolare in fase di inserimento:
+                // 1. Aggiungiamo i record senza il legame di navigazione circolare
+                t.IdgirocontoNavigation = null;
+
+                if (id == -1)
+                    Db.Movimentis.Add(t);
+
+                Db.Movimentis.Add(t2);
+                
+                await Db.SaveChangesAsync();
+
+                // 2. Ora che hanno entrambi un ID, impostiamo il legame e risalviamo
+                t.IdgirocontoNavigation = t2;
+                t2.IdgirocontoNavigation = t;
+            }
+            else
+            {
+                t.IdgirocontoNavigation = t2;
+                t2.IdgirocontoNavigation = t;
+            }
+        }
         else
+        {
+            // Se toAccount è stato svuotato, rimuoviamo l'eventuale giroconto esistente
+            if (t.IdgirocontoNavigation != null)
+            {
+                Movimenti linked = t.IdgirocontoNavigation;
+
+                // Rompiamo il legame circolare prima della rimozione per evitare conflitti
+                t.Idgiroconto = null;
+                t.IdgirocontoNavigation = null;
+                linked.Idgiroconto = null;
+                linked.IdgirocontoNavigation = null;
+                await Db.SaveChangesAsync();
+
+                Db.Movimentis.Remove(linked);
+            }
+        }
+
+        if (id > -1 && Db.Entry(t).State != EntityState.Deleted)
+            Db.Movimentis.Update(t);
+        else if (id == -1 && Db.Entry(t).State == EntityState.Detached)
             Db.Movimentis.Add(t);
 
         await Db.SaveChangesAsync();
