@@ -19,7 +19,7 @@ else
     <h2>Edit account @account</h2>
 }
 
-<div>
+<form @onsubmit="SaveAccount">
     <div class="bottomspace">
         <label for="Nome">Name</label>        
         <input type="text" id="Nome" @bind="Nome" maxlength="255" autocomplete="on" required placeholder="Account name" disabled=@(!NewRecord) />
@@ -34,13 +34,13 @@ else
     </div>
 
     <div class="divSpaceBetween">
-        <button @onclick="SaveAccount">Save</button>
+        <button type="submit">Save</button>
         @if (!NewRecord)
         {
             <button @onclick="DeleteAccount">Delete</button>
         }
     </div>
-</div>
+</form>
 
 @code {
 

@@ -22,7 +22,7 @@ else
     <h2>Edit transaction @id</h2>
 }
 
-<div>
+<form @onsubmit="SaveTransaction">
     <div class="form-group bottomspace">
         <label for="fromAccount">From account</label>
         <select id="fromAccount" @bind="fromAccount" required>
@@ -83,7 +83,7 @@ else
     </div>
 
     <div class="divSpaceBetween">
-        <button @onclick="SaveTransaction">Save</button>
+        <button type="submit">Save</button>
         @if (id > -1)
         {
             <button @onclick="DeleteTransaction">Delete</button>
@@ -103,7 +103,7 @@ else
             <p>@GB.ToMoney(amount) @GB.MoneyDirection(amount.GetValueOrDefault(), isTransfer: false) @fromAccount</p>
         }
     }
-</div>
+</form>
 
 @code {
 
