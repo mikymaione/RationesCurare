@@ -2,6 +2,9 @@ namespace RationesCurare.Data;
 
 public partial class MovimentiTempo
 {    
+    public bool IsGiornaliero =>
+        TipoGiorniMese == "G";
+        
     public string Periodo_H =>
         TipoGiorniMese switch
         { 

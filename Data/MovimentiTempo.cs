@@ -21,11 +21,11 @@ public partial class MovimentiTempo
 
     public DateTime? GiornoDelMese { get; set; }
 
-    public string? TipoGiorniMese { get; set; }
+    public string TipoGiorniMese { get; set; } = null!;
 
-    public string? PartendoDalGiorno { get; set; }
+    public DateTime? PartendoDalGiorno { get; set; }
 
-    public string? Scadenza { get; set; }
+    public DateTime? Scadenza { get; set; }
 
     public virtual ICollection<Movimenti> Movimentis { get; set; } = new List<Movimenti>();
 

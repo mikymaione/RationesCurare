@@ -1,0 +1,300 @@
+@page "/recurring/{id:int}"
+
+@using Microsoft.EntityFrameworkCore
+@using RationesCurare.Data
+@using RationesCurare.Functions
+@using Microsoft.AspNetCore.WebUtilities
+
+@rendermode InteractiveServer
+
+@inject AppDbContext Db
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+
+@if (id == -1)
+{
+    <PageTitle>RationesCurare - New recurring transaction</PageTitle>
+    <h2>New recurring transaction</h2>
+}
+else
+{
+    <PageTitle>RationesCurare - Edit recurring transaction #@id</PageTitle>
+    <h2>Edit recurring transaction #@id</h2>
+}
+
+<form @onsubmit="SaveTransaction">
+    <div class="form-group bottomspace">
+        <label for="amount">Transaction amount</label>
+        <input type="number" id="amount" @bind="Soldi" step="0.01" min="-10000000" max="10000000" required placeholder="Transaction amount in money" />
+    </div>
+
+    <div class="form-group bottomspace">
+        <label for="description">Description</label>
+        <input type="text" id="description" list="descriptionList" @bind="Descrizione" @onblur="OnDescriptionBlur" data-minchars="1" required autocomplete="off" placeholder="Operation Description" />
+        <datalist id="descriptionList">
+            @foreach (var desc in descriptionsList)
+            {
+                <option value="@desc" />
+            }
+        </datalist>
+    </div>
+
+    <div class="form-group bottomspace">
+        <label for="category">Category</label>
+        <input type="text" id="category" list="categoryList" @bind="MacroArea" data-minchars="1" maxlength="250" required autocomplete="off" placeholder="Category to which the transaction belongs" />
+        <datalist id="categoryList">
+            @foreach (var cat in categoriesList)
+            {
+                <option value="@cat" />
+            }
+        </datalist>
+    </div>
+
+    <div class="form-group bottomspace">
+        <label for="account">From account</label>
+        <select id="account" @bind="Tipo" required>
+            <option value="">«select account»</option>
+            @foreach (var acc in accountsList)
+            {
+                <option value="@acc">@GB.ToProperCase(acc)</option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group bottomspace">
+        <label for="periodicity">Periodicity</label>
+        <select id="periodicity" @bind="TipoGiorniMese" required>
+            <option value="G">Everyday</option>
+            <option value="M">Every month</option>
+            <option value="B">Every two months</option>
+            <option value="T">Every three months</option>
+            <option value="Q">Every four months</option>
+            <option value="S">Every six months</option>
+            <option value="A">Every year</option>
+        </select>
+    </div>
+
+    @if (TipoGiorniMese == "G")
+    {
+        <div class="form-group bottomspace">
+            <label for="numeroGiorni">Every how many days</label>
+            <input type="number" id="numeroGiorni" @bind="NumeroGiorni" step="1" min="1" max="3650" required placeholder="How often does it repeat?" />
+        </div>
+    }
+
+    <div class="form-group bottomspace">
+        <label for="startingDay">Starting from the day</label>
+        <input type="date" id="startingDay" @bind="Data" required />
+    </div>
+
+    <div class="form-group bottomspace">
+        <input id="hasExpiration" type="checkbox" @bind="hasExpiration" @bind:after="@HasExpirationChanged" />
+        <label for="hasExpiration">Enable expiration</label>
+        <br />
+        <input type="date" id="expiration" @bind="Scadenza" required disabled="@(!hasExpiration)" />
+    </div>
+
+    <div class="form-group bottomspace">
+        <label for="author">Author</label>
+        <input type="text" id="author" @bind="Nome" maxlength="255" autocomplete="on" required placeholder="Author of the transaction" />
+    </div>
+
+    <div class="divSpaceBetween">
+        <button type="submit">Save</button>
+        @if (id > -1)
+        {
+            <button @onclick="DeleteTransaction">Delete</button>
+        }
+    </div>
+    
+    @if (Soldi.HasValue && Soldi != 0)
+    {
+        <h3>Summary</h3>
+        @if (!string.IsNullOrEmpty(Tipo))
+        {
+            <p>@GB.ToMoney(Soldi) @GB.MoneyDirection(Soldi.GetValueOrDefault(), isTransfer: false) @Tipo</p>
+        }
+    }
+</form>
+
+@code {
+
+    [Parameter]
+    public int? id { get; set; }
+
+    private List<string> accountsList = new();
+    private List<string> categoriesList = new();
+    private List<string> descriptionsList = new();
+
+    private string? Tipo;
+    private double? Soldi;
+    private DateTime? Data;
+    private string? Descrizione;
+    private string? MacroArea;
+    private string? Nome;
+
+    private int? NumeroGiorni;
+    private string TipoGiorniMese = "M";
+    private DateTime? Scadenza;
+    private bool hasExpiration;
+    
+    private string returnUrl = "/transactions/";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Extract returnUrl from query string
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("returnUrl", out var value))
+            returnUrl = value.ToString();
+
+        await LoadOptions();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadTransaction();
+    }
+
+    private async Task LoadOptions()
+    {
+        var baseQuery = Db.Movimentis.AsQueryable();
+
+        categoriesList = await baseQuery
+            .Select(m => m.MacroArea)
+            .Where(m => !string.IsNullOrEmpty(m))
+            .Distinct()
+            .OrderBy(m => m)
+            .ToListAsync();
+
+        descriptionsList = await baseQuery
+            .Select(m => m.Descrizione)
+            .Where(m => !string.IsNullOrEmpty(m))
+            .Distinct()
+            .OrderBy(m => m)
+            .ToListAsync();
+
+        accountsList = await Db.Casses
+            .Where(c => c.Nascondi != true)
+            .Select(c => c.Nome)
+            .Where(m => !string.IsNullOrEmpty(m))
+            .OrderBy(m => m)
+            .ToListAsync();
+    }
+
+    private async Task LoadTransaction()
+    {
+        if (id > -1)
+        {
+            MovimentiTempo t = await Db.MovimentiTempos
+                .FirstOrDefaultAsync(m => m.Id == id.Value)
+                ?? throw new Exception("Transaction not found");
+
+            Tipo = t.Tipo;
+            Soldi = t.Soldi;
+            Descrizione = t.Descrizione;
+            MacroArea = t.MacroArea;
+            Nome = t.Nome;
+            NumeroGiorni = t.NumeroGiorni;
+            TipoGiorniMese = t.TipoGiorniMese;
+            Scadenza = t.Scadenza;
+            hasExpiration = Scadenza.HasValue;
+            Data = t.IsGiornaliero
+                ? t.PartendoDalGiorno
+                : t.GiornoDelMese;
+        }
+        else
+        {
+            Tipo = null;
+            Soldi = null;
+            Data = null;
+            Descrizione = null;
+            MacroArea = null;
+            Nome = null;
+            NumeroGiorni = null;
+            TipoGiorniMese = null;
+            Scadenza = null;
+            hasExpiration = false;
+        }
+    }
+
+    private async Task SaveTransaction()
+    {
+        MovimentiTempo t = id > -1
+            ? await Db.MovimentiTempos
+                .FirstOrDefaultAsync(m => m.Id == id.Value)
+                ?? throw new Exception("Recurring transaction not found")
+            : new();
+
+        t.Soldi = Soldi.GetValueOrDefault();
+        t.Tipo = Tipo ?? throw new Exception("From Account is required");        
+        t.Descrizione = Descrizione ?? throw new Exception("Description is required");
+        t.MacroArea = MacroArea ?? throw new Exception("Category is required");
+        t.Nome = Nome ?? throw new Exception("Author is required");
+        t.Scadenza = Scadenza;
+        t.TipoGiorniMese = TipoGiorniMese ?? throw new Exception("Periodicity is required");;
+        
+        if (t.IsGiornaliero)
+        {
+            t.GiornoDelMese = Data;
+            t.PartendoDalGiorno = null;
+            t.NumeroGiorni = NumeroGiorni;
+        }
+        else
+        {
+            t.GiornoDelMese = null;
+            t.PartendoDalGiorno = Data;
+            t.NumeroGiorni = null;
+        }        
+
+        if (id > -1)
+            Db.MovimentiTempos.Update(t);
+        else
+            Db.MovimentiTempos.Add(t);
+
+        await Db.SaveChangesAsync();
+        NavigationManager.NavigateTo(returnUrl);
+    }
+
+    private async Task DeleteTransaction()
+    {
+        if (id > -1)
+        {
+            var confermato = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this recurring transaction?");
+            
+            if (confermato)
+            {
+                MovimentiTempo transaction = await Db.MovimentiTempos.FindAsync(id.Value)
+                    ?? throw new Exception("Recurring transaction not found");
+
+                Db.MovimentiTempos.Remove(transaction);
+                await Db.SaveChangesAsync();
+                
+                NavigationManager.NavigateTo(returnUrl);
+            }
+        }
+    }
+
+    private async Task OnDescriptionBlur()
+    {
+        if (!string.IsNullOrWhiteSpace(Descrizione))
+        {
+            var suggestedCategory = await Db.MovimentiTempos
+                .Where(m => m.Descrizione == Descrizione)
+                .GroupBy(m => m.MacroArea)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key)
+                .FirstOrDefaultAsync();
+
+            if (!string.IsNullOrWhiteSpace(suggestedCategory))
+                MacroArea = suggestedCategory;
+        }
+    }
+
+    private void HasExpirationChanged()
+    {
+        if (!hasExpiration)
+            Scadenza = null;
+    }
+
+}
