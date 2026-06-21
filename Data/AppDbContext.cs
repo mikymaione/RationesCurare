@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RationesCurare.Functions;
 
 namespace RationesCurare.Data;
 
-public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+public partial class AppDbContext(DbContextOptions<AppDbContext> options, UserSession userSession) : DbContext(options)
 {
     public virtual DbSet<Calendario> Calendarios { get; set; }
 
@@ -19,6 +20,14 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
     public virtual DbSet<MovimentiTempo> MovimentiTempos { get; set; }
 
     public virtual DbSet<Valute> Valutes { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (userSession.IsInitialized)
+            optionsBuilder.UseSqlite($"Data Source={userSession.DatabasePath}");
+
+        base.OnConfiguring(optionsBuilder);
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

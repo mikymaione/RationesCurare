@@ -1,0 +1,104 @@
+@page "/"
+
+@using RationesCurare.Functions
+
+@rendermode InteractiveServer
+
+@inject NavigationManager Nav
+@inject CookieHelper Cookies
+
+<PageTitle>RationesCurare</PageTitle>
+
+<div style="display: flex">
+    <img src="favicon/favicon_orange.svg" alt="logo" />
+    <h1 class="giustificato">RationesCurare</h1>
+</div>
+
+<p class="giustificato">an open-source software for the management of the personal economy.</p>
+
+<hr />
+
+<p class="giustificato">RationesCurare is a web application designed to help you manage your home finances with ease, freely licensed under the <a target="_blank" href="https://www.gnu.org/licenses/gpl-3.0.html#license-text">GNU</a> GPL.</p>
+<p class="giustificato">Designed to be easy to use, yet powerful and flexible, RationesCurare allows you to track bank accounts, stocks, income and expenses. As quick and intuitive to use as a checkbook register, it is based on professional accounting principles to ensure balanced books and accurate reports.</p>
+
+<section class="giustificato">
+    <h3>Features</h3>
+    <ul>
+        <li>
+            <b>Track finances</b>: monitor your bank accounts, stocks, income, and expenses with ease;
+        </li>
+        <li>
+            <b>User-friendly</b>: simple and intuitive interface, designed for everyone;
+        </li>
+        <li>
+            <b>Professional accounting</b>: ensures balanced books and accurate reports;
+        </li>
+        <li>
+            <b>Security and privacy</b>: TLS encryption for secure communication and 256-bit AES full database encryption;
+        </li>
+        <li>
+            <b>Open source</b>: developed, maintained, documented, and translated entirely by volunteers. Check the <a target="_blank" href="https://github.com/mikymaione/RationesCurare/">GitHub</a> repository.
+        </li>
+    </ul>
+</section>
+
+<section>
+    <h2>Get started</h2>
+    <p class="giustificato">Ready to take control of your personal finances?</p>
+
+    <button id="butInstall" type="button" class="bottomspace" style="display: none;">Install the app on your device</button>
+    <button type="button" class="bottomspace" @onclick="NavigateToLogin">Access RationesCurare</button>
+</section>
+
+<script>
+    window.addEventListener('beforeinstallprompt', (event) => {
+        // Prevent the mini-infobar from appearing on mobile.
+        event.preventDefault();
+        console.log('👍', 'beforeinstallprompt', event);
+
+        // Stash the event so it can be triggered later.
+        window.deferredPrompt = event;      
+
+        // Show install button.     
+        document.getElementById('butInstall').style.display = 'inline';
+    });
+
+    window.addEventListener('appinstalled', (event) => {
+        console.log('👍', 'appinstalled', event);
+
+        // Clear the deferredPrompt so it can be garbage collected
+        window.deferredPrompt = null;
+    });
+
+    butInstall.addEventListener('click', async () => {
+        console.log('👍', 'butInstall-clicked');
+
+        const promptEvent = window.deferredPrompt;
+
+        if (!promptEvent) {
+            // The deferred prompt isn't available.
+            return;
+        }
+
+        // Show the install prompt.
+        promptEvent.prompt();
+
+        // Log the result
+        const result = await promptEvent.userChoice;
+        console.log('👍', 'userChoice', result);
+
+        // Reset the deferred prompt variable, since
+        // prompt() can only be called once.
+        window.deferredPrompt = null;     
+
+        // Hide the install button.
+        document.getElementById('butInstall').style.display = 'none';
+    });
+</script>
+
+@code {
+
+    private void NavigateToLogin() =>
+        Nav.NavigateTo("/signin");    
+
+}

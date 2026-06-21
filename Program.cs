@@ -1,35 +1,95 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+using System.Security.Claims;
 using RationesCurare.Components;
 using RationesCurare.Data;
+using RationesCurare.Functions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Recupera la stringa di connessione dal file appsettings.json
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// 1. REGISTRA I SERVIZI FONDAMENTALI DELLA DI
+builder.Services.AddScoped<UserSession>();
+builder.Services.AddScoped<CookieHelper>();
 
-// 2. Registra l'AppDbContext nel container dei servizi per SQLite
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(connectionString));
+// Serve per consentire alla configurazione del DbContext di leggere i cookie della richiesta corrente
+builder.Services.AddHttpContextAccessor(); 
 
-// Add services to the container.
+// 2. REGISTRAZIONE DINAMICA DI APPDBCONTEXT CON PROVIDER SQLITE
+builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
+{
+    var env = serviceProvider.GetRequiredService<IWebHostEnvironment>();
+    var httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+
+    // Recuperiamo l'email dell'utente autenticato direttamente dal Cookie nativo crittografato
+    var email = httpContextAccessor.HttpContext?.User?.Identity?.Name;
+
+    if (!string.IsNullOrWhiteSpace(email))
+    {
+        // Se l'utente è loggato, agganciamo dinamicamente il suo database SQLite specifico
+        var dbPath = Path.Combine(env.ContentRootPath, "App_Data", $"{email.Trim().ToLower()}.rqd8");
+        options.UseSqlite($"Data Source={dbPath}");
+    }
+    else
+    {
+        // Fallback di sicurezza per le rotte anonime (es. Home pubblica o pagina di SignIn)
+        // serve a evitare che la DI fallisca prima del Login
+        var fallbackPath = Path.Combine(env.ContentRootPath, "App_Data", "guest.rqd8");
+        options.UseSqlite($"Data Source={fallbackPath}");
+    }
+});
+
+// 3. AUTENTICAZIONE TRAMITE COOKIE NATIVI
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/signin";
+        options.ExpireTimeSpan = TimeSpan.FromDays(30);
+    });
+
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
+// Middleware nell'ordine corretto
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
+
+// 4. ENDPOINT DI LOGIN (Rendiamo minimale e pulito anche questo)
+app.MapGet("/login-cookie", async (string email, bool rememberMe, HttpContext httpContext) =>
+{
+    var claims = new List<Claim> { new Claim(ClaimTypes.Name, email) };
+    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+    var principal = new ClaimsPrincipal(identity);
+
+    var authProperties = new AuthenticationProperties
+    {
+        IsPersistent = rememberMe,
+        ExpiresUtc = rememberMe ? DateTimeOffset.UtcNow.AddDays(30) : null
+    };
+
+    // Scrive il cookie cifrato nel browser
+    await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authProperties);
+
+    // Il redirect ora è sicuro al 100%: la richiesta successiva leggerà il cookie appena emesso!
+    return Results.Redirect("/balance");
+});
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

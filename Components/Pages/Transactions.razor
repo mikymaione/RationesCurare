@@ -121,7 +121,7 @@
     </div>
 </div>
 
-<h3>Transactions</h3>
+<h3>@TheSubTitle</h3>
 
 @switch (filterViewType)
 {
@@ -188,8 +188,12 @@
 
     string TheTitle =>
         string.IsNullOrEmpty(account)
-            ? "Balance"
-            : $"Balance of {account}";
+            ? "Transactions"
+            : $"Transactions of {account}";
+    string TheSubTitle =>
+        string.IsNullOrEmpty(account)
+            ? "Content"
+            : $"Content of {account}";
 
     private List<CashFlow> cashFlowItems = new();
     private List<CategoryBreakdown> breakdownItems = new();

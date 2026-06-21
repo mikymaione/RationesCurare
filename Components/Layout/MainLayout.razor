@@ -1,18 +1,16 @@
-﻿@using RationesCurare.Functions
-
+﻿@using Microsoft.AspNetCore.Components.Authorization
 @inject NavigationManager NavigationManager
-@inject DbSessionState SessionState
 
 @inherits LayoutComponentBase
 
-@if (SessionState.IsAuthenticated)
+@if (IsAuthenticated)
 {
     <nav class="menu">
-        <NavLink href="" Match="NavLinkMatch.All" ActiveClass="not-active" title="Balance">point_of_sale</NavLink>
+        <NavLink href="balance/" Match="NavLinkMatch.All" ActiveClass="not-active" title="Balance">point_of_sale</NavLink>
         <NavLink href="accounts/" ActiveClass="not-active" title="Account Management">account_balance_wallet</NavLink>
         <NavLink href="transactions/" ActiveClass="not-active" title="Transactions">payments</NavLink>
         <NavLink href="recurring/" ActiveClass="not-active" title="Recurring transaction management">update</NavLink>
-        <a @onclick="EseguiLogout" class="not-active" title="Log Out" style="cursor: pointer;">logout</a>
+        <a href="/logout-cookie" class="not-active" title="Log Out" style="cursor: pointer;">logout</a>
     </nav>
     <hr />
 }
@@ -27,19 +25,19 @@
 
 @code {
 
-    public void Dispose() =>
-        SessionState.OnStateChanged -= RinfrescaMenu;
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
 
-    protected override void OnInitialized() =>
-        SessionState.OnStateChanged += RinfrescaMenu;    
-
-    private void RinfrescaMenu() =>
-        InvokeAsync(StateHasChanged);
+    private bool IsAuthenticated;
     
-    private void EseguiLogout()
+    protected override async Task OnParametersSetAsync()
     {
-        SessionState.Logout();        
-        NavigationManager.NavigateTo("/signin");
+        if (AuthStateTask != null)
+        {
+            var authState = await AuthStateTask;
+            var user = authState.User;
+            
+            IsAuthenticated = user.Identity?.IsAuthenticated ?? false;
+        }
     }
-
 }

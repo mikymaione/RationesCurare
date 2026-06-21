@@ -2,11 +2,7 @@
 
 @using System.IO
 @using Microsoft.AspNetCore.Components.Authorization
-@using Microsoft.AspNetCore.Authorization
 @using RationesCurare.Functions
-@using RationesCurare.Services
-
-@attribute [AllowAnonymous]
 
 @rendermode InteractiveServer
 
@@ -15,7 +11,6 @@
 @inject IWebHostEnvironment Env
 @inject IJSRuntime JS
 @inject CookieHelper CookieHelper
-@inject DbSessionState SessionState
 
 <PageTitle>RationesCurare - Sign In</PageTitle>
 
@@ -72,26 +67,27 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        return;
         if (firstRender)
         {
             // Se l'utente è già autenticato (magari è tornato indietro), mandiamolo avanti
-            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-            if (authState.User.Identity?.IsAuthenticated == true)
+            var IsAuthenticated = false;
+
+            if (IsAuthenticated)
             {
-                Navigation.NavigateTo("/balance");
-                return;
+                Navigation.NavigateTo("/balance");                
             }
-
-            var auto = await CookieHelper.GetCookieAsync("AutoLogin");
-
-            if (auto == "TRUE")
+            else
             {
-                email = await CookieHelper.GetCookieAsync("AutoLogin_UserName");
-                password = await CookieHelper.GetCookieAsync("AutoLogin_UserPassword");
-                rememberMe = "true";
-                StateHasChanged();
-                await HandleLogin();
+                var auto = await CookieHelper.GetCookieAsync("AutoLogin");
+
+                if (auto == "TRUE")
+                {
+                    email = await CookieHelper.GetCookieAsync("AutoLogin_UserName");
+                    password = await CookieHelper.GetCookieAsync("AutoLogin_UserPassword");
+                    rememberMe = "true";
+
+                    await HandleLogin();
+                }
             }
         }
     }
@@ -132,18 +128,10 @@
             string[] c = rememberMeBool
                 ? [ cleanEmail, password, "TRUE"]
                 : ["", "", "FALSE"];
-            
-            SessionState.Login(dbPath, password);
-
-            if (AuthStateProvider is DbAuthStateProvider customAuthStateProvider)
-                customAuthStateProvider.NotifyUserAuthentication(cleanEmail);
 
             await CookieHelper.SetCookieAsync(n, c);
 
-            // Usiamo forceLoad: true per assicurarci che il middleware del server 
-            // veda i nuovi cookie e che lo stato di autenticazione sia persistente 
-            // tra le diverse modalità di rendering.
-            Navigation.NavigateTo("/balance", forceLoad: true);
+            Navigation.NavigateTo($"/login-cookie?email={Uri.EscapeDataString(cleanEmail)}&rememberMe={rememberMeBool}", forceLoad: true);
         }
         catch (Exception ex)
         {
