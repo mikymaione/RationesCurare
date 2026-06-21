@@ -2,19 +2,16 @@
 
 @using System.IO
 @using Microsoft.AspNetCore.Components.Authorization
-@using RationesCurare.Functions
 
 @rendermode InteractiveServer
 
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Navigation
 @inject IWebHostEnvironment Env
-@inject IJSRuntime JS
-@inject CookieHelper CookieHelper
 
 <PageTitle>RationesCurare - Sign In</PageTitle>
 
-<div style="display: flex">
+<div style=\"display: flex\">
     <img src="favicon/favicon_orange.svg" alt="logo" />
     <h1 class="giustificato">RationesCurare</h1>
 </div>
@@ -58,37 +55,22 @@
 </form>
 
 @code {
-    
     private string? email, password, errorMessage;    
     private string rememberMe = "true";
     
     private bool rememberMeBool =>
         rememberMe == "true";
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    // Controlliamo SUBITO all'avvio se l'utente ha già il cookie nativo valido di ASP.NET Core
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender)
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
         {
-            // Se l'utente è già autenticato (magari è tornato indietro), mandiamolo avanti
-            var IsAuthenticated = false;
-
-            if (IsAuthenticated)
-            {
-                Navigation.NavigateTo("/balance");                
-            }
-            else
-            {
-                var auto = await CookieHelper.GetCookieAsync("AutoLogin");
-
-                if (auto == "TRUE")
-                {
-                    email = await CookieHelper.GetCookieAsync("AutoLogin_UserName");
-                    password = await CookieHelper.GetCookieAsync("AutoLogin_UserPassword");
-                    rememberMe = "true";
-
-                    await HandleLogin();
-                }
-            }
+            // Se è già autenticato grazie al "Remember Me", lo mandiamo direttamente alla Home interna
+            Navigation.NavigateTo("/balance");
         }
     }
     
@@ -114,23 +96,14 @@
 
         try
         {
-            // Verifica la password dal file .psw (in chiaro)
             var storedPsw = await File.ReadAllTextAsync(pswPath);
-            
             if (storedPsw != password)
             {
                 errorMessage = "Wrong credentials!";
                 return;
             }
 
-            string[] n = ["AutoLogin_UserName", "AutoLogin_UserPassword", "AutoLogin" ];
-
-            string[] c = rememberMeBool
-                ? [ cleanEmail, password, "TRUE"]
-                : ["", "", "FALSE"];
-
-            await CookieHelper.SetCookieAsync(n, c);
-
+            // Nessun salvataggio di password nei cookie! Ci pensa il forceLoad a far emettere il cookie nativo persistent.
             Navigation.NavigateTo($"/login-cookie?email={Uri.EscapeDataString(cleanEmail)}&rememberMe={rememberMeBool}", forceLoad: true);
         }
         catch (Exception ex)

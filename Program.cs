@@ -10,10 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // 1. REGISTRA I SERVIZI FONDAMENTALI DELLA DI
 builder.Services.AddScoped<UserSession>();
-builder.Services.AddScoped<CookieHelper>();
 
 // Serve per consentire alla configurazione del DbContext di leggere i cookie della richiesta corrente
-builder.Services.AddHttpContextAccessor(); 
+builder.Services.AddHttpContextAccessor();
 
 // 2. REGISTRAZIONE DINAMICA DI APPDBCONTEXT CON PROVIDER SQLITE
 builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
@@ -73,8 +72,7 @@ app.MapStaticAssets();
 // 4. ENDPOINT DI LOGIN (Rendiamo minimale e pulito anche questo)
 app.MapGet("/login-cookie", async (string email, bool rememberMe, HttpContext httpContext) =>
 {
-    var claims = new List<Claim> { new Claim(ClaimTypes.Name, email) };
-    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+    var identity = new ClaimsIdentity([new(ClaimTypes.Name, email)], CookieAuthenticationDefaults.AuthenticationScheme);
     var principal = new ClaimsPrincipal(identity);
 
     var authProperties = new AuthenticationProperties
@@ -88,6 +86,13 @@ app.MapGet("/login-cookie", async (string email, bool rememberMe, HttpContext ht
 
     // Il redirect ora è sicuro al 100%: la richiesta successiva leggerà il cookie appena emesso!
     return Results.Redirect("/balance");
+});
+
+// Endpoint HTTP minimale per distruggere il cookie di sessione
+app.MapGet("/logout-cookie", async (HttpContext httpContext) =>
+{
+    await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    return Results.Redirect("/signin");
 });
 
 app.MapRazorComponents<App>()
