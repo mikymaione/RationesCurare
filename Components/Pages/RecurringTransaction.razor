@@ -1,9 +1,12 @@
 @page "/recurring/{id:int}"
 
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.WebUtilities
 @using Microsoft.EntityFrameworkCore
 @using RationesCurare.Data
 @using RationesCurare.Functions
-@using Microsoft.AspNetCore.WebUtilities
+
+@attribute [Authorize]
 
 @rendermode InteractiveServer
 
@@ -212,7 +215,7 @@ else
             MacroArea = null;
             Nome = null;
             NumeroGiorni = null;
-            TipoGiorniMese = null;
+            TipoGiorniMese = "M";
             Scadenza = null;
             hasExpiration = false;
         }

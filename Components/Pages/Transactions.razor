@@ -1,11 +1,14 @@
 @page "/transactions/"
 @page "/transactions/{account}"
 
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 @using RationesCurare.Data
 @using RationesCurare.Functions
 @using RationesCurare.Models
 @using RationesCurare.Components.Widgets
+
+@attribute [Authorize]
 
 @rendermode InteractiveServer
 

@@ -1,0 +1,16 @@
+@inject NavigationManager Navigation
+
+@code {
+    protected override void OnInitialized()
+    {
+        var relativePath = Navigation.ToBaseRelativePath(Navigation.Uri);
+
+        // Evitiamo il loop: se siamo già sulla pagina di login o sulla Home (che è stringa vuota), 
+        // non dobbiamo forzare alcun reindirizzamento.
+        if (!relativePath.StartsWith("signin", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(relativePath))
+        {
+            var returnUrl = Uri.EscapeDataString(relativePath);
+            Navigation.NavigateTo($"/signin?returnUrl={returnUrl}", forceLoad: false);
+        }
+    }
+}

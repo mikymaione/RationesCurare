@@ -1,7 +1,10 @@
 @page "/accounts/-1"
 @page "/accounts/{account}"
 
+@using Microsoft.AspNetCore.Authorization
 @using RationesCurare.Data
+
+@attribute [Authorize]
 
 @rendermode InteractiveServer
 

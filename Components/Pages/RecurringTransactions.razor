@@ -1,8 +1,11 @@
 @page "/recurring"
 
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 @using RationesCurare.Data
 @using RationesCurare.Functions
+
+@attribute [Authorize]
 
 @rendermode InteractiveServer
 

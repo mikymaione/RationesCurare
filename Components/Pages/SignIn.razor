@@ -1,0 +1,153 @@
+@page "/signin"
+
+@using System.IO
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Authorization
+@using RationesCurare.Functions
+@using RationesCurare.Services
+
+@attribute [AllowAnonymous]
+
+@rendermode InteractiveServer
+
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+@inject IWebHostEnvironment Env
+@inject IJSRuntime JS
+@inject CookieHelper CookieHelper
+@inject DbSessionState SessionState
+
+<PageTitle>RationesCurare - Sign In</PageTitle>
+
+<div style="display: flex">
+    <img src="favicon/favicon_orange.svg" alt="logo" />
+    <h1 class="giustificato">RationesCurare</h1>
+</div>
+
+<p class="giustificato">an open-source software for the management of the personal economy.</p>
+
+<hr />
+
+<h2>Sign In</h2>
+
+<form @onsubmit="HandleLogin">
+    <div class="form-group bottomspace">
+        <label class="form-group" for="eUtente">Email</label>
+        <input id="eUtente" @bind="email" placeholder="Email you signed up with" type="email" required />
+    </div>
+    <div class="form-group bottomspace">
+        <label class="form-group" for="ePsw">Password</label>
+        <input id="ePsw" @bind="password" placeholder="Database decryption password" type="password" required />
+    </div>
+
+    <div class="form-group bottomspace">
+        <label for="cbMemorizza">Remember Me</label>
+        <select id="cbMemorizza" @bind="rememberMe">
+            <option value="false">No</option>
+            <option value="true">Yes</option>
+        </select>
+    </div>
+
+    <div class="bottomspace">
+        <button type="submit">Sign In</button>
+        <a href="/signup"><button type="button">Sign Up</button></a>
+        <a href="/"><button type="button">Go Back</button></a>
+    </div>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div>
+            <em>@errorMessage</em>
+        </div>
+    }
+</form>
+
+@code {
+    
+    private string? email, password, errorMessage;    
+    private string rememberMe = "true";
+    
+    private bool rememberMeBool =>
+        rememberMe == "true";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        return;
+        if (firstRender)
+        {
+            // Se l'utente è già autenticato (magari è tornato indietro), mandiamolo avanti
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            if (authState.User.Identity?.IsAuthenticated == true)
+            {
+                Navigation.NavigateTo("/balance");
+                return;
+            }
+
+            var auto = await CookieHelper.GetCookieAsync("AutoLogin");
+
+            if (auto == "TRUE")
+            {
+                email = await CookieHelper.GetCookieAsync("AutoLogin_UserName");
+                password = await CookieHelper.GetCookieAsync("AutoLogin_UserPassword");
+                rememberMe = "true";
+                StateHasChanged();
+                await HandleLogin();
+            }
+        }
+    }
+    
+    private async Task HandleLogin()
+    {
+        errorMessage = null;
+
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        {
+            errorMessage = "Please fill in all fields.";
+            return;
+        }
+
+        var cleanEmail = email.Trim().ToLower();
+        var dbPath = Path.Combine(Env.ContentRootPath, "App_Data", $"{cleanEmail}.rqd8");
+        var pswPath = Path.Combine(Env.ContentRootPath, "App_Data", $"{cleanEmail}.psw");
+
+        if (!File.Exists(dbPath) || !File.Exists(pswPath))
+        {
+            errorMessage = "Wrong credentials!";
+            return;
+        }
+
+        try
+        {
+            // Verifica la password dal file .psw (in chiaro)
+            var storedPsw = await File.ReadAllTextAsync(pswPath);
+            
+            if (storedPsw != password)
+            {
+                errorMessage = "Wrong credentials!";
+                return;
+            }
+
+            string[] n = ["AutoLogin_UserName", "AutoLogin_UserPassword", "AutoLogin" ];
+
+            string[] c = rememberMeBool
+                ? [ cleanEmail, password, "TRUE"]
+                : ["", "", "FALSE"];
+            
+            SessionState.Login(dbPath, password);
+
+            if (AuthStateProvider is DbAuthStateProvider customAuthStateProvider)
+                customAuthStateProvider.NotifyUserAuthentication(cleanEmail);
+
+            await CookieHelper.SetCookieAsync(n, c);
+
+            // Usiamo forceLoad: true per assicurarci che il middleware del server 
+            // veda i nuovi cookie e che lo stato di autenticazione sia persistente 
+            // tra le diverse modalità di rendering.
+            Navigation.NavigateTo("/balance", forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error during sign in: {ex.Message}";
+        }
+    }
+}

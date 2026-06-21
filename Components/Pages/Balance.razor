@@ -1,9 +1,12 @@
-﻿@page "/balance"
+@page "/balance"
 
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 @using RationesCurare.Data
 @using RationesCurare.Functions
 @using RationesCurare.Models
+
+@attribute [Authorize]
 
 @rendermode InteractiveServer
 
@@ -47,7 +50,8 @@
     </table>
 }
 
-<input class="myBtn googleIcon fsXXL" @onclick="NewTransaction" type="submit" title="New transaction" value="local_atm" />
+<input class="myBtn googleIcon fsXXL" @onclick="NewTransaction" type="submit" title="New transaction"
+       value="local_atm" />
 
 @code {
 
