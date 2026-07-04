@@ -89,7 +89,7 @@ else
         <button type="submit">Save</button>
         @if (id > -1)
         {
-            <button @onclick="DeleteTransaction">Delete</button>
+            <button type="button" @onclick="DeleteTransaction">Delete</button>
         }
     </div>
     
@@ -172,7 +172,7 @@ else
     {
         if (id > -1)
         {
-            Movimenti t = await Db.Movimentis
+            var t = await Db.Movimentis
                 .Include(m => m.IdgirocontoNavigation)
                 .FirstOrDefaultAsync(m => m.Id == id.Value)
                 ?? throw new Exception("Transaction not found");
@@ -199,7 +199,7 @@ else
 
     private async Task SaveTransaction()
     {
-        Movimenti t = id > -1
+        var t = id > -1
             ? await Db.Movimentis
                 .Include(m => m.IdgirocontoNavigation)
                 .FirstOrDefaultAsync(m => m.Id == id.Value)
@@ -216,7 +216,7 @@ else
         if (!string.IsNullOrEmpty(toAccount))
         {
             // Gestione Giroconto: creiamo o aggiorniamo il secondo movimento collegato
-            Movimenti t2 = t.IdgirocontoNavigation ?? new();
+            var t2 = t.IdgirocontoNavigation ?? new();
 
             t2.Tipo = toAccount;
             t2.Soldi = -t.Soldi; // Importo opposto
@@ -253,7 +253,7 @@ else
             // Se toAccount è stato svuotato, rimuoviamo l'eventuale giroconto esistente
             if (t.IdgirocontoNavigation != null)
             {
-                Movimenti linked = t.IdgirocontoNavigation;
+                var linked = t.IdgirocontoNavigation;
 
                 // Rompiamo il legame circolare prima della rimozione per evitare conflitti
                 t.Idgiroconto = null;
@@ -284,7 +284,7 @@ else
                 .Select(m => m.Idgiroconto)
                 .SingleAsync() ?? -1;
             
-            string confirmationMessage = IdGiroconto > -1
+            var confirmationMessage = IdGiroconto > -1
                 ? "Are you sure you want to delete this internal transfer? Both linked transactions will be removed."
                 : "Are you sure you want to delete this transaction?";
             
@@ -292,12 +292,12 @@ else
             
             if (confermato)
             {
-                Movimenti transaction = await Db.Movimentis.FindAsync(id.Value)
+                var transaction = await Db.Movimentis.FindAsync(id.Value)
                     ?? throw new Exception("Transaction not found");
 
                 if (IdGiroconto > -1)
                 {
-                    Movimenti linkedTransaction = await Db.Movimentis.FindAsync(IdGiroconto)
+                    var linkedTransaction = await Db.Movimentis.FindAsync(IdGiroconto)
                         ?? throw new Exception("Linked transaction not found");
                     
                     // Step 1: Break the circular foreign key references in the database

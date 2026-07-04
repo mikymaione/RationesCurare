@@ -41,7 +41,7 @@ else
         <button type="submit">Save</button>
         @if (!NewRecord)
         {
-            <button @onclick="DeleteAccount">Delete</button>
+            <button type="button"@onclick="DeleteAccount">Delete</button>
         }
     </div>
 </form>
@@ -77,7 +77,7 @@ else
         }
         else
         {
-            Casse a = await Db.Casses.FindAsync(account)
+            var a = await Db.Casses.FindAsync(account)
                 ?? throw new Exception($"Account {account} not found");
             
             Nome = a.Nome;
@@ -87,7 +87,7 @@ else
 
     private async Task SaveAccount()
     {
-        Casse a = NewRecord
+        var a = NewRecord
             ? new()
             : await Db.Casses.FindAsync(account)            
                 ?? throw new Exception($"Account {account} not found");
@@ -111,7 +111,7 @@ else
 
         if (confermato)
         {
-            Casse a = await Db.Casses.FindAsync(account)
+            var a = await Db.Casses.FindAsync(account)
                 ?? throw new Exception($"Account {account} not found");
 
             Db.Casses.Remove(a);

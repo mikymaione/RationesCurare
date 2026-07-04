@@ -106,7 +106,7 @@ else
         <button type="submit">Save</button>
         @if (id > -1)
         {
-            <button @onclick="DeleteTransaction">Delete</button>
+            <button type="button" @onclick="DeleteTransaction">Delete</button>
         }
     </div>
     
@@ -189,7 +189,7 @@ else
     {
         if (id > -1)
         {
-            MovimentiTempo t = await Db.MovimentiTempos
+            var t = await Db.MovimentiTempos
                 .FirstOrDefaultAsync(m => m.Id == id.Value)
                 ?? throw new Exception("Transaction not found");
 
@@ -223,7 +223,7 @@ else
 
     private async Task SaveTransaction()
     {
-        MovimentiTempo t = id > -1
+        var t = id > -1
             ? await Db.MovimentiTempos
                 .FirstOrDefaultAsync(m => m.Id == id.Value)
                 ?? throw new Exception("Recurring transaction not found")
@@ -235,20 +235,20 @@ else
         t.MacroArea = MacroArea ?? throw new Exception("Category is required");
         t.Nome = Nome ?? throw new Exception("Author is required");
         t.Scadenza = Scadenza;
-        t.TipoGiorniMese = TipoGiorniMese ?? throw new Exception("Periodicity is required");;
+        t.TipoGiorniMese = TipoGiorniMese ?? throw new Exception("Periodicity is required");
         
         if (t.IsGiornaliero)
         {
-            t.GiornoDelMese = Data;
-            t.PartendoDalGiorno = null;
+            t.PartendoDalGiorno = Data;
+            t.GiornoDelMese = null;
             t.NumeroGiorni = NumeroGiorni;
         }
         else
         {
-            t.GiornoDelMese = null;
-            t.PartendoDalGiorno = Data;
+            t.PartendoDalGiorno = null;
+            t.GiornoDelMese = Data;
             t.NumeroGiorni = null;
-        }        
+        }
 
         if (id > -1)
             Db.MovimentiTempos.Update(t);
@@ -267,7 +267,7 @@ else
             
             if (confermato)
             {
-                MovimentiTempo transaction = await Db.MovimentiTempos.FindAsync(id.Value)
+                var transaction = await Db.MovimentiTempos.FindAsync(id.Value)
                     ?? throw new Exception("Recurring transaction not found");
 
                 Db.MovimentiTempos.Remove(transaction);
