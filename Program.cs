@@ -31,12 +31,13 @@ builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
     }
     else
     {
-        // Fallback di sicurezza per le rotte anonime (es. Home pubblica o pagina di SignIn)
-        // serve a evitare che la DI fallisca prima del Login
-        var fallbackPath = Path.Combine(env.ContentRootPath, "App_Data", "guest.rqd8");
+        // Fallback di sicurezza per le rotte anonime (es. Home pubblica o pagina di SignIn) serve a evitare che la DI fallisca prima del Login
+        var fallbackPath = Path.Combine(env.ContentRootPath, "App_Data", "default.rqd8");
         options.UseSqlite($"Data Source={fallbackPath}");
     }
 });
+
+builder.Services.AddScoped<RecurringTransactionManagement>();
 
 // 3. AUTENTICAZIONE TRAMITE COOKIE NATIVI
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -69,7 +70,7 @@ app.UseAntiforgery();
 
 app.MapStaticAssets();
 
-// 4. ENDPOINT DI LOGIN (Rendiamo minimale e pulito anche questo)
+// 4. ENDPOINT DI LOGIN
 app.MapGet("/login-cookie", async (string email, bool rememberMe, HttpContext httpContext) =>
 {
     var identity = new ClaimsIdentity([new(ClaimTypes.Name, email)], CookieAuthenticationDefaults.AuthenticationScheme);
@@ -83,8 +84,7 @@ app.MapGet("/login-cookie", async (string email, bool rememberMe, HttpContext ht
 
     // Scrive il cookie cifrato nel browser
     await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authProperties);
-
-    // Il redirect ora è sicuro al 100%: la richiesta successiva leggerà il cookie appena emesso!
+    
     return Results.Redirect("/balance");
 });
 

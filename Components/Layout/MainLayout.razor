@@ -1,5 +1,8 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
+@using RationesCurare.Functions
+
 @inject NavigationManager NavigationManager
+@inject RecurringTransactionManagement RecurringTransactionManagement
 
 @inherits LayoutComponentBase
 
@@ -29,15 +32,21 @@
     private Task<AuthenticationState>? AuthStateTask { get; set; }
 
     private bool IsAuthenticated;
-    
+
     protected override async Task OnParametersSetAsync()
     {
         if (AuthStateTask != null)
         {
             var authState = await AuthStateTask;
             var user = authState.User;
-            
+
             IsAuthenticated = user.Identity?.IsAuthenticated ?? false;
         }
     }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RecurringTransactionManagement.ProcessPendingTransactionsAsync();
+    }
+
 }
