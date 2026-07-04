@@ -125,14 +125,12 @@
 @switch (filterViewType)
 {
     case ViewType.ExpenseBreakdown:
-        <h3>Chart</h3>
-        <ExpenseBreakdownChart Data="@breakdownItems" />
+        <ExpenseBreakdownChart @ref="expenseBreakdownChart" Data="@breakdownItems" />
         break;
 
     case ViewType.AnnualAccountBalanceTrend:
     case ViewType.MonthlyAccountBalanceTrend:
-        <h3>Chart</h3>
-        <AccountBalanceTrendChart Data="@cashFlowItems" viewType="@filterViewType" />
+        <AccountBalanceTrendChart @ref="accountBalanceTrendChart" Data="@cashFlowItems" viewType="@filterViewType" />
         break;
 
     case ViewType.AnnualCashFlow:
@@ -141,10 +139,10 @@
         break;
 
     default:
+        <br />
         break;
 }
 
-<h3>@TheSubTitle</h3>
 @switch (filterViewType)
 {
     case ViewType.AllTransactions:
@@ -206,7 +204,10 @@
 @code {
 
     [Parameter]
-    public string? account { get; set; }    
+    public string? account { get; set; }        
+
+    private AccountBalanceTrendChart? accountBalanceTrendChart;
+    private ExpenseBreakdownChart? expenseBreakdownChart;
 
     string TheTitle =>
         string.IsNullOrEmpty(account)
@@ -454,6 +455,23 @@
 
             default:
                 throw new ArgumentOutOfRangeException(nameof(filterViewType), filterViewType, $"Unsupported view type: {filterViewType}");
+        }
+
+        switch (filterViewType)
+        {
+            case ViewType.ExpenseBreakdown:
+                if (expenseBreakdownChart != null)    
+                    await expenseBreakdownChart.AggiornaGraficoAsync();    
+                break;
+
+            case ViewType.AnnualAccountBalanceTrend:
+            case ViewType.MonthlyAccountBalanceTrend:
+                if (accountBalanceTrendChart != null)    
+                    await accountBalanceTrendChart.AggiornaGraficoAsync();    
+                break;
+
+            default:
+                break;
         }
     }
 

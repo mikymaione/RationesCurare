@@ -3,7 +3,7 @@
 
 @if (Data != null && Data.Any())
 {
-    <ApexChart TItem="CategoryItem" Title="Expense Breakdown" Options="options">
+    <ApexChart @ref="chart" TItem="CategoryItem" Options="options">
         @foreach (var categoryBreakdown in Data)
         {
             var categoryItems = categoryBreakdown.ToCategoryItem();
@@ -22,11 +22,21 @@
     [Parameter]
     public List<CategoryBreakdown> Data { get; set; } = new();
 
+    private ApexChart<CategoryItem>? chart;
+
     private ApexChartOptions<CategoryItem> options = new()
-    {
+    {        
         Chart = new()
         {
-            Stacked = true
+            Stacked = true,
+            Toolbar = new()
+            {
+                Show = false
+            },
+            Zoom = new()
+            {
+                Enabled = false
+            }
         },
         Legend = new()
         {
@@ -136,4 +146,10 @@
             }
         }        
     };
+
+    public async Task AggiornaGraficoAsync()
+    {
+        if (chart != null)
+            await chart.UpdateSeriesAsync(animate: true);
+    }
 }

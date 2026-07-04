@@ -6,7 +6,7 @@
     @switch (viewType)
     {
         case ViewType.AnnualAccountBalanceTrend:
-            <ApexChart TItem="CashFlow" Title="Annual Account Balance Trend" Options="options">
+            <ApexChart @ref="chartA" TItem="CashFlow" Options="options">
                 <ApexPointSeries
                     TItem="CashFlow" Items="Data"
                     Name="Balance" SeriesType="SeriesType.Line"
@@ -16,7 +16,7 @@
             break;
 
         case ViewType.MonthlyAccountBalanceTrend:
-            <ApexChart TItem="CashFlow" Title="Monthly Account Balance Trend" Options="options">
+            <ApexChart @ref="chartM" TItem="CashFlow" Options="options">
                 <ApexPointSeries
                     TItem="CashFlow" Items="Data"
                     Name="Balance" SeriesType="SeriesType.Line"
@@ -37,6 +37,8 @@
 
     [Parameter]
     public ViewType viewType { get; set; }
+
+    private ApexChart<CashFlow>? chartA, chartM;
 
     protected override void OnParametersSet()
     {
@@ -66,6 +68,17 @@
     private ApexChartOptions<CashFlow> options = new()
     {
         Colors = ["#F79E10"],
+        Chart = new()
+        {
+            Toolbar = new()
+            {
+                Show = false
+            },
+            Zoom = new()
+            {
+                Enabled = false
+            }
+        },
         Legend = new()
         {
             Show = false
@@ -172,4 +185,22 @@
             }
         }        
     };
+
+    public async Task AggiornaGraficoAsync()
+    {
+        switch (viewType){
+            case ViewType.AnnualAccountBalanceTrend:
+                if (chartA != null)
+                    await chartA.UpdateSeriesAsync(animate: true);
+                break;
+
+            case ViewType.MonthlyAccountBalanceTrend:
+                if (chartM != null)
+                    await chartM.UpdateSeriesAsync(animate: true);
+                break;
+
+            default:
+                break;
+        }
+    }
 }
