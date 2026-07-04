@@ -459,6 +459,10 @@ Integrazione ApexCharts con il Tema di Sistema (Light/Dark)
 
 /* Quando l'utente usa il tema LIGHT (Chiaro) */
 @media (prefers-color-scheme: light) {
+    :root {
+        --bar-good: #005000;
+        --bar-bad: #640000;
+    }
 
     .apexcharts-xaxis-label,
     .apexcharts-yaxis-label,
@@ -471,6 +475,10 @@ Integrazione ApexCharts con il Tema di Sistema (Light/Dark)
 
 /* Quando l'utente usa il tema DARK (Scuro) */
 @media (prefers-color-scheme: dark) {
+    :root {
+        --bar-good: #DCFFDC;
+        --bar-bad: #FFB4B4;
+    }
 
     /* Forza i testi degli assi e delle legende a diventare chiari/bianchi */
     .apexcharts-xaxis-label,

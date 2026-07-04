@@ -135,7 +135,7 @@
 
     case ViewType.AnnualCashFlow:
     case ViewType.MonthlyCashFlow:
-        // Se serve, puoi aggiungere qui il componente del Cash Flow a barre
+        <CashFlowChart @ref="cashFlowChart" Data="@cashFlowItems" viewType="@filterViewType" />
         break;
 
     default:
@@ -208,6 +208,7 @@
 
     private AccountBalanceTrendChart? accountBalanceTrendChart;
     private ExpenseBreakdownChart? expenseBreakdownChart;
+    private CashFlowChart? cashFlowChart;
 
     string TheTitle =>
         string.IsNullOrEmpty(account)
@@ -462,6 +463,12 @@
             case ViewType.ExpenseBreakdown:
                 if (expenseBreakdownChart != null)    
                     await expenseBreakdownChart.AggiornaGraficoAsync();    
+                break;
+
+            case ViewType.AnnualCashFlow:
+            case ViewType.MonthlyCashFlow:
+                if (cashFlowChart != null)    
+                    await cashFlowChart.AggiornaGraficoAsync();
                 break;
 
             case ViewType.AnnualAccountBalanceTrend:

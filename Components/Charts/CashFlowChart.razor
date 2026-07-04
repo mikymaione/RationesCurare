@@ -1,0 +1,174 @@
+@using ApexCharts
+@using RationesCurare.Models
+
+@if (Data != null && Data.Any())
+{
+    @switch (viewType)
+    {
+        case ViewType.AnnualCashFlow:
+            <ApexChart @ref="chartA" TItem="CashFlow" Options="options">
+                <ApexPointSeries
+                    TItem="CashFlow" Items="Data"
+                    Name="Cash Flow" SeriesType="SeriesType.Bar"
+                    DataPointMutator="PointMutator"
+                    XValue="@(e => new DateTime(e.Year.GetValueOrDefault(), 1, 1))"
+                    YAggregate="@(e => e.Sum(x => x.BalanceDecimal))" />
+            </ApexChart>
+            break;
+
+        case ViewType.MonthlyCashFlow:
+            <ApexChart @ref="chartM" TItem="CashFlow" Options="options">
+                <ApexPointSeries
+                    TItem="CashFlow" Items="Data"
+                    Name="Cash Flow" SeriesType="SeriesType.Bar"
+                    DataPointMutator="PointMutator"
+                    XValue="@(e => new DateTime(e.Year.GetValueOrDefault(), e.Month.GetValueOrDefault(), 1))"
+                    YAggregate="@(e => e.Sum(x => x.BalanceDecimal))" />
+            </ApexChart>
+            break;
+
+        default:
+            break;
+    }
+}
+
+@code {
+    [Parameter]
+    public List<CashFlow> Data { get; set; } = new();
+
+    [Parameter]
+    public ViewType viewType { get; set; }
+
+    private ApexChart<CashFlow>? chartA, chartM;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        options.Xaxis ??= new();
+        options.Xaxis.Labels ??= new();
+        options.Tooltip ??= new();
+        options.Tooltip.X ??= new();
+
+        options.Xaxis.Type = XAxisType.Datetime;
+
+        if (viewType == ViewType.AnnualCashFlow)
+        {
+            options.Xaxis.Labels.Format = "yyyy";
+            options.Tooltip.X.Format = "yyyy";
+        }
+        else
+        {
+            options.Xaxis.Labels.Format = "yyyy-MM";
+            options.Tooltip.X.Format = "yyyy-MM";
+        }
+    }
+
+    private void PointMutator(IDataPoint<CashFlow> point)
+    {
+        var dataPoint = (DataPoint<CashFlow>)point;
+        
+        dataPoint.FillColor = dataPoint.Y < 0
+            ? "var(--bar-bad)"
+            : "var(--bar-good)";
+    }
+
+    private ApexChartOptions<CashFlow> options = new()
+    {
+        Chart = new()
+        {
+            Toolbar = new() { Show = false },
+            Zoom = new() { Enabled = false },            
+        },
+        Legend = new() { Show = false },
+        Xaxis = new()
+        {
+            Type = XAxisType.Datetime
+        },
+        Yaxis = new()
+        {
+            new()
+            {
+                Labels = new()
+                {
+                    Formatter = @"function (value) {
+                        if (value === undefined || value === null) return '';
+                        var locale = navigator.language || 'it-IT';
+                        var defaultCurrency = 'EUR';
+                        try {
+                            var formatter = new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' });
+                            defaultCurrency = formatter.resolvedOptions().currency;
+                        } catch(e) {}
+                        return Number(value).toLocaleString(locale, {
+                            style: 'currency', 
+                            currency: defaultCurrency, 
+                            maximumFractionDigits: 0 
+                        });
+                    }"
+                }
+            }
+        },
+        DataLabels = new()
+        {
+            Formatter = @"function (value, opts) {
+                if (value === undefined || value === null) return '';
+                var locale = navigator.language || 'it-IT';
+                var defaultCurrency = 'EUR';
+                try {
+                    var formatter = new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' });
+                    defaultCurrency = formatter.resolvedOptions().currency;
+                } catch(e) {}
+                return Number(value).toLocaleString(locale, {
+                    style: 'currency', 
+                    currency: defaultCurrency, 
+                    maximumFractionDigits: 0 
+                });
+            }"
+        },
+        Tooltip = new()
+        {
+            Y = new()
+            {
+                Formatter = @"function (value) {
+                    if (value === undefined || value === null) return '';
+                    var locale = navigator.language || 'it-IT';
+                    var defaultCurrency = 'EUR';
+                    try {
+                        var formatter = new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' });
+                        defaultCurrency = formatter.resolvedOptions().currency;
+                    } catch(e) {}
+                    return Number(value).toLocaleString(locale, {
+                        style: 'currency', 
+                        currency: defaultCurrency, 
+                        maximumFractionDigits: 2
+                    });
+                }"
+            }
+        },
+        Grid = new()
+        {
+            Padding = new() { Right = 0, Left = 0 },
+            Xaxis = new() { Lines = new() { Show = true } },
+            Yaxis = new() { Lines = new() { Show = true } }
+        }        
+    };
+
+    public async Task AggiornaGraficoAsync()
+    {
+        switch (viewType)
+        {
+            case ViewType.AnnualCashFlow:
+                if (chartA != null)
+                    await chartA.UpdateSeriesAsync(animate: true);
+                break;
+
+            case ViewType.MonthlyCashFlow:
+                if (chartM != null)
+                    await chartM.UpdateSeriesAsync(animate: true);
+                break;
+
+            default:
+                break;
+        }
+    }
+}
