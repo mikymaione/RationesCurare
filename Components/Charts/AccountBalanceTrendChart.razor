@@ -67,7 +67,6 @@
 
     private ApexChartOptions<CashFlow> options = new()
     {
-        Colors = ["#F79E10"],
         Chart = new()
         {
             Toolbar = new()
@@ -82,6 +81,18 @@
         Legend = new()
         {
             Show = false
+        },
+        PlotOptions = new()
+        {
+            Line = new()
+            {
+                Colors = new()
+                {
+                    Threshold = 0,
+                    ColorAboveThreshold = "var(--bar-good)",
+                    ColorBelowThreshold = "var(--bar-bad)"
+                }
+            }
         },
         Xaxis = new()
         {
