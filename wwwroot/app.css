@@ -80,10 +80,6 @@ tfoot {
     z-index: 10;
 }
 
-tbody tr:nth-child(even) {
-    background-color: #f0f0f0;
-}
-
 tbody tr:hover {
     background-color: #F79E10;
 }
@@ -249,7 +245,7 @@ div.awesomplete li[aria-selected="true"] mark {
         color: #464453 !important;
     }
 
-    tr.trGrid:nth-child(odd) {
+    tbody tr:nth-child(odd) {
         background-color: #f0f0f0;
     }
 
@@ -303,7 +299,7 @@ div.awesomplete li[aria-selected="true"] mark {
         color: #FFF !important;
     }
 
-    tr.trGrid:nth-child(odd) {
+    tbody tr:nth-child(odd) {
         background-color: #474747;
     }
 
@@ -451,5 +447,54 @@ input:user-invalid {
 
     .moneyBad {
         color: #FFB4B4;
+    }
+}
+
+
+/*
+==========================================================================
+Integrazione ApexCharts con il Tema di Sistema (Light/Dark)
+==========================================================================
+*/
+
+/* Quando l'utente usa il tema LIGHT (Chiaro) */
+@media (prefers-color-scheme: light) {
+
+    .apexcharts-xaxis-label,
+    .apexcharts-yaxis-label,
+    .apexcharts-legend-text,
+    .apexcharts-datalabel {
+        fill: #464453 !important;
+        /* Il grigio scuro che usi per i tuoi h2/h3 */
+    }
+}
+
+/* Quando l'utente usa il tema DARK (Scuro) */
+@media (prefers-color-scheme: dark) {
+
+    /* Forza i testi degli assi e delle legende a diventare chiari/bianchi */
+    .apexcharts-xaxis-label,
+    .apexcharts-yaxis-label,
+    .apexcharts-legend-text {
+        fill: #F2F2F2 !important;
+        /* Il grigio chiaro del tuo body in dark mode */
+    }
+
+    /* Se hai abilitato i valori numerici direttamente sui nodi/linee */
+    .apexcharts-datalabel {
+        fill: #F79E10 !important;
+        /* Manteniamo il brand color arancione */
+    }
+
+    /* Sistema lo sfondo del Tooltip che altrimenti rimarrebbe bianco con testo bianco */
+    .apexcharts-tooltip {
+        background-color: #474747 !important;
+        color: #FFF !important;
+        border: 1px solid #F79E10 !important;
+    }
+
+    .apexcharts-tooltip-title {
+        background-color: #333 !important;
+        color: #FFF !important;
     }
 }
