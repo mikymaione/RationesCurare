@@ -1,0 +1,175 @@
+@using ApexCharts
+@using RationesCurare.Models
+
+@if (Data != null && Data.Any())
+{
+    @switch (viewType)
+    {
+        case ViewType.AnnualAccountBalanceTrend:
+            <ApexChart TItem="CashFlow" Title="Annual Account Balance Trend" Options="options">
+                <ApexPointSeries
+                    TItem="CashFlow" Items="Data"
+                    Name="Balance" SeriesType="SeriesType.Line"
+                    XValue="@(e => new DateTime(e.Year.GetValueOrDefault(), 1, 1))"
+                    YAggregate="@(e => e.Sum(e => e.BalanceDecimal))" />
+            </ApexChart>
+            break;
+
+        case ViewType.MonthlyAccountBalanceTrend:
+            <ApexChart TItem="CashFlow" Title="Monthly Account Balance Trend" Options="options">
+                <ApexPointSeries
+                    TItem="CashFlow" Items="Data"
+                    Name="Balance" SeriesType="SeriesType.Line"
+                    XValue="@(e => new DateTime(e.Year.GetValueOrDefault(), e.Month.GetValueOrDefault(), 1))"
+                    YAggregate="@(e => e.Sum(e => e.BalanceDecimal))" />
+            </ApexChart>
+            break;
+
+        default:
+            break;
+    }
+}
+
+@code {
+
+    [Parameter]
+    public List<CashFlow> Data { get; set; } = new();
+
+    [Parameter]
+    public ViewType viewType { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        options.Xaxis ??= new();
+        options.Xaxis.Labels ??= new();
+
+        // PROTEZIONE: Inizializza gli oggetti del tooltip se sono null
+        options.Tooltip ??= new();
+        options.Tooltip.X ??= new();
+
+        options.Xaxis.Type = XAxisType.Datetime;
+
+        if (viewType == ViewType.AnnualAccountBalanceTrend)
+        {
+            options.Xaxis.Labels.Format = "yyyy";
+            options.Tooltip.X.Format = "yyyy";
+        }
+        else
+        {
+            options.Xaxis.Labels.Format = "yyyy-MM";
+            options.Tooltip.X.Format = "yyyy-MM";
+        }
+    }
+
+    private ApexChartOptions<CashFlow> options = new()
+    {
+        Colors = ["#F79E10"],
+        Legend = new()
+        {
+            Show = false
+        },
+        Xaxis = new()
+        {
+            Type = XAxisType.Datetime
+        },
+        Yaxis = new()
+        {
+            new()
+            {
+                Labels = new()
+                {
+                    Formatter = @"function (value) {
+                        if (value === undefined || value === null) return '';
+                        
+                        // Rileva il locale del browser (es. en-NZ, pt-BR)
+                        var locale = navigator.language || 'it-IT';
+                        
+                        // Cerca di capire qual è la valuta di quel locale. 
+                        // Se non ci riesce, fa un fallback su USD o EUR
+                        var defaultCurrency = 'EUR';
+                        try {
+                            var formatter = new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' });
+                            defaultCurrency = formatter.resolvedOptions().currency;
+                        } catch(e) {
+                            // non trovato
+                        }
+
+                        return Number(value).toLocaleString(locale, {
+                            style: 'currency', 
+                            currency: defaultCurrency, 
+                            maximumFractionDigits: 0 
+                        });
+                    }"
+                }
+            }
+        },
+        DataLabels = new()
+        {
+            Formatter = @"function (value, opts) {
+                if (value === undefined || value === null) return '';
+                var locale = navigator.language || 'it-IT';
+                var defaultCurrency = 'EUR';
+
+                try {
+                    var formatter = new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' });
+                    defaultCurrency = formatter.resolvedOptions().currency;
+                } catch(e) {
+                    // non trovato
+                }
+
+                return Number(value).toLocaleString(locale, {
+                    style: 'currency', 
+                    currency: defaultCurrency, 
+                    maximumFractionDigits: 0 
+                });
+            }"
+        },
+        Tooltip = new()
+        {
+            Y = new()
+            {
+                Formatter = @"function (value) {
+                    if (value === undefined || value === null) return '';
+                    var locale = navigator.language || 'it-IT';
+                    var defaultCurrency = 'EUR';
+                    try {
+                        var formatter = new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' });
+                        defaultCurrency = formatter.resolvedOptions().currency;
+                    } catch(e) {
+                        // non trovato
+                    }
+
+                    return Number(value).toLocaleString(locale, {
+                        style: 'currency', 
+                        currency: defaultCurrency, 
+                        maximumFractionDigits: 2
+                    });
+                }"
+            }
+        },
+        Grid = new()
+        {
+            Padding = new()
+            {
+                Right = 0,
+                Left = 0
+            },
+            Xaxis = new()
+            {
+                Lines = new()
+                {
+                    Show = true
+                }
+            },
+            Yaxis = new()
+            {
+                Lines = new()
+                {
+                    Show = true
+                }
+            }
+        }        
+    };
+}

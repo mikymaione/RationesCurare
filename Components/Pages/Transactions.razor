@@ -131,15 +131,15 @@
 
     case ViewType.AnnualAccountBalanceTrend:
     case ViewType.MonthlyAccountBalanceTrend:
-        // Se serve, puoi aggiungere qui il componente del Trend lineare
+        <h3>Chart</h3>
+        <AccountBalanceTrendChart Data="@cashFlowItems" viewType="@filterViewType" />
         break;
 
     case ViewType.AnnualCashFlow:
     case ViewType.MonthlyCashFlow:
         // Se serve, puoi aggiungere qui il componente del Cash Flow a barre
         break;
-        
-    case ViewType.AllTransactions:
+
     default:
         break;
 }
