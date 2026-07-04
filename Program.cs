@@ -5,6 +5,7 @@ using System.Security.Claims;
 using RationesCurare.Components;
 using RationesCurare.Data;
 using RationesCurare.Functions;
+using ApexCharts;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,6 +53,8 @@ builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddApexCharts();
 
 var app = builder.Build();
 

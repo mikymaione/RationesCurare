@@ -1,0 +1,139 @@
+@using RationesCurare.Models
+@using ApexCharts
+
+@if (Data != null && Data.Any())
+{
+    <ApexChart TItem="CategoryItem" Title="Expense Breakdown" Options="options">
+        @foreach (var categoryBreakdown in Data)
+        {
+            var categoryItems = categoryBreakdown.ToCategoryItem();
+
+            <ApexPointSeries
+                TItem="CategoryItem" Items="categoryItems"
+                Name="@categoryBreakdown.Category" SeriesType="SeriesType.Bar"
+                XValue="@(e => e.TipoFlusso)"
+                YAggregate="@(e => e.Sum(x => x.Valore))"
+                ShowDataLabels />
+        }
+    </ApexChart>
+}
+
+@code {
+    [Parameter]
+    public List<CategoryBreakdown> Data { get; set; } = new();
+
+    private ApexChartOptions<CategoryItem> options = new()
+    {
+        Chart = new()
+        {
+            Stacked = true
+        },
+        Legend = new()
+        {
+            Show = false
+        },
+        PlotOptions = new PlotOptions
+        {
+            Bar = new()
+            {
+                Horizontal = true
+            }
+        },
+        Xaxis = new()
+        {
+            Min = 0,
+            Max = "max",
+            Labels = new()
+            {
+                Formatter = @"function (value) {
+                    if (value === undefined || value === null) return '';
+                    
+                    // Rileva il locale del browser (es. en-NZ, pt-BR)
+                    var locale = navigator.language || 'it-IT';
+                    
+                    // Cerca di capire qual è la valuta di quel locale. 
+                    // Se non ci riesce, fa un fallback su USD o EUR
+                    var defaultCurrency = 'EUR';
+                    try {
+                        var formatter = new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' });
+                        defaultCurrency = formatter.resolvedOptions().currency;
+                    } catch(e) {
+                        // non trovato
+                    }
+
+                    return Number(value).toLocaleString(locale, {
+                        style: 'currency', 
+                        currency: defaultCurrency, 
+                        maximumFractionDigits: 0 
+                    });
+                }"
+            }
+        },
+        DataLabels = new()
+        {
+            Formatter = @"function (value, opts) {
+                if (value === undefined || value === null) return '';
+                var locale = navigator.language || 'it-IT';
+                var defaultCurrency = 'EUR';
+
+                try {
+                    var formatter = new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' });
+                    defaultCurrency = formatter.resolvedOptions().currency;
+                } catch(e) {
+                    // non trovato
+                }
+
+                return Number(value).toLocaleString(locale, {
+                    style: 'currency', 
+                    currency: defaultCurrency, 
+                    maximumFractionDigits: 0 
+                });
+            }"
+        },
+        Tooltip = new()
+        {
+            Y = new()
+            {
+                Formatter = @"function (value) {
+                    if (value === undefined || value === null) return '';
+                    var locale = navigator.language || 'it-IT';
+                    var defaultCurrency = 'EUR';
+                    try {
+                        var formatter = new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' });
+                        defaultCurrency = formatter.resolvedOptions().currency;
+                    } catch(e) {
+                        // non trovato
+                    }
+
+                    return Number(value).toLocaleString(locale, {
+                        style: 'currency', 
+                        currency: defaultCurrency, 
+                        maximumFractionDigits: 2
+                    });
+                }"
+            }
+        },
+        Grid = new()
+        {
+            Padding = new()
+            {
+                Right = 0,
+                Left = 0
+            },
+            Xaxis = new()
+            {                
+                Lines = new()
+                {
+                    Show = true
+                }
+            },
+            Yaxis = new()
+            {
+                Lines = new()
+                {
+                    Show = true
+                }
+            }
+        }        
+    };
+}

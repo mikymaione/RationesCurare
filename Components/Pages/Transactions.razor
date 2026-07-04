@@ -6,6 +6,7 @@
 @using RationesCurare.Data
 @using RationesCurare.Functions
 @using RationesCurare.Models
+@using RationesCurare.Components.Charts
 @using RationesCurare.Components.Widgets
 
 @attribute [Authorize]
@@ -121,8 +122,29 @@
     </div>
 </div>
 
-<h3>@TheSubTitle</h3>
+@switch (filterViewType)
+{
+    case ViewType.ExpenseBreakdown:
+        <h3>Chart</h3>
+        <ExpenseBreakdownChart Data="@breakdownItems" />
+        break;
 
+    case ViewType.AnnualAccountBalanceTrend:
+    case ViewType.MonthlyAccountBalanceTrend:
+        // Se serve, puoi aggiungere qui il componente del Trend lineare
+        break;
+
+    case ViewType.AnnualCashFlow:
+    case ViewType.MonthlyCashFlow:
+        // Se serve, puoi aggiungere qui il componente del Cash Flow a barre
+        break;
+        
+    case ViewType.AllTransactions:
+    default:
+        break;
+}
+
+<h3>@TheSubTitle</h3>
 @switch (filterViewType)
 {
     case ViewType.AllTransactions:
@@ -331,10 +353,15 @@
                     })
                     .ToListAsync();
 
-                var breakdownSorted = breakdownRaw
-                    .Where(b => b.Balance != 0)
-                    .OrderByDescending(b => b.Balance)
-                    .ToList();
+                var positives = breakdownRaw
+                    .Where(b => b.Balance > 0)
+                    .OrderByDescending(b => b.Balance);
+
+                var negatives = breakdownRaw
+                    .Where(b => b.Balance < 0)
+                    .OrderBy(b => b.Balance);
+
+                var breakdownSorted = positives.Concat(negatives).ToList();
 
                 foreach (var x in breakdownSorted)
                     breakdownItems.Add(new(
