@@ -5,6 +5,7 @@
 @using Microsoft.EntityFrameworkCore
 @using RationesCurare.Data
 @using RationesCurare.Functions
+@using RationesCurare.Components.Widgets
 
 @attribute [Authorize]
 
@@ -33,24 +34,12 @@ else
 
     <div class="form-group bottomspace">
         <label for="description">Description</label>
-        <input type="text" id="description" list="descriptionList" @bind="Descrizione" @onblur="OnDescriptionBlur" data-minchars="1" required autocomplete="off" placeholder="Operation Description" />
-        <datalist id="descriptionList">
-            @foreach (var desc in descriptionsList)
-            {
-                <option value="@desc" />
-            }
-        </datalist>
+        <TextDatalist @bind-value="Descrizione" Items="descriptionsList" OnSelected="OnDescriptionBlur" Placeholder="Operation Description" />
     </div>
 
     <div class="form-group bottomspace">
         <label for="category">Category</label>
-        <input type="text" id="category" list="categoryList" @bind="MacroArea" data-minchars="1" maxlength="250" required autocomplete="off" placeholder="Category to which the transaction belongs" />
-        <datalist id="categoryList">
-            @foreach (var cat in categoriesList)
-            {
-                <option value="@cat" />
-            }
-        </datalist>
+        <TextDatalist @bind-value="MacroArea" Items="categoriesList" Placeholder="Category to which the transaction belongs" />
     </div>
 
     <div class="form-group bottomspace">
@@ -282,7 +271,7 @@ else
     {
         if (!string.IsNullOrWhiteSpace(Descrizione))
         {
-            var suggestedCategory = await Db.MovimentiTempos
+            var suggestedCategory = await Db.Movimentis
                 .Where(m => m.Descrizione == Descrizione)
                 .GroupBy(m => m.MacroArea)
                 .OrderByDescending(g => g.Count())

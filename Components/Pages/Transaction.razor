@@ -5,6 +5,7 @@
 @using Microsoft.EntityFrameworkCore
 @using RationesCurare.Data
 @using RationesCurare.Functions
+@using RationesCurare.Components.Widgets
 
 @attribute [Authorize]
 
@@ -60,25 +61,13 @@ else
 
     <div class="form-group bottomspace">
         <label for="description">Description</label>
-        <input type="text" id="description" list="descriptionList" @bind="description" @onblur="OnDescriptionBlur" data-minchars="1" required="@(string.IsNullOrEmpty(toAccount))" autocomplete="off" placeholder="Operation Description" />
-        <datalist id="descriptionList">
-            @foreach (var desc in descriptions)
-            {
-                <option value="@desc" />
-            }
-        </datalist>
+        <TextDatalist @bind-Value="description" Items="descriptions" OnSelected="OnDescriptionBlur" Placeholder="Operation Description" />
     </div>
 
     <div class="form-group bottomspace">
         <label for="category">Category</label>
-        <input type="text" id="category" list="categoryList" @bind="category" data-minchars="1" maxlength="250" required="@(string.IsNullOrEmpty(toAccount))" autocomplete="off" placeholder="Category to which the transaction belongs" />
-        <datalist id="categoryList">
-            @foreach (var cat in categories)
-            {
-                <option value="@cat" />
-            }
-        </datalist>
-    </div>
+        <TextDatalist @bind-Value="category" Items="categories" Placeholder="Category to which the transaction belongs" />
+    </div>    
 
     <div class="form-group bottomspace">
         <label for="author">Author</label>
@@ -137,10 +126,8 @@ else
         await LoadOptions();
     }
 
-    protected override async Task OnParametersSetAsync()
-    {
-        await LoadTransaction();
-    }
+    protected override Task OnParametersSetAsync() =>
+        LoadTransaction();
 
     private async Task LoadOptions()
     {

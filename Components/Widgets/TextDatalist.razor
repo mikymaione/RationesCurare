@@ -1,0 +1,67 @@
+<div>
+    <input type="text" 
+           value="@Value" 
+           @oninput="OnInputChanged" 
+           @onfocus="() => showDropdown = true"
+           @onblur="HideDropdownWithDelay"
+           placeholder="@Placeholder" 
+           autocomplete="off" />
+
+    @if (showDropdown && !string.IsNullOrEmpty(Value) && FilteredItems.Any())
+    {
+        <ul>
+            @foreach (var item in FilteredItems)
+            {
+                <li class="cp" @onclick="() => SelectItem(item)">
+                    @item
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? Value { get; set; }
+    
+    [Parameter]
+    public EventCallback<string?> ValueChanged { get; set; }
+    
+    [Parameter]
+    public IEnumerable<string> Items { get; set; } = [];
+    
+    [Parameter]
+    public string? Placeholder { get; set; }
+    
+    [Parameter]
+    public EventCallback OnSelected { get; set; }
+
+    private bool showDropdown;
+
+    private IEnumerable<string> FilteredItems => 
+        string.IsNullOrEmpty(Value) 
+            ? Items 
+            : Items.Where(i => i.Contains(Value, StringComparison.OrdinalIgnoreCase));
+
+    private async Task OnInputChanged(ChangeEventArgs e)
+    {
+        Value = e.Value?.ToString();
+        showDropdown = true; // Mostra la lista mentre l'utente digita
+        await ValueChanged.InvokeAsync(Value);
+        await OnSelected.InvokeAsync();
+    }
+
+    private async Task SelectItem(string item)
+    {
+        Value = item;
+        showDropdown = false;
+        await ValueChanged.InvokeAsync(Value);
+        await OnSelected.InvokeAsync();
+    }
+
+    private async Task HideDropdownWithDelay()
+    {
+        await Task.Delay(200);
+        showDropdown = false;
+    }
+}

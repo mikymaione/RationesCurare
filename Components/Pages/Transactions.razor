@@ -72,33 +72,15 @@
         <!-- Category -->
         <div class="bottomspace">
             <label for="category">Filter by category:</label>
-            <input type="text" id="category" list="categoryList" @bind="filterCategory" placeholder="Category to which the transaction belongs" />
-            <datalist id="categoryList">
-                @if (categories != null)
-                {
-                    @foreach (var cat in categories)
-                    {
-                        <option value="@cat" />
-                    }
-                }
-            </datalist>
+            <TextDatalist @bind-value="filterCategory" Items="categories" OnSelected="ApplyFilters" Placeholder="Category to which the transaction belongs" />
         </div>
 
         <!-- Description -->
         <div class="bottomspace">
             <label for="description">Filter by description:</label>
-            <input type="text" id="description" list="descriptionList" @bind="filterDescription" placeholder="Transaction description" />
-            <datalist id="descriptionList">
-                @if (descriptions != null)
-                {
-                    @foreach (var desc in descriptions)
-                    {
-                        <option value="@desc" />
-                    }
-                }
-            </datalist>
+            <TextDatalist @bind-value="filterDescription" Items="descriptions" OnSelected="ApplyFilters" Placeholder="Transaction description" />
         </div>
-
+        
         <!-- Account -->
         <div class="bottomspace">
             <label for="filterAccount">Filter by account:</label>

@@ -323,6 +323,14 @@ div.awesomplete li[aria-selected="true"] mark {
     width: auto !important;
 }
 
+.cp {
+    cursor: pointer;
+}
+
+.cp:hover {
+    background-color: #F79E10;
+}
+
 button {
     cursor: pointer;
     box-sizing: border-box;
