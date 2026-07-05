@@ -1,9 +1,12 @@
 @page "/"
 
+@using Microsoft.AspNetCore.Components.Authorization
+
 @rendermode InteractiveServer
 
 @inject NavigationManager Nav
 @inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthStateProvider
 
 @implements IDisposable
 
@@ -60,12 +63,23 @@
     private bool isInstallable = false;
     private DotNetObjectReference<Home>? objRef;
 
+    // Aggiungi questo controllo per saltare la home se già autenticato
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            Nav.NavigateTo("/balance");
+        }
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             objRef = DotNetObjectReference.Create(this);
-            // Inizializza il bridge JS mandando il riferimento di questo componente
             await JS.InvokeVoidAsync("pwaRegistration.init", objRef);
         }
     }
@@ -74,14 +88,12 @@
     public void ShowInstallButton()
     {
         isInstallable = true;
-        StateHasChanged(); // Forza il re-rendering per mostrare il pulsante
+        StateHasChanged();
     }
 
     private async Task TriggerInstallPrompt()
     {
-        // Chiede a JS di mostrare il prompt nativo
         var success = await JS.InvokeAsync<bool>("pwaRegistration.showPrompt");
-
         if (success)
             isInstallable = false;
     }
@@ -89,7 +101,6 @@
     private void NavigateToLogin() =>
         Nav.NavigateTo("/signin");
 
-    // Rilascia la memoria del riferimento .NET per evitare memory leak
     public void Dispose() =>
         objRef?.Dispose();
 }
