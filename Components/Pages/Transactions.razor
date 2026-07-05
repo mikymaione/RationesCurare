@@ -568,8 +568,15 @@
         await LoadNextBatch();
     }
 
-    private void Detail(int id) =>
-        NavigationManager.NavigateTo($"/transactions/{id}?returnUrl={System.Web.HttpUtility.UrlEncode(NavigationManager.Uri)}");
+    private void Detail(int id) 
+    {
+        // Se stiamo creando una nuova transazione (id == -1) e abbiamo un account selezionato, lo passiamo in query string
+        var qsAccount = id == -1 && !string.IsNullOrEmpty(account)
+            ? $"&defaultAccount={System.Web.HttpUtility.UrlEncode(account)}"
+            : string.Empty;
+
+        NavigationManager.NavigateTo($"/transactions/{id}?returnUrl={System.Web.HttpUtility.UrlEncode(NavigationManager.Uri)}{qsAccount}");
+    }
 
     private void NewTransaction() =>
         Detail(-1);

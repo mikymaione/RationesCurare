@@ -114,6 +114,7 @@ else
     private string? category;
     private string? author;
     private string returnUrl = "/transactions/";
+    private string? defaultAccountFromQuery;
 
     protected override async Task OnInitializedAsync()
     {
@@ -122,6 +123,10 @@ else
 
         if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("returnUrl", out var value))
             returnUrl = value.ToString();
+
+        // Estraiamo l'eventuale account di default
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("defaultAccount", out var accValue))
+            defaultAccountFromQuery = accValue.ToString();
 
         await LoadOptions();
     }
@@ -176,7 +181,7 @@ else
         {
             var dbInfo = await Db.Dbinfos.FirstOrDefaultAsync();
             
-            fromAccount = null;
+            fromAccount = string.IsNullOrEmpty(defaultAccountFromQuery) ? null : defaultAccountFromQuery;
             toAccount = null;
             amount = null;
             date = DateTime.Now;
