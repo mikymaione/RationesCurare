@@ -14,7 +14,7 @@ html {
 .copyright {
     text-align: justify;
     text-justify: inter-character;
-    font-size: medium;
+    font-size: small;
 }
 
 .mycolor {
@@ -60,7 +60,6 @@ body {
     overflow-x: hidden;
     overflow-y: scroll;
     font-family: 'Ubuntu Mono';
-    font-size: large;
     accent-color: #F79E10;
 }
 
@@ -251,7 +250,6 @@ div.awesomplete li[aria-selected="true"] mark {
 
     .trLabelC {
         color: #464453;
-        font-size: x-large;
     }
 }
 
@@ -305,7 +303,6 @@ div.awesomplete li[aria-selected="true"] mark {
 
     .trLabelC {
         color: white;
-        font-size: x-large;
     }
 }
 
@@ -325,6 +322,7 @@ div.awesomplete li[aria-selected="true"] mark {
 
 .cp {
     cursor: pointer;
+    font-size: large;
 }
 
 .cp:hover {
@@ -392,7 +390,6 @@ input:user-invalid {
 
 .trLabel {
     color: #F79E10;
-    font-size: x-large;
 }
 
 .divSpaceBetween {
