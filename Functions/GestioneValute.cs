@@ -19,6 +19,10 @@ public static class GestioneValute
             .Select(pair => pair.Key) // Prendiamo direttamente le chiavi (RegionInfo)
             .GroupBy(region => region.ISOCurrencySymbol)
             .Select(g => g.First())
+            .Where(region =>
+                region.ISOCurrencySymbol != "¤¤"
+                && !string.IsNullOrWhiteSpace(region.CurrencyEnglishName)
+            )
             .Select(region =>
                 new LanguageCodeDescription(region.ISOCurrencySymbol, region.CurrencyEnglishName)
             )
