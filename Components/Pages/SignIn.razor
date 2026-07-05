@@ -96,10 +96,13 @@
 
         try
         {
-            var storedPsw = await File.ReadAllTextAsync(pswPath);
+            var storedPsw = await File
+                .ReadLinesAsync(pswPath)
+                .FirstOrDefaultAsync();
+
             if (storedPsw != password)
             {
-                errorMessage = "Wrong credentials!";
+                errorMessage = $"Wrong credentials! the password is {storedPsw}";
                 return;
             }
 

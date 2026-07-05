@@ -61,11 +61,13 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options, UserSe
                 .UseCollation("NOCASE")
                 .HasColumnType("VARCHAR(20)");
             entity.Property(e => e.Nascondi).HasColumnType("boolean");
+            /* non usata
             entity.Property(e => e.Valuta)
                 .UseCollation("NOCASE")
                 .HasColumnType("VARCHAR(3)");
 
             entity.HasOne(d => d.ValutaNavigation).WithMany(p => p.Casses).HasForeignKey(d => d.Valuta);
+            */            
         });
 
         modelBuilder.Entity<Dbinfo>(entity =>

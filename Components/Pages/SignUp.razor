@@ -72,9 +72,8 @@
 
     @if (!string.IsNullOrEmpty(errorMessage))
     {
-        <div class="bottomspace moneyBad" style="font-weight: bold;">
-            <span class="material-icons" style="vertical-align: middle; margin-right: 5px;">error</span>
-            <mark style="background: none; color: inherit;">@errorMessage</mark>
+        <div>
+            <em>@errorMessage</em>
         </div>
     }
 </form>

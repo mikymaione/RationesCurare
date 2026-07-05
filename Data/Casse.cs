@@ -9,13 +9,11 @@ public partial class Casse
 
     public byte[]? ImgName { get; set; }
 
-    public string? Valuta { get; set; }
+    // public string? Valuta { get; set; } non usata
 
     public bool? Nascondi { get; set; }
 
     public virtual ICollection<MovimentiTempo> MovimentiTempos { get; set; } = new List<MovimentiTempo>();
 
     public virtual ICollection<Movimenti> Movimentis { get; set; } = new List<Movimenti>();
-
-    public virtual Valute? ValutaNavigation { get; set; }
 }
