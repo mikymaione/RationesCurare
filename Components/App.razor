@@ -20,6 +20,8 @@ You should have received a copy of the GNU General Public License along with thi
 	<meta name="theme-color" content="#f79e10">
 	<meta name="apple-mobile-web-app-capable" content="yes">	
     
+    <link rel="manifest" href="/manifest.json">
+    
     <base href="/" />
     
     <ResourcePreloader />
@@ -36,7 +38,17 @@ You should have received a copy of the GNU General Public License along with thi
 <body>
     <Routes />
     <ReconnectModal />
+    
     <script src="@Assets["_framework/blazor.web.js"]"></script>
+    <script src="@Assets["app.js"]"></script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(reg => console.log('👍 Service Worker registrato con successo:', reg.scope))
+                .catch(err => console.error('👎 Errore registrazione Service Worker:', err));
+        }
+    </script>
 
     <hr />
     <ruby class="copyright">RationesCurare © 2006-2026, [MAIONE MIKΨ]</ruby>

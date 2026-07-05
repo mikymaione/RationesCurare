@@ -1,0 +1,123 @@
+@page "/signup"
+
+@using System.IO
+@using Microsoft.EntityFrameworkCore
+@using RationesCurare.Data
+
+@inject NavigationManager Navigation
+@inject IWebHostEnvironment Env
+@inject IDbContextFactory<AppDbContext> DbFactory
+
+<PageTitle>RationesCurare - Sign Up</PageTitle>
+
+<div style="display: flex">
+    <img src="favicon/favicon_orange.svg" alt="logo" />
+    <h1 class="giustificato">RationesCurare</h1>
+</div>
+
+<p class="giustificato">an open-source software for the management of the personal economy.</p>
+
+<hr />
+
+<h2>Sign Up</h2>
+
+<form @onsubmit="HandleSignUp">
+    <div class="form-group bottomspace">
+        <label class="form-group" for="eUtente">Email</label>
+        <input id="eUtente" @bind="email" placeholder="Email you signed up with" type="email" required />
+    </div>
+    <div class="form-group bottomspace">
+        <label class="form-group" for="ePsw">Password</label>
+        <input id="ePsw" @bind="password" placeholder="Database decryption password" type="password" required />
+    </div>
+
+    <div class="form-group bottomspace">
+        <label for="cbMemorizza">Remember Me</label>
+        <select id="cbMemorizza" @bind="rememberMe">
+            <option value="false">No</option>
+            <option value="true">Yes</option>
+        </select>
+    </div>
+
+    <div class="bottomspace">
+        <button type="submit">Sign Up</button>        
+        <a href="/signin"><button type="button">Go Back</button></a>
+    </div>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div>
+            <em>@errorMessage</em>
+        </div>
+    }
+</form>
+
+@code {
+    private string email = "";
+    private string password = "";
+    private string rememberMe = "true";
+    private string? errorMessage;
+
+    private async Task HandleSignUp()
+    {
+        errorMessage = null;
+
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        {
+            errorMessage = "Please fill in all fields.";
+            return;
+        }
+
+        // 1. Costruiamo il percorso del database basato sull'email
+        // Usiamo Path.GetFileName per evitare tentativi di Path Traversal
+        var dbFileName = $"{email.Trim().ToLower()}.rqd8";
+        var dbPath = Path.Combine(Env.ContentRootPath, "App_Data", dbFileName);
+
+        if (!File.Exists(dbPath))
+        {
+            errorMessage = "User not found. Check your email or Sign Up.";
+            return;
+        }
+
+        try
+        {
+            // 2. Proviamo a connetterci al database specifico
+            // La password viene passata nella stringa di connessione (SQLCipher)
+            var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+            optionsBuilder.UseSqlite($"Data Source={dbPath};Password={password}");
+
+            using var db = new AppDbContext(optionsBuilder.Options);
+            
+            // 3. Verifichiamo se riusciamo a leggere dal DB
+            // Se la password è errata, l'apertura o la prima query scateneranno un'eccezione
+            var dbExists = await db.Dbinfos.AnyAsync();
+
+            if (dbExists)
+            {
+                // Login Successo! 
+                // Carichiamo le impostazioni dell'utente (come faceva LeggiValutaInDbInfo)
+                var info = await db.Dbinfos.FirstAsync();
+                
+                // Qui andrebbe salvata la sessione (Username, PathDB, Valuta/Culture)
+                Navigation.NavigateTo("/dashboard");
+            }
+            else
+            {
+                errorMessage = "Invalid password.";
+            }
+        }
+        catch (Exception ex)
+        {
+            // In SQLite, se la password è errata solitamente l'errore è "file is not a database" 
+            // o "authentication required" a seconda della libreria.
+            if (ex.Message.Contains("file is not a database") || ex.Message.Contains("authentication"))
+            {
+                errorMessage = "Credenziali d'accesso errate!";
+            }
+            else
+            {
+                errorMessage = "Errore durante l'accesso: " + ex.Message;
+            }
+        }
+    }
+}

@@ -33,7 +33,7 @@ builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
     else
     {
         // Fallback di sicurezza per le rotte anonime (es. Home pubblica o pagina di SignIn) serve a evitare che la DI fallisca prima del Login
-        var fallbackPath = Path.Combine(env.ContentRootPath, "App_Data", "default.rqd8");
+        var fallbackPath = Path.Combine(env.ContentRootPath, "App_Data", "standard.rqd8");
         options.UseSqlite($"Data Source={fallbackPath}");
     }
 });

@@ -1,0 +1,100 @@
+{
+	"id": "RationesCurare",
+	"name": "Rationes Curare",
+	"short_name": "RC",
+	"description": "An open-source software for the management of the personal economy",
+	"display": "standalone",
+	"theme_color": "#000000",
+	"background_color": "#000000",
+	"lang": "en",
+	"dir": "ltr",
+	"orientation": "natural",
+	"prefer_related_applications": false,
+	"start_url": "/",
+	"categories": [
+		"finance"
+	],
+	"launch_handler": {
+		"client_mode": "navigate-existing"
+	},
+	"screenshots": [
+		{
+			"src": "/favicon/screenshotsM/home.png",
+			"sizes": "375x667",
+			"type": "image/png",
+			"form_factor": "narrow"
+		},
+		{
+			"src": "/favicon/screenshotsM/filters.png",
+			"sizes": "375x667",
+			"type": "image/png",
+			"form_factor": "narrow"
+		},
+		{
+			"src": "/favicon/screenshotsM/content.png",
+			"sizes": "780x600",
+			"type": "image/png",
+			"form_factor": "narrow"
+		},
+		{
+			"src": "/favicon/screenshotsM/transaction.png",
+			"sizes": "780x600",
+			"type": "image/png",
+			"form_factor": "narrow"
+		},
+		{
+			"src": "/favicon/screenshots/home.png",
+			"sizes": "780x600",
+			"type": "image/png",
+			"form_factor": "wide"
+		},
+		{
+			"src": "/favicon/screenshots/filters.png",
+			"sizes": "780x600",
+			"type": "image/png",
+			"form_factor": "wide"
+		},
+		{
+			"src": "/favicon/screenshots/content.png",
+			"sizes": "780x600",
+			"type": "image/png",
+			"form_factor": "wide"
+		},
+		{
+			"src": "/favicon/screenshots/transaction.png",
+			"sizes": "780x600",
+			"type": "image/png",
+			"form_factor": "wide"
+		}
+	],
+	"icons": [
+		{
+			"src": "favicon.ico",
+			"sizes": "48x48"
+		},
+		{
+			"src": "/favicon/android-chrome-192x192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "any"
+		},
+		{
+			"src": "/favicon/maskable_icon_x192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "maskable"
+		},
+		{
+			"src": "/favicon/android-chrome-512x512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "any"
+		},
+		{
+			"src": "/favicon/maskable_icon_x512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "maskable"
+		}
+	]
+}
