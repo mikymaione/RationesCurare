@@ -3,10 +3,13 @@
 @using System.IO
 @using Microsoft.EntityFrameworkCore
 @using RationesCurare.Data
+@using RationesCurare.Models
+@using RationesCurare.Functions
+
+@rendermode InteractiveServer
 
 @inject NavigationManager Navigation
 @inject IWebHostEnvironment Env
-@inject IDbContextFactory<AppDbContext> DbFactory
 
 <PageTitle>RationesCurare - Sign Up</PageTitle>
 
@@ -23,101 +26,180 @@
 
 <form @onsubmit="HandleSignUp">
     <div class="form-group bottomspace">
-        <label class="form-group" for="eUtente">Email</label>
-        <input id="eUtente" @bind="email" placeholder="Email you signed up with" type="email" required />
-    </div>
-    <div class="form-group bottomspace">
-        <label class="form-group" for="ePsw">Password</label>
-        <input id="ePsw" @bind="password" placeholder="Database decryption password" type="password" required />
+        <label class="form-group" for="eNickName">NickName</label>
+        <input id="eNickName" @bind="nickName" placeholder="Your display name" type="text" required />
     </div>
 
     <div class="form-group bottomspace">
-        <label for="cbMemorizza">Remember Me</label>
-        <select id="cbMemorizza" @bind="rememberMe">
-            <option value="false">No</option>
-            <option value="true">Yes</option>
+        <label class="form-group" for="eUtente">Email</label>
+        <input id="eUtente" @bind="email" placeholder="Used for login and no advertising" type="email" required />
+    </div>
+
+    <div class="form-group bottomspace">
+        <label class="form-group" for="ePsw">Password</label>
+        <input id="ePsw" @bind="password" placeholder="Non-changeable and non-recoverable" type="password" required />
+        <small class="mytextcolor giustificato" style="display: block; margin-top: 4px;">
+            Since the password will be used to encrypt your database and there is no possibility of recovery, we recommend that you save the password in your browser's password manager.
+        </small>
+    </div>
+
+    <div class="form-group bottomspace">
+        <label class="form-group" for="eCurrency">Currency</label>
+        <select id="eCurrency" @value="selectedCurrency" @onchange="OnCurrencyChanged" required>
+            <option value="">Select currency...</option>
+            @foreach (var valuta in GestioneValute.Currencies)
+            {
+                <option value="@valuta.Code">@valuta.Description</option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group bottomspace">
+        <label class="form-group" for="eLanguage">Language</label>
+        <select id="eLanguage" @bind="selectedLanguage" required>
+            <option value="">Select language...</option>
+            @foreach (var lingua in listaLingue)
+            {
+                <option value="@lingua.Code">@lingua.Description</option>
+            }
         </select>
     </div>
 
     <div class="bottomspace">
-        <button type="submit">Sign Up</button>        
+        <button type="submit">Sign Up</button>
         <a href="/signin"><button type="button">Go Back</button></a>
     </div>
 
     @if (!string.IsNullOrEmpty(errorMessage))
     {
-        <div>
-            <em>@errorMessage</em>
+        <div class="bottomspace moneyBad" style="font-weight: bold;">
+            <span class="material-icons" style="vertical-align: middle; margin-right: 5px;">error</span>
+            <mark style="background: none; color: inherit;">@errorMessage</mark>
         </div>
     }
 </form>
 
 @code {
+    private string nickName = "";
     private string email = "";
     private string password = "";
-    private string rememberMe = "true";
+    private string selectedCurrency = "";
+    private string selectedLanguage = "";
+
+    private List<LanguageCodeDescription> listaLingue = new();
     private string? errorMessage;
+
+    protected override void OnInitialized()
+    {
+        // Seleziona EUR come default iniziale se presente
+        var defaultCurrency =
+            GestioneValute.Currencies.FirstOrDefault(c => c.Code == "EUR")
+            ?? GestioneValute.Currencies.FirstOrDefault();
+
+        if (defaultCurrency != null)
+        {
+            selectedCurrency = defaultCurrency.Code;
+            AggiornaLingue(selectedCurrency);
+        }
+    }
+
+    private void OnCurrencyChanged(ChangeEventArgs e)
+    {
+        if (e.Value is string valutaSelezionata)
+        {
+            selectedCurrency = valutaSelezionata;
+            AggiornaLingue(selectedCurrency);
+        }
+    }
+
+    private void AggiornaLingue(string valuta)
+    {
+        listaLingue = GestioneValute.GetLanguageCurrenciesByValuta(valuta);
+        selectedLanguage = listaLingue.FirstOrDefault()?.Code ?? "";
+    }
 
     private async Task HandleSignUp()
     {
         errorMessage = null;
 
-        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        var utente = nickName.TrimEnd();
+        var nome = email.TrimEnd().ToLower();
+        var psw = password.TrimEnd();
+
+        if (
+            string.IsNullOrEmpty(nome)
+            || string.IsNullOrEmpty(psw)
+            || string.IsNullOrEmpty(utente)
+            || string.IsNullOrEmpty(selectedCurrency)
+            || string.IsNullOrEmpty(selectedLanguage)
+        )
         {
             errorMessage = "Please fill in all fields.";
             return;
         }
 
-        // 1. Costruiamo il percorso del database basato sull'email
-        // Usiamo Path.GetFileName per evitare tentativi di Path Traversal
-        var dbFileName = $"{email.Trim().ToLower()}.rqd8";
-        var dbPath = Path.Combine(Env.ContentRootPath, "App_Data", dbFileName);
-
-        if (!File.Exists(dbPath))
-        {
-            errorMessage = "User not found. Check your email or Sign Up.";
-            return;
-        }
+        var appDataPath = Path.Combine(Env.ContentRootPath, "App_Data");
+        var templateDbPath = Path.Combine(appDataPath, "standard.rqd8");
+        var dbPath = Path.Combine(appDataPath, $"{nome}.rqd8");
+        var pswPath = Path.Combine(appDataPath, $"{nome}.psw");
 
         try
         {
-            // 2. Proviamo a connetterci al database specifico
-            // La password viene passata nella stringa di connessione (SQLCipher)
+            if (!File.Exists(templateDbPath))
+            {
+                errorMessage = "Error: standard.rqd8 missing in App_Data.";
+                return;
+            }
+
+            if (File.Exists(dbPath) || File.Exists(pswPath))
+            {
+                errorMessage = "This email is already registered.";
+                return;
+            }
+
+            // 1. COPIA FISICA DEL DB VERGINE TEMPLATE
+            File.Copy(templateDbPath, dbPath, overwrite: false);
+
+            // 2. APERTURA CON PASSWORD (CIFRATURA)
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            optionsBuilder.UseSqlite($"Data Source={dbPath};Password={password}");
+            optionsBuilder.UseSqlite($"Data Source={dbPath}");
 
-            using var db = new AppDbContext(optionsBuilder.Options);
-            
-            // 3. Verifichiamo se riusciamo a leggere dal DB
-            // Se la password è errata, l'apertura o la prima query scateneranno un'eccezione
-            var dbExists = await db.Dbinfos.AnyAsync();
+            var temporarySession = new UserSession(Env);
+            temporarySession.Initialize(nome);
 
-            if (dbExists)
+            using (var db = new AppDbContext(optionsBuilder.Options, temporarySession))
             {
-                // Login Successo! 
-                // Carichiamo le impostazioni dell'utente (come faceva LeggiValutaInDbInfo)
-                var info = await db.Dbinfos.FirstAsync();
-                
-                // Qui andrebbe salvata la sessione (Username, PathDB, Valuta/Culture)
-                Navigation.NavigateTo("/dashboard");
+                // 3. LOGICA IDENTICA A MREGISTER.ASPX.CS (INSERIMENTO NELLA TABELLA DBINFOS)
+                var info = new Dbinfo
+                {
+                    Email = nome,
+                    Nome = utente,
+                    Psw = psw,
+                    SincronizzaDb = true,
+                    UltimaModifica = DateTime.Now,
+                    UltimoAggiornamentoDb = DateTime.Now.AddYears(-15).ToString("yyyy-MM-dd HH:mm:ss"),
+                    Valuta = selectedCurrency,
+                    Lingua = selectedLanguage
+                };
+
+                db.Dbinfos.Add(info);
+                await db.SaveChangesAsync();
             }
-            else
-            {
-                errorMessage = "Invalid password.";
-            }
+
+            // 4. SCRITTURA FILE .PSW PER SIGNIN
+            await File.WriteAllTextAsync(pswPath, psw);
+
+            Navigation.NavigateTo("/signin");
         }
         catch (Exception ex)
         {
-            // In SQLite, se la password è errata solitamente l'errore è "file is not a database" 
-            // o "authentication required" a seconda della libreria.
-            if (ex.Message.Contains("file is not a database") || ex.Message.Contains("authentication"))
-            {
-                errorMessage = "Credenziali d'accesso errate!";
-            }
-            else
-            {
-                errorMessage = "Errore durante l'accesso: " + ex.Message;
-            }
+            errorMessage = $"Error during registration: {ex.Message}";
+
+            if (File.Exists(dbPath))
+                File.Delete(dbPath);
+
+            if (File.Exists(pswPath))
+                File.Delete(pswPath);
         }
     }
 }
