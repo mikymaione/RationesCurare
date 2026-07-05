@@ -197,12 +197,14 @@ else
         }
         else
         {
+            var dbInfo = await Db.Dbinfos.FirstOrDefaultAsync();
+
             Tipo = null;
             Soldi = null;
             Data = null;
             Descrizione = null;
             MacroArea = null;
-            Nome = null;
+            Nome = dbInfo?.Nome ?? string.Empty;
             NumeroGiorni = null;
             TipoGiorniMese = "M";
             Scadenza = null;

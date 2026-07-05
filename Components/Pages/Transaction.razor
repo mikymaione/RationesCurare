@@ -174,13 +174,15 @@ else
         }
         else
         {
+            var dbInfo = await Db.Dbinfos.FirstOrDefaultAsync();
+            
             fromAccount = null;
             toAccount = null;
             amount = null;
             date = DateTime.Now;
             description = null;
             category = null;
-            author = null;
+            author = dbInfo?.Nome ?? string.Empty;
         }
     }
 
