@@ -1,54 +1,153 @@
+/* ==========================================================================
+   Gestione Visibilità Stati Blazor & Icone (Versione Esclusiva)
+   ========================================================================== */
+.UI-icon {
+    font-size: xx-large;
+    color: #F79E10;
+    text-align: center;
+}
+
+/* Nasconde tutto di default */
+.UI-icon,
 .components-reconnect-first-attempt-visible,
 .components-reconnect-repeated-attempt-visible,
 .components-reconnect-failed-visible,
 .components-pause-visible,
 .components-resume-failed-visible,
 .components-rejoining-animation {
-    display: none;
+    display: none !important;
 }
 
-#components-reconnect-modal.components-reconnect-show .components-reconnect-first-attempt-visible,
-#components-reconnect-modal.components-reconnect-show .components-rejoining-animation,
-#components-reconnect-modal.components-reconnect-paused .components-pause-visible,
-#components-reconnect-modal.components-reconnect-resume-failed .components-resume-failed-visible,
-#components-reconnect-modal.components-reconnect-retrying,
-#components-reconnect-modal.components-reconnect-retrying .components-reconnect-repeated-attempt-visible,
-#components-reconnect-modal.components-reconnect-retrying .components-rejoining-animation,
-#components-reconnect-modal.components-reconnect-failed,
+/* Mostra gli elementi in maniera selettiva:
+   Evita la sovrapposizione escludendo le altre classi quando una è attiva.
+*/
+
+/* STATO 1: Primo tentativo (Mostra solo se NON è in retrying o failed) */
+#components-reconnect-modal.components-reconnect-show:not(.components-reconnect-retrying):not(.components-reconnect-failed) .components-reconnect-first-attempt-visible {
+    display: block !important;
+}
+
+/* STATO 2: Tentativi ripetuti con countdown (Esclude lo show iniziale) */
+#components-reconnect-modal.components-reconnect-retrying:not(.components-reconnect-failed) .components-reconnect-repeated-attempt-visible {
+    display: block !important;
+}
+
+/* STATO 3: Connessione fallita (Quando fermi dotnet watch, mostra solo il blocco failed) */
 #components-reconnect-modal.components-reconnect-failed .components-reconnect-failed-visible {
-    display: block;
+    display: block !important;
 }
 
+/* STATO 4: Pausa */
+#components-reconnect-modal.components-reconnect-paused .components-pause-visible {
+    display: block !important;
+}
 
+/* STATO 5: Ripristino fallito */
+#components-reconnect-modal.components-reconnect-resume-failed .components-resume-failed-visible {
+    display: block !important;
+}
+
+/* ==========================================================================
+   Struttura del Dialog (Conforme al Tema RationesCurare)
+   ========================================================================== */
 #components-reconnect-modal {
-    background-color: white;
-    width: 20rem;
-    margin: 20vh auto;
+    width: 22rem;
+    margin: 25vh auto;
     padding: 2rem;
-    border: 0;
-    border-radius: 0.5rem;
-    box-shadow: 0 3px 6px 2px rgba(0, 0, 0, 0.3);
+    border: 1px outset #F79E10;
+    /* Bordo arancione netto in stile bottoni app.css */
+    border-radius: 0;
+    /* Rimosso l'arrotondamento per uniformità */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     opacity: 0;
+    font-family: 'Ubuntu Mono';
+    font-size: large;
     transition: display 0.5s allow-discrete, overlay 0.5s allow-discrete;
     animation: components-reconnect-modal-fadeOutOpacity 0.5s both;
-    &[open]
 
-{
-    animation: components-reconnect-modal-slideUp 1.5s cubic-bezier(.05, .89, .25, 1.02) 0.3s, components-reconnect-modal-fadeInOpacity 0.5s ease-in-out 0.3s;
-    animation-fill-mode: both;
+    &[open] {
+        animation: components-reconnect-modal-slideUp 1.2s cubic-bezier(.05, .89, .25, 1.02) 0.1s,
+            components-reconnect-modal-fadeInOpacity 0.4s ease-in-out 0.1s;
+        animation-fill-mode: both;
+    }
 }
 
-}
-
+/* Sfondo oscurato dietro al modal */
 #components-reconnect-modal::backdrop {
-    background-color: rgba(0, 0, 0, 0.4);
-    animation: components-reconnect-modal-fadeInOpacity 0.5s ease-in-out;
+    background-color: rgba(0, 0, 0, 0.6);
+    animation: components-reconnect-modal-fadeInOpacity 0.4s ease-in-out;
     opacity: 1;
 }
 
+.components-reconnect-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+}
+
+#components-reconnect-modal p {
+    margin: 0;
+    text-align: center;
+    line-height: 1.4;
+}
+
+/* ==========================================================================
+   Pulsanti (Uniformati allo stile dei bottoni dell'applicazione)
+   ========================================================================== */
+#components-reconnect-modal button {
+    font-family: 'Ubuntu Mono';
+    font-size: large;
+    cursor: pointer;
+    box-sizing: border-box;
+    border: 1px outset #F79E10;
+    border-radius: 0;
+    padding: 6px 24px;
+}
+
+/* ==========================================================================
+   Integrazione con i Temi di Sistema (Light / Dark)
+   ========================================================================== */
+@media (prefers-color-scheme: light) {
+    #components-reconnect-modal {
+        background-color: white;
+        color: black;
+    }
+
+    #components-reconnect-modal button {
+        background: #f0f0f0;
+        color: black;
+    }
+
+    #components-reconnect-modal button:hover {
+        background-color: #F79E10;
+        color: black;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    #components-reconnect-modal {
+        background-color: #333333;
+        color: #FFFFFF;
+    }
+
+    #components-reconnect-modal button {
+        background: #474747;
+        color: #FFFFFF;
+    }
+
+    #components-reconnect-modal button:hover {
+        background-color: #F79E10;
+        color: black;
+    }
+}
+
+/* ==========================================================================
+   Keyframes Animazioni
+   ========================================================================== */
 @keyframes components-reconnect-modal-slideUp {
     0% {
-        transform: translateY(30px) scale(0.95);
+        transform: translateY(20px);
     }
 
     100% {
@@ -72,86 +171,6 @@
     }
 
     100% {
-        opacity: 0;
-    }
-}
-
-.components-reconnect-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-}
-
-#components-reconnect-modal p {
-    margin: 0;
-    text-align: center;
-}
-
-#components-reconnect-modal button {
-    border: 0;
-    background-color: #6b9ed2;
-    color: white;
-    padding: 4px 24px;
-    border-radius: 4px;
-}
-
-    #components-reconnect-modal button:hover {
-        background-color: #3b6ea2;
-    }
-
-    #components-reconnect-modal button:active {
-        background-color: #6b9ed2;
-    }
-
-.components-rejoining-animation {
-    position: relative;
-    width: 80px;
-    height: 80px;
-}
-
-    .components-rejoining-animation div {
-        position: absolute;
-        border: 3px solid #0087ff;
-        opacity: 1;
-        border-radius: 50%;
-        animation: components-rejoining-animation 1.5s cubic-bezier(0, 0.2, 0.8, 1) infinite;
-    }
-
-        .components-rejoining-animation div:nth-child(2) {
-            animation-delay: -0.5s;
-        }
-
-@keyframes components-rejoining-animation {
-    0% {
-        top: 40px;
-        left: 40px;
-        width: 0;
-        height: 0;
-        opacity: 0;
-    }
-
-    4.9% {
-        top: 40px;
-        left: 40px;
-        width: 0;
-        height: 0;
-        opacity: 0;
-    }
-
-    5% {
-        top: 40px;
-        left: 40px;
-        width: 0;
-        height: 0;
-        opacity: 1;
-    }
-
-    100% {
-        top: 0px;
-        left: 0px;
-        width: 80px;
-        height: 80px;
         opacity: 0;
     }
 }

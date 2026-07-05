@@ -2,30 +2,36 @@
 
 <dialog id="components-reconnect-modal" data-nosnippet>
     <div class="components-reconnect-container">
-        <div class="components-rejoining-animation" aria-hidden="true">
-            <div></div>
-            <div></div>
-        </div>
+        
+        <div class="components-reconnect-first-attempt-visible googleIcon UI-icon">sync</div>
         <p class="components-reconnect-first-attempt-visible">
-            Rejoining the server...
+            Retrieving latest financial data...
         </p>
+        
+        <div class="components-reconnect-repeated-attempt-visible googleIcon UI-icon">update</div>
         <p class="components-reconnect-repeated-attempt-visible">
-            Rejoin failed... trying again in <span id="components-seconds-to-next-attempt"></span> seconds.
+            Sync failed. Retrying data recovery in <span id="components-seconds-to-next-attempt"></span> seconds.
         </p>
+        
+        <div class="components-reconnect-failed-visible googleIcon UI-icon">report_problem</div>
         <p class="components-reconnect-failed-visible">
-            Failed to rejoin.<br />Please retry or reload the page.
+            Unable to sync ledger. Please check your connection and retry.
         </p>
         <button id="components-reconnect-button" class="components-reconnect-failed-visible">
-            Retry
+            Retry Sync
         </button>
+        
+        <div class="components-pause-visible googleIcon UI-icon">lock</div>
         <p class="components-pause-visible">
-            The session has been paused by the server.
+            Accounting session paused to protect data.
         </p>
+        
+        <div class="components-resume-failed-visible googleIcon UI-icon">error</div>
         <p class="components-resume-failed-visible">
-            Failed to resume the session.<br />Please retry or reload the page.
+            Failed to resume session. Please reload the secure workspace.
         </p>
         <button id="components-resume-button" class="components-pause-visible components-resume-failed-visible">
-            Resume
+            Resume Session
         </button>
     </div>
 </dialog>
