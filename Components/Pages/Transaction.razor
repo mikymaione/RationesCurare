@@ -61,12 +61,12 @@ else
 
     <div class="form-group bottomspace">
         <label for="description">Description</label>
-        <TextDatalist @bind-Value="description" Items="descriptions" OnSelected="OnDescriptionBlur" Placeholder="Operation Description" />
+        <TextDatalist @bind-Value="description" Items="descriptions" OnSelected="OnDescriptionBlur" Placeholder="Operation Description" Required="@(!IsGiroconto)" />
     </div>
 
     <div class="form-group bottomspace">
         <label for="category">Category</label>
-        <TextDatalist @bind-Value="category" Items="categories" Placeholder="Category to which the transaction belongs" />
+        <TextDatalist @bind-Value="category" Items="categories" Placeholder="Category to which the transaction belongs" Required="@(!IsGiroconto)" />
     </div>    
 
     <div class="form-group bottomspace">
@@ -115,6 +115,10 @@ else
     private string? author;
     private string returnUrl = "/transactions/";
     private string? defaultAccountFromQuery;
+
+    private bool IsGiroconto =>
+        !string.IsNullOrEmpty(fromAccount)
+        && !string.IsNullOrEmpty(toAccount);
 
     protected override async Task OnInitializedAsync()
     {
