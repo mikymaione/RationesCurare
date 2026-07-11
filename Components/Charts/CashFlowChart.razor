@@ -77,10 +77,29 @@
     {
         Chart = new()
         {
-            Toolbar = new() { Show = false },
-            Zoom = new() { Enabled = false },            
+            Toolbar = new()
+            {
+                Show = true,
+                Tools = new()
+                {
+                    Download = true,
+                    Pan = true,
+                    Selection = true,
+                    Zoom = true,
+                    Zoomin = true,
+                    Zoomout = true,
+                    Reset = true
+                }
+            },
+            Zoom = new()
+            {
+                AllowMouseWheelZoom = false,
+            }
         },
-        Legend = new() { Show = false },
+        Legend = new()
+        { 
+            Show = false
+        },
         Xaxis = new()
         {
             Type = XAxisType.Datetime
@@ -147,9 +166,25 @@
         },
         Grid = new()
         {
-            Padding = new() { Right = 0, Left = 0 },
-            Xaxis = new() { Lines = new() { Show = true } },
-            Yaxis = new() { Lines = new() { Show = true } }
+            Padding = new()
+            {
+                Right = 0,
+                Left = 0
+            },
+            Xaxis = new()
+            {
+                Lines = new()
+                {
+                    Show = true
+                }
+            },
+            Yaxis = new()
+            {
+                Lines = new()
+                {
+                    Show = true 
+                }
+            }
         }        
     };
 

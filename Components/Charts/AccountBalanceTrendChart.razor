@@ -71,11 +71,21 @@
         {
             Toolbar = new()
             {
-                Show = false
+                Show = true,
+                Tools = new()
+                {
+                    Download = true,
+                    Pan = true,
+                    Selection = true,
+                    Zoom = true,
+                    Zoomin = true,
+                    Zoomout = true,
+                    Reset = true
+                }
             },
             Zoom = new()
             {
-                Enabled = false
+                AllowMouseWheelZoom = false,
             }
         },
         Legend = new()
