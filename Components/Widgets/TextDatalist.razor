@@ -9,7 +9,7 @@
            placeholder="@Placeholder" 
            autocomplete="off" />
 
-    @if (showDropdown && !string.IsNullOrEmpty(Value) && FilteredItems.Any())
+    @if (showDropdown && !string.IsNullOrEmpty(Value) && Value.Length > 2 && FilteredItems.Any())
     {
         var itemsList = FilteredItems.ToArray();
 
@@ -57,11 +57,14 @@
 
     private async Task OnInputChanged(ChangeEventArgs e)
     {
-        Value = e.Value?.ToString();
-        showDropdown = true;
+        Value = e.Value?.ToString();        
         activeIndex = -1;
+
+        if (string.IsNullOrEmpty(Value) || Value.Length < 3)
+            return;
+
+        showDropdown = true;
         await ValueChanged.InvokeAsync(Value);
-        await OnSelected.InvokeAsync();
     }
 
     private async Task SelectItem(string item)
@@ -77,6 +80,7 @@
     {
         await Task.Delay(200);
         showDropdown = false;
+        await OnSelected.InvokeAsync();
     }
 
     private async Task HandleKeyDown(KeyboardEventArgs e)
