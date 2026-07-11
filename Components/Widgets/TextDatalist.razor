@@ -5,15 +5,21 @@
            @oninput="OnInputChanged" 
            @onfocus="() => showDropdown = true"
            @onblur="HideDropdownWithDelay"
+           @onkeydown="HandleKeyDown"
            placeholder="@Placeholder" 
            autocomplete="off" />
 
     @if (showDropdown && !string.IsNullOrEmpty(Value) && FilteredItems.Any())
     {
+        var itemsList = FilteredItems.ToArray();
+
         <ul>
-            @foreach (var item in FilteredItems)
+            @for (var i = 0; i < itemsList.Length; i++)
             {
-                <li class="cp" @onclick="() => SelectItem(item)">
+                var item = itemsList[i];
+                var x = i;
+                
+                <li class="cp @(x == activeIndex ? "active" : "")" @onclick="() => SelectItem(item)">
                     @item
                 </li>
             }
@@ -42,6 +48,7 @@
     public EventCallback OnSelected { get; set; }
 
     private bool showDropdown;
+    private int activeIndex = -1;
 
     private IEnumerable<string> FilteredItems => 
         string.IsNullOrEmpty(Value) 
@@ -51,7 +58,8 @@
     private async Task OnInputChanged(ChangeEventArgs e)
     {
         Value = e.Value?.ToString();
-        showDropdown = true; // Mostra la lista mentre l'utente digita
+        showDropdown = true;
+        activeIndex = -1;
         await ValueChanged.InvokeAsync(Value);
         await OnSelected.InvokeAsync();
     }
@@ -60,6 +68,7 @@
     {
         Value = item;
         showDropdown = false;
+        activeIndex = -1;
         await ValueChanged.InvokeAsync(Value);
         await OnSelected.InvokeAsync();
     }
@@ -69,4 +78,35 @@
         await Task.Delay(200);
         showDropdown = false;
     }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        var list = FilteredItems.ToList();
+        if (!list.Any()) return;
+
+        if (e.Key == "ArrowDown")
+        {
+            // Freccia GIÙ: aumenta l'indice (senza andare oltre la fine)
+            if (activeIndex < list.Count - 1) activeIndex++;
+        }
+        else if (e.Key == "ArrowUp")
+        {
+            // Freccia SU: diminuisce l'indice (senza andare sotto lo zero)
+            if (activeIndex > 0) activeIndex--;
+        }
+        else if (e.Key == "Enter")
+        {
+            // Tasto INVIO: se c'è un elemento selezionato, lo conferma
+            if (activeIndex >= 0 && activeIndex < list.Count)
+            {
+                await SelectItem(list[activeIndex]);
+            }
+        }
+        else if (e.Key == "Escape")
+        {
+            showDropdown = false;
+            activeIndex = -1;
+        }
+    }
+
 }

@@ -328,6 +328,12 @@ div.awesomplete li[aria-selected="true"] mark {
 
 .cp:hover {
     background-color: #F79E10;
+    font-weight: bold;
+}
+
+.cp.active {
+    background-color: #F79E10;
+    font-weight: bold;
 }
 
 button {
