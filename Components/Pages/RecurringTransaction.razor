@@ -34,12 +34,12 @@ else
 
     <div class="form-group bottomspace">
         <label for="description">Description</label>
-        <TextDatalist @bind-value="Descrizione" Items="descriptionsList" OnSelected="OnDescriptionBlur" Placeholder="Operation Description" />
+        <TextDatalist @bind-value="Descrizione" Items="descriptionsList" OnSelected="OnDescriptionBlur" Placeholder="Operation Description" Required="true" />
     </div>
 
     <div class="form-group bottomspace">
         <label for="category">Category</label>
-        <TextDatalist @bind-value="MacroArea" Items="categoriesList" Placeholder="Category to which the transaction belongs" />
+        <TextDatalist @bind-value="MacroArea" Items="categoriesList" Placeholder="Category to which the transaction belongs" Required="true" />
     </div>
 
     <div class="form-group bottomspace">
