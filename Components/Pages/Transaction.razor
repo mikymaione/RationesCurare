@@ -284,17 +284,16 @@ else
     {
         error = string.Empty;
 
-        if (id == null || id <= -1)
+        if (id == null || id < 0)
             return;
+        
+        var isGiroconto = await Db.Movimentis
+            .Where(m =>
+                m.Id == id
+                && m.Idgiroconto > -1
+            )            
+            .AnyAsync();
 
-        // Recuperiamo l'ID del giroconto prima di iniziare
-        var idGiroconto = await Db.Movimentis
-            .Where(m => m.Id == id)
-            .Where(m => m.Idgiroconto > -1)
-            .Select(m => m.Idgiroconto)
-            .SingleAsync();
-
-        var isGiroconto = idGiroconto.HasValue;
         var confirmationMessage = isGiroconto
             ? "Are you sure you want to delete this internal transfer? Both linked transactions will be removed."
             : "Are you sure you want to delete this transaction?";
@@ -311,6 +310,8 @@ else
             var mainTransaction = await Db.Movimentis.FindAsync(id.Value) 
                 ?? throw new Exception("Transaction not found");
 
+            var idGiroconto = mainTransaction.Idgiroconto;
+            
             if (isGiroconto && idGiroconto.HasValue && idGiroconto > -1)
             {
                 var linkedTransaction = await Db.Movimentis.FindAsync(idGiroconto.Value)
