@@ -17,6 +17,17 @@ html {
     font-size: small;
 }
 
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logo-img {
+    height: 2.5rem;
+    width: auto;
+}
+
 .mycolor {
     background-color: #F79E10;
 }
