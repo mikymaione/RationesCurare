@@ -69,7 +69,7 @@
 	],
 	"icons": [
 		{
-			"src": "favicon.ico",
+			"src": "/favicon/favicon.ico",
 			"sizes": "48x48"
 		},
 		{
