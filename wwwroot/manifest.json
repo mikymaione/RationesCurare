@@ -4,8 +4,8 @@
 	"short_name": "RC",
 	"description": "An open-source software for the management of the personal economy",
 	"display": "standalone",
-	"theme_color": "#000000",
-	"background_color": "#000000",
+	"theme_color": "#F79E10",
+	"background_color": "#F79E10",
 	"lang": "en",
 	"dir": "ltr",
 	"orientation": "natural",
@@ -95,6 +95,12 @@
 			"sizes": "512x512",
 			"type": "image/png",
 			"purpose": "maskable"
+		},
+		{
+			"src": "/favicon/safari-pinned-tab.svg",
+			"sizes": "192x192 512x512",
+			"type": "image/svg+xml",
+			"purpose": "monochrome"
 		}
 	]
 }
