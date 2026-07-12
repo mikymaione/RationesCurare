@@ -95,6 +95,12 @@ else
             <p>@GB.ToMoney(amount) @GB.MoneyDirection(amount.GetValueOrDefault(), isTransfer: false) @fromAccount</p>
         }
     }
+
+    @if (!string.IsNullOrEmpty(error))
+    {
+        <h3 class="mytextcolor">Error</h3>
+        <p class="mytextcolor giustificato">@error</p>
+    }
 </form>
 
 @code {
@@ -115,6 +121,8 @@ else
     private string? author;
     private string returnUrl = "/transactions/";
     private string? defaultAccountFromQuery;
+
+    private string error = string.Empty;
 
     private bool IsGiroconto =>
         !string.IsNullOrEmpty(fromAccount)
@@ -197,125 +205,139 @@ else
 
     private async Task SaveTransaction()
     {
-        var t = id > -1
-            ? await Db.Movimentis
-                .Include(m => m.IdgirocontoNavigation)
-                .FirstOrDefaultAsync(m => m.Id == id.Value)
-                ?? throw new Exception("Transaction not found")
-            : new();
+        error = string.Empty;
+        
+        // Start an explicit transaction
+        using var transaction = await Db.Database.BeginTransactionAsync();
 
-        t.Tipo = fromAccount ?? throw new Exception("From account is required");
-        t.Soldi = amount.GetValueOrDefault();
-        t.Data = date;
-        t.Descrizione = description ?? string.Empty;
-        t.MacroArea = category ?? string.Empty;
-        t.Nome = author ?? throw new Exception("Author is required");
-
-        if (!string.IsNullOrEmpty(toAccount))
+        try
         {
-            // Gestione Giroconto: creiamo o aggiorniamo il secondo movimento collegato
-            var t2 = t.IdgirocontoNavigation ?? new();
+            var t = id > -1
+                ? await Db.Movimentis
+                    .Include(m => m.IdgirocontoNavigation)
+                    .FirstOrDefaultAsync(m => m.Id == id.Value)
+                    ?? throw new Exception("Transaction not found")
+                : new();
 
-            t2.Tipo = toAccount;
-            t2.Soldi = -t.Soldi; // Importo opposto
-            t2.Data = t.Data;
-            t2.Descrizione = t.Descrizione;
-            t2.MacroArea = t.MacroArea;
-            t2.Nome = t.Nome;
+            t.Tipo = fromAccount ?? throw new Exception("From account is required");
+            t.Soldi = amount.GetValueOrDefault();
+            t.Data = date;
+            t.Descrizione = description ?? string.Empty;
+            t.MacroArea = category ?? string.Empty;
+            t.Nome = author ?? throw new Exception("Author is required");
 
-            if (t2.Id == 0)
+            if (!string.IsNullOrEmpty(toAccount))
             {
-                // Per evitare l'errore di dipendenza circolare in fase di inserimento:
-                // 1. Aggiungiamo i record senza il legame di navigazione circolare
-                t.IdgirocontoNavigation = null;
+                var t2 = t.IdgirocontoNavigation ?? new();
+                t2.Tipo = toAccount;
+                t2.Soldi = -t.Soldi;
+                t2.Data = t.Data;
+                t2.Descrizione = t.Descrizione;
+                t2.MacroArea = t.MacroArea;
+                t2.Nome = t.Nome;
 
-                if (id == -1)
-                    Db.Movimentis.Add(t);
+                if (t2.Id < 1)
+                {
+                    // If it's a completely new single transaction, add it first so it gets an ID
+                    if (id == -1)
+                        Db.Movimentis.Add(t);
 
-                Db.Movimentis.Add(t2);
-                
-                await Db.SaveChangesAsync();
+                    Db.Movimentis.Add(t2);
+                    await Db.SaveChangesAsync(); // Saves t2 (and t if new) to generate IDs
+                }
 
-                // 2. Ora che hanno entrambi un ID, impostiamo il legame e risalviamo
+                // Sync the circular relationship explicitly so EF Core binds them perfectly
                 t.IdgirocontoNavigation = t2;
                 t2.IdgirocontoNavigation = t;
             }
-            else
-            {
-                t.IdgirocontoNavigation = t2;
-                t2.IdgirocontoNavigation = t;
-            }
-        }
-        else
-        {
-            // Se toAccount è stato svuotato, rimuoviamo l'eventuale giroconto esistente
-            if (t.IdgirocontoNavigation != null)
+            else if (t.IdgirocontoNavigation != null && t.IdgirocontoNavigation.Id > -1)
             {
                 var linked = t.IdgirocontoNavigation;
-
-                // Rompiamo il legame circolare prima della rimozione per evitare conflitti
                 t.Idgiroconto = null;
                 t.IdgirocontoNavigation = null;
-                linked.Idgiroconto = null;
-                linked.IdgirocontoNavigation = null;
-                await Db.SaveChangesAsync();
-
                 Db.Movimentis.Remove(linked);
             }
+
+            // If it's a new standard transaction (not a transfer), add it now
+            if (id == -1 && string.IsNullOrEmpty(toAccount))
+            {
+                Db.Movimentis.Add(t);
+            }
+
+            // EF Core automatically tracks changes for existing items.
+            // No manual Db.Movimentis.Update(t) is needed here!
+            await Db.SaveChangesAsync();
+            
+            // Commit the transaction
+            await transaction.CommitAsync();
+            NavigationManager.NavigateTo(returnUrl);
         }
-
-        if (id > -1 && Db.Entry(t).State != EntityState.Deleted)
-            Db.Movimentis.Update(t);
-        else if (id == -1 && Db.Entry(t).State == EntityState.Detached)
-            Db.Movimentis.Add(t);
-
-        await Db.SaveChangesAsync();
-        NavigationManager.NavigateTo(returnUrl);
+        catch (Exception ex)
+        {
+            // Rollback on error
+            await transaction.RollbackAsync();
+            error = $"{ex.Message}: {ex.InnerException?.Message}";
+        }
     }
 
     private async Task DeleteTransaction()
     {
-        if (id > -1)
+        error = string.Empty;
+
+        if (id == null || id <= -1)
+            return;
+
+        // Recuperiamo l'ID del giroconto prima di iniziare
+        var idGiroconto = await Db.Movimentis
+            .Where(m => m.Id == id)
+            .Where(m => m.Idgiroconto > -1)
+            .Select(m => m.Idgiroconto)
+            .SingleAsync();
+
+        var isGiroconto = idGiroconto.HasValue;
+        var confirmationMessage = isGiroconto
+            ? "Are you sure you want to delete this internal transfer? Both linked transactions will be removed."
+            : "Are you sure you want to delete this transaction?";
+
+        var confermato = await JS.InvokeAsync<bool>("confirm", confirmationMessage);
+        if (!confermato)
+            return;
+
+        // Avviamo la transazione per gestire il vincolo di integrità
+        using var transaction = await Db.Database.BeginTransactionAsync();
+
+        try
         {
-            var IdGiroconto = await Db.Movimentis
-                .Where(m => m.Id == id)
-                .Select(m => m.Idgiroconto)
-                .SingleAsync() ?? -1;
-            
-            var confirmationMessage = IdGiroconto > -1
-                ? "Are you sure you want to delete this internal transfer? Both linked transactions will be removed."
-                : "Are you sure you want to delete this transaction?";
-            
-            var confermato = await JS.InvokeAsync<bool>("confirm", confirmationMessage);
-            
-            if (confermato)
+            var mainTransaction = await Db.Movimentis.FindAsync(id.Value) 
+                ?? throw new Exception("Transaction not found");
+
+            if (isGiroconto && idGiroconto.HasValue && idGiroconto > -1)
             {
-                var transaction = await Db.Movimentis.FindAsync(id.Value)
-                    ?? throw new Exception("Transaction not found");
+                var linkedTransaction = await Db.Movimentis.FindAsync(idGiroconto.Value)
+                    ?? throw new Exception("Linked transaction not found");
 
-                if (IdGiroconto > -1)
-                {
-                    var linkedTransaction = await Db.Movimentis.FindAsync(IdGiroconto)
-                        ?? throw new Exception("Linked transaction not found");
-                    
-                    // Step 1: Break the circular foreign key references in the database
-                    transaction.Idgiroconto = null;
-                    linkedTransaction.Idgiroconto = null;
-                    
-                    // Push this change to the DB so the constraints are cleared
-                    await Db.SaveChangesAsync();
-
-                    // Step 2: Now that they are completely independent, safe to delete
-                    Db.Movimentis.Remove(linkedTransaction);
-                }
-
-                Db.Movimentis.Remove(transaction);
+                // 1. Rompiamo il legame in entrambi i sensi
+                mainTransaction.Idgiroconto = null;
+                linkedTransaction.Idgiroconto = null;
                 
-                // Save the deletions
+                // Salviamo subito per rimuovere il vincolo dal DB
                 await Db.SaveChangesAsync();
-                
-                NavigationManager.NavigateTo(returnUrl);
+
+                // 2. Rimuoviamo entrambi i record
+                Db.Movimentis.Remove(linkedTransaction);
             }
+
+            Db.Movimentis.Remove(mainTransaction);
+            await Db.SaveChangesAsync();
+
+            // Confermiamo l'eliminazione definitiva
+            await transaction.CommitAsync();
+            NavigationManager.NavigateTo(returnUrl);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            error = $"{ex.Message}: {ex.InnerException?.Message}";
         }
     }
 
