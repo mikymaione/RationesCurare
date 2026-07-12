@@ -63,7 +63,6 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
 // Middleware nell'ordine corretto
@@ -87,7 +86,7 @@ app.MapGet("/login-cookie", async (string email, bool rememberMe, HttpContext ht
 
     // Scrive il cookie cifrato nel browser
     await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authProperties);
-    
+
     return Results.Redirect("/balance");
 });
 
@@ -96,6 +95,13 @@ app.MapGet("/logout-cookie", async (HttpContext httpContext) =>
 {
     await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
     return Results.Redirect("/signin");
+});
+
+app.Use(async (context, next) =>
+{
+    await next();
+    if (context.Response.StatusCode == 404 && !context.Response.HasStarted)
+        context.Response.Redirect("/");
 });
 
 app.MapRazorComponents<App>()
