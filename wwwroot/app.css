@@ -11,6 +11,19 @@ html {
     accent-color: #F79E10;
 }
 
+.back-to-top {
+	position: fixed;
+	bottom: 0.5em;
+	right: 0.65em;
+	display: none;		
+	background-color: #F79E10;
+	color: black;
+	border: none;	
+	cursor: pointer;
+	z-index: 1000;
+	font-size: x-large;
+}
+
 .copyright {
     text-align: justify;
     text-justify: inter-character;
