@@ -20,15 +20,19 @@ builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
 {
     var env = serviceProvider.GetRequiredService<IWebHostEnvironment>();
     var httpContextAccessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+    var userSession = serviceProvider.GetRequiredService<UserSession>();
 
-    // Recuperiamo l'email dell'utente autenticato direttamente dal Cookie nativo crittografato
     var email = httpContextAccessor.HttpContext?.User?.Identity?.Name;
 
     if (!string.IsNullOrWhiteSpace(email))
     {
-        // Se l'utente è loggato, agganciamo dinamicamente il suo database SQLite specifico
-        var dbPath = Path.Combine(env.ContentRootPath, "App_Data", $"{email.Trim().ToLower()}.rqd8");
+        userSession.Initialize(email);
+        var dbPath = Path.Combine(env.ContentRootPath, "App_Data", $"{userSession.Email}.rqd8");
         options.UseSqlite($"Data Source={dbPath}");
+    }
+    else if (userSession.IsInitialized)
+    {
+        options.UseSqlite($"Data Source={userSession.DatabasePath}");
     }
     else
     {
@@ -68,6 +72,20 @@ app.UseHttpsRedirection();
 // Middleware nell'ordine corretto
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.Use(async (context, next) =>
+{
+    var userSession = context.RequestServices.GetRequiredService<UserSession>();
+    var email = context.User?.Identity?.Name;
+
+    if (!string.IsNullOrWhiteSpace(email))
+    {
+        userSession.Initialize(email);
+    }
+
+    await next();
+});
+
 app.UseAntiforgery();
 
 app.MapStaticAssets();
