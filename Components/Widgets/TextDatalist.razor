@@ -6,8 +6,8 @@
            @onfocus="() => showDropdown = true"
            @onblur="HideDropdownWithDelay"
            @onkeydown="HandleKeyDown"
-           placeholder="@Placeholder" 
-           autocomplete="off" />
+           @onkeydown:preventDefault="preventDefault"
+           placeholder="@Placeholder" />
 
     @if (showDropdown && !string.IsNullOrEmpty(Value) && Value.Length > 2 && FilteredItems.Any())
     {
@@ -47,17 +47,20 @@
     [Parameter]
     public EventCallback OnSelected { get; set; }
 
-    private bool showDropdown;
+    private bool showDropdown, preventDefault;
     private int activeIndex = -1;
 
     private IEnumerable<string> FilteredItems => 
-        string.IsNullOrEmpty(Value) 
-            ? Items 
-            : Items.Where(i => i.Contains(Value, StringComparison.OrdinalIgnoreCase));
+        string.IsNullOrEmpty(Value)
+            ? Items
+            : Items
+                .Where(i =>
+                    i.Contains(Value, StringComparison.OrdinalIgnoreCase)
+                );
 
     private async Task OnInputChanged(ChangeEventArgs e)
     {
-        Value = e.Value?.ToString();        
+        Value = $"{e.Value}";
         activeIndex = -1;
 
         if (string.IsNullOrEmpty(Value) || Value.Length < 3)
@@ -85,24 +88,36 @@
 
     private async Task HandleKeyDown(KeyboardEventArgs e)
     {
-        var list = FilteredItems.ToList();
-        if (!list.Any()) return;
+        preventDefault = false;
+
+        var list = FilteredItems
+            .ToArray();
+        
+        if (list.Length < 1)
+            return;
 
         if (e.Key == "ArrowDown")
         {
+            preventDefault = true;
+
             // Freccia GIÙ: aumenta l'indice (senza andare oltre la fine)
-            if (activeIndex < list.Count - 1) activeIndex++;
+            if (activeIndex < list.Length - 1)
+                activeIndex++;
         }
         else if (e.Key == "ArrowUp")
         {
+            preventDefault = true;
+
             // Freccia SU: diminuisce l'indice (senza andare sotto lo zero)
-            if (activeIndex > 0) activeIndex--;
+            if (activeIndex > 0)
+                activeIndex--;
         }
         else if (e.Key == "Enter")
         {
-            // Tasto INVIO: se c'è un elemento selezionato, lo conferma
-            if (activeIndex >= 0 && activeIndex < list.Count)
+            // Se il dropdown è visibile o c'è un elemento evidenziato, previene il submit del form
+            if (showDropdown && activeIndex >= 0 && activeIndex < list.Length)
             {
+                preventDefault = true;
                 await SelectItem(list[activeIndex]);
             }
         }
