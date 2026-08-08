@@ -10,7 +10,7 @@
                 <ApexPointSeries
                     TItem="CashFlow" Items="Data"
                     Name="Balance" SeriesType="SeriesType.Line"
-                    XValue="@(e => new DateTime(e.Year.GetValueOrDefault(), 1, 1))"
+                    XValue="@(e => new DateTime(e.Year.GetValueOrDefault(), 1, 1, 12, 0, 0))"
                     YAggregate="@(e => e.Sum(e => e.BalanceDecimal))" />
             </ApexChart>
             break;
@@ -20,7 +20,7 @@
                 <ApexPointSeries
                     TItem="CashFlow" Items="Data"
                     Name="Balance" SeriesType="SeriesType.Line"
-                    XValue="@(e => new DateTime(e.Year.GetValueOrDefault(), e.Month.GetValueOrDefault(), 1))"
+                    XValue="@(e => new DateTime(e.Year.GetValueOrDefault(), e.Month.GetValueOrDefault(), 1, 12, 0, 0))"
                     YAggregate="@(e => e.Sum(e => e.BalanceDecimal))" />
             </ApexChart>
             break;

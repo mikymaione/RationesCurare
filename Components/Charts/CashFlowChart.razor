@@ -11,7 +11,7 @@
                     TItem="CashFlow" Items="Data"
                     Name="Cash Flow" SeriesType="SeriesType.Bar"
                     DataPointMutator="PointMutator"
-                    XValue="@(e => new DateTime(e.Year.GetValueOrDefault(), 1, 1))"
+                    XValue="@(e => new DateTime(e.Year.GetValueOrDefault(), 1, 1, 12, 0, 0))"
                     YAggregate="@(e => e.Sum(x => x.BalanceDecimal))" />
             </ApexChart>
             break;
@@ -22,7 +22,7 @@
                     TItem="CashFlow" Items="Data"
                     Name="Cash Flow" SeriesType="SeriesType.Bar"
                     DataPointMutator="PointMutator"
-                    XValue="@(e => new DateTime(e.Year.GetValueOrDefault(), e.Month.GetValueOrDefault(), 1))"
+                    XValue="@(e => new DateTime(e.Year.GetValueOrDefault(), e.Month.GetValueOrDefault(), 1, 12, 0, 0))"
                     YAggregate="@(e => e.Sum(x => x.BalanceDecimal))" />
             </ApexChart>
             break;
@@ -33,8 +33,9 @@
 }
 
 @code {
+
     [Parameter]
-    public List<CashFlow> Data { get; set; } = new();
+    public List<CashFlow>? Data { get; set; }
 
     [Parameter]
     public ViewType viewType { get; set; }
