@@ -44,15 +44,13 @@
         if (AuthStateTask != null)
         {
             var authState = await AuthStateTask;
-            var user = authState.User;
+            var user = authState?.User;
 
-            IsAuthenticated = user.Identity?.IsAuthenticated ?? false;
+            IsAuthenticated = user?.Identity?.IsAuthenticated ?? false;
         }
     }
 
-    protected override async Task OnInitializedAsync()
-    {
-        await RecurringTransactionManagement.ProcessPendingTransactionsAsync();
-    }
+    protected override Task OnInitializedAsync() =>
+        RecurringTransactionManagement.ProcessPendingTransactionsAsync();
 
 }
