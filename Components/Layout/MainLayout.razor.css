@@ -1,20 +1,53 @@
 #blazor-error-ui {
-    color-scheme: light only;
-    background: lightyellow;
-    bottom: 0;
-    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
-    box-sizing: border-box;
-    display: none;
-    left: 0;
-    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    font-family: 'Ubuntu Mono', monospace;
+    font-size: medium;
     position: fixed;
-    width: 100%;
-    z-index: 1000;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 500px;
+    z-index: 10000;
+    box-sizing: border-box;
+    padding: 1.5rem;
+    display: none;
+    border: 2px solid #F79E10;
+    border-radius: 4px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    text-align: center;
 }
 
-    #blazor-error-ui .dismiss {
-        cursor: pointer;
-        position: absolute;
-        right: 0.75rem;
-        top: 0.5rem;
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+    font-weight: bold;
+    font-size: large;
+}
+
+#blazor-error-ui .reload {
+    color: #F79E10;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+@media (prefers-color-scheme: light) {
+    #blazor-error-ui {
+        background-color: #ffffff;
+        color: black;
     }
+    #blazor-error-ui .dismiss {
+        color: #464453;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    #blazor-error-ui {
+        background-color: #474747;
+        color: #FFF;
+    }
+    #blazor-error-ui .dismiss {
+        color: #F2F2F2;
+    }
+}
