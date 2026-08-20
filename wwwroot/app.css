@@ -428,6 +428,13 @@ input:user-invalid {
     justify-content: space-between;
 }
 
+.date-presets-container {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr); /* 6 colonne uguali fisse su un'unica riga */
+    gap: 6px;
+    width: 100%;
+}
+
 .googleIcon {
     font-family: 'Material Icons';
 }

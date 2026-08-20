@@ -54,7 +54,18 @@
             <div>
                 <label for="dateTo">Date to:</label>
                 <input type="date" id="dateTo" @bind="dateTo" min="@minDate?.ToString("yyyy-MM-dd")" max="@maxDate?.ToString("yyyy-MM-dd")" placeholder="Date the transaction was performed" />
-            </div>
+            </div>            
+        </div>
+
+        <!-- Quick Date Presets -->
+        <div class="bottomspace date-presets-container">
+            <button type="button" class="googleIcon" title="This Month" @onclick="SetThisMonth">calendar_month</button>
+            <button type="button" class="googleIcon" title="Previous Month" @onclick="SetPreviousMonth">navigate_before</button>
+            <button type="button" class="googleIcon" title="Next Month" @onclick="SetNextMonth">navigate_next</button>
+
+            <button type="button" class="googleIcon" title="This Year" @onclick="SetThisYear">calendar_today</button>
+            <button type="button" class="googleIcon" title="Previous Year" @onclick="SetPreviousYear">fast_rewind</button>
+            <button type="button" class="googleIcon" title="Next Year" @onclick="SetNextYear">fast_forward</button>
         </div>
 
         <!-- Amount -->
@@ -581,5 +592,59 @@
 
     private void NewTransaction() =>
         Detail(-1);
-    
+
+
+    private async Task SetThisMonth()
+    {
+        var today = DateTime.Today;
+        dateFrom = new DateTime(today.Year, today.Month, 1);
+        dateTo = dateFrom.Value.AddMonths(1).AddDays(-1);
+        await ApplyFilters();
+    }
+
+    private async Task SetPreviousMonth()
+    {
+        var baseDate = dateFrom ?? DateTime.Today;
+        var targetDate = new DateTime(baseDate.Year, baseDate.Month, 1).AddMonths(-1);
+        
+        dateFrom = targetDate;
+        dateTo = targetDate.AddMonths(1).AddDays(-1);
+        await ApplyFilters();
+    }
+
+    private async Task SetNextMonth()
+    {
+        var baseDate = dateFrom ?? DateTime.Today;
+        var targetDate = new DateTime(baseDate.Year, baseDate.Month, 1).AddMonths(1);
+        
+        dateFrom = targetDate;
+        dateTo = targetDate.AddMonths(1).AddDays(-1);
+        await ApplyFilters();
+    }
+
+    private async Task SetThisYear()
+    {
+        var today = DateTime.Today;
+        dateFrom = new DateTime(today.Year, 1, 1);
+        dateTo = new DateTime(today.Year, 12, 31);
+        await ApplyFilters();
+    }
+
+    private async Task SetPreviousYear()
+    {
+        var baseYear = (dateFrom ?? DateTime.Today).Year - 1;
+        
+        dateFrom = new DateTime(baseYear, 1, 1);
+        dateTo = new DateTime(baseYear, 12, 31);
+        await ApplyFilters();
+    }
+
+    private async Task SetNextYear()
+    {
+        var baseYear = (dateFrom ?? DateTime.Today).Year + 1;
+        
+        dateFrom = new DateTime(baseYear, 1, 1);
+        dateTo = new DateTime(baseYear, 12, 31);
+        await ApplyFilters();
+    }
 }
