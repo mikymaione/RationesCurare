@@ -11,6 +11,9 @@ public static class GB
     public static string? ToDateTime(DateTime? d) =>
         d?.ToString("g");
 
+    public static string? ToInt(int? i) =>
+        i?.ToString("N0");
+
     public static string? ToMoney(double? d) =>
         d?.ToString("C2");
 

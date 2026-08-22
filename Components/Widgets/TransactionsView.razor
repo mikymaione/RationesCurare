@@ -80,13 +80,13 @@
         </tbody>
         <tfoot>
             <tr class="footer-desktop">
-                <td colspan="5"># @itemsCount</td>
+                <td colspan="5"># @GB.ToInt(itemsCount)</td>
                 <td class="nw" align="right">
                     @GB.ToMoney(total)
                 </td>
             </tr>
             <tr class="footer-mobile">
-                <td># @itemsCount</td>
+                <td># @GB.ToInt(itemsCount)</td>
                 <td class="nw" align="right">
                     @GB.ToMoney(total)
                 </td>
@@ -101,7 +101,7 @@
     public List<Movimenti>? items { get; set; }
 
     [Parameter]
-    public double itemsCount { get; set; }
+    public int itemsCount { get; set; }
 
     [Parameter]
     public double total { get; set; }
