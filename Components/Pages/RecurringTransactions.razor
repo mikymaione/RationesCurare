@@ -18,35 +18,67 @@
 
 @if (items != null)
 {
-    <table width="100%">
+    <table width="100%" class="responsive-table">
         <thead>
-            <tr>
+            <!-- Header > 745px -->
+            <tr class="header-desktop">
+                <th class="col-shrink">Account</th>
+                <th class="col-shrink">Category</th>
+                <th class="col-expand">Description</th>
+                <th class="col-shrink">Periodicity</th>
+                <th class="col-shrink">Due date</th>
+                <th align="right" class="col-shrink">Amount</th>
+            </tr>
+            <!-- Header <= 745px -->
+            <tr class="header-mobile">
                 <th>Description</th>
-                <th>Amount</th>
+                <th align="right">Amount</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var x in items)
             {
                 <tr @onclick="() => Detail(x.Id)" style="cursor:pointer;">
-                    <td>
+                    <!-- COLONNE DESKTOP (> 745px) -->
+                    <td class="col-desktop col-shrink nw">
+                        @GB.ToProperCase(x.Tipo)
+                    </td>
+                    <td class="col-desktop col-shrink nw">
+                        @x.MacroArea
+                    </td>
+                    <td class="col-desktop col-expand">
+                        @x.Descrizione
+                    </td>
+                    <td class="col-desktop col-shrink nw">
+                        @x.Periodo_H
+                    </td>
+                    <td class="col-desktop col-shrink nw">
+                        @GB.ToDate(x.GiornoDelMese)
+                    </td>
+
+                    <!-- COLONNA MOBILE (<= 745px) -->
+                    <td class="col-mobile">
                         <div>
                             <span class="trLabelC">@GB.ToProperCase(x.Tipo)</span>
                             <span class="trLabel">@x.MacroArea</span>
                         </div>
                         <div><small>@x.Descrizione</small></div>
-                        <div><ruby>@GB.ToDateTime(x.GiornoDelMese)</ruby> - @x.Periodo_H</div>
+                        <div><ruby>@GB.ToDate(x.GiornoDelMese)</ruby> - @x.Periodo_H</div>
                     </td>
-                    <td align="right" class="nw @GB.ClassColoreImporto(x.Soldi)">
+
+                    <!-- COLONNA SOLDI (Comune a entrambe le viste) -->
+                    <td align="right" class="nw col-shrink @GB.ClassColoreImporto(x.Soldi)">
                         @GB.ToMoney(x.Soldi)
                     </td>
                 </tr>
             }
         </tbody>
         <tfoot>
-            <tr>
-                <td># @items.Count</td>
-                <td></td>
+            <tr class="footer-desktop">
+                <td colspan="6"># @items.Count</td>
+            </tr>
+            <tr class="footer-mobile">
+                <td colspan="2"># @items.Count</td>
             </tr>
         </tfoot>
     </table>

@@ -4,6 +4,10 @@ namespace RationesCurare.Functions;
 
 public static class GB
 {
+
+    public static string? ToDate(DateTime? d) =>
+        d?.ToString("d");
+
     public static string? ToDateTime(DateTime? d) =>
         d?.ToString("g");
 
@@ -11,7 +15,7 @@ public static class GB
         d?.ToString("C2");
 
     public static string? MoneyDirection(double d, bool isTransfer) =>
-        d < 0 
+        d < 0
             ? "from"
             : isTransfer ? "to" : "in";
 

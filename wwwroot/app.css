@@ -12,16 +12,16 @@ html {
 }
 
 .back-to-top {
-	position: fixed;
-	bottom: 1em;
-	right: 0.7em;
-	display: none;		
-	background-color: #F79E10;
-	color: black;
-	border: none;	
-	cursor: pointer;
-	z-index: 1000;
-	font-size: x-large;
+    position: fixed;
+    bottom: 1em;
+    right: 0.7em;
+    display: none;
+    background-color: #F79E10;
+    color: black;
+    border: none;
+    cursor: pointer;
+    z-index: 1000;
+    font-size: x-large;
 }
 
 .copyright {
@@ -77,7 +77,6 @@ html {
 }
 
 body {
-    max-width: 745px;
     margin: auto;
     margin-bottom: 1rem;
     padding: 1rem;
@@ -430,7 +429,8 @@ input:user-invalid {
 
 .date-presets-container {
     display: grid;
-    grid-template-columns: repeat(6, 1fr); /* 6 colonne uguali fisse su un'unica riga */
+    grid-template-columns: repeat(6, 1fr);
+    /* 6 colonne uguali fisse su un'unica riga */
     gap: 6px;
     width: 100%;
 }
@@ -547,5 +547,82 @@ Integrazione ApexCharts con il Tema di Sistema (Light/Dark)
     .apexcharts-tooltip-title {
         background-color: #333 !important;
         color: #FFF !important;
+    }
+}
+
+
+.responsive-table .desktop-only {
+    display: none !important;
+}
+
+.responsive-table .mobile-only {
+    display: table-cell;
+}
+
+tr.mobile-only {
+    display: table-row;
+}
+
+@media (min-width: 746px) {
+    .responsive-table .desktop-only {
+        display: table-cell !important;
+    }
+
+    tr.desktop-only {
+        display: table-row !important;
+    }
+
+    .responsive-table .mobile-only {
+        display: none !important;
+    }
+}
+
+
+/* 1. VISTA MOBILE DI DEFAULT (<= 745px) */
+.responsive-table .header-desktop,
+.responsive-table .footer-desktop,
+.responsive-table .col-desktop {
+    display: none !important;
+}
+
+.responsive-table .header-mobile,
+.responsive-table .footer-mobile {
+    display: table-row;
+}
+
+.responsive-table .col-mobile {
+    display: table-cell;
+}
+
+/* 2. VISTA DESKTOP (> 745px) */
+@media (min-width: 746px) {
+
+    .responsive-table .header-mobile,
+    .responsive-table .footer-mobile,
+    .responsive-table .col-mobile {
+        display: none !important;
+    }
+
+    .responsive-table .header-desktop,
+    .responsive-table .footer-desktop {
+        display: table-row !important;
+    }
+
+    .responsive-table .col-desktop {
+        display: table-cell !important;
+    }
+
+    /* Gestione dimensioni colonne */
+    .responsive-table th.col-shrink,
+    .responsive-table td.col-shrink {
+        width: 1%;
+        white-space: nowrap;
+        /* Impedisce che il testo vada a capo forzando la colonna a essere stretta */
+    }
+
+    .responsive-table th.col-expand,
+    .responsive-table td.col-expand {
+        width: auto;
+        /* Prende tutto lo spazio rimanente */
     }
 }
