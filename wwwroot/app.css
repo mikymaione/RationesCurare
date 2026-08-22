@@ -13,8 +13,8 @@ html {
 
 .back-to-top {
 	position: fixed;
-	bottom: 0.5em;
-	right: 0.65em;
+	bottom: 1em;
+	right: 0.7em;
 	display: none;		
 	background-color: #F79E10;
 	color: black;
