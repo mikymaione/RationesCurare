@@ -1,6 +1,7 @@
 using System.Globalization;
+using RationesCurare.Models;
 
-namespace RationesCurare.Models;
+namespace RationesCurare.Functions;
 
 public static class GestioneValute
 {

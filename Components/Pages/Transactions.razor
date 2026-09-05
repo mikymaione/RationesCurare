@@ -16,6 +16,7 @@
 @inject AppDbContext Db
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
+@inject LocalStorageManager LocalStorageManager
 
 <PageTitle>RationesCurare - @TheTitle</PageTitle>
 
@@ -248,20 +249,23 @@
     public void Dispose() =>
         dotNetRef?.Dispose();
 
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadFilterOptions();
-        await CalculateTotal();
-        await LoadNextBatch();
-    }
+    protected override Task OnInitializedAsync() =>
+        LoadFilterOptions();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             dotNetRef = DotNetObjectReference.Create(this);
-            await JS.InvokeVoidAsync("setupScrollObserver", scrollTrigger, dotNetRef);
+
+            await LoadFilters();
+            await ApplyFilters();
+
+            StateHasChanged();
         }
+
+        if (hasMoreItems && scrollTrigger.Context != null)
+            await JS.InvokeVoidAsync("setupScrollObserver", scrollTrigger, dotNetRef);
     }
 
     [JSInvokable]
@@ -276,6 +280,8 @@
 
     private async Task LoadNextBatch()
     {
+        await SaveFilters();
+
         var query = Db.Movimentis.AsQueryable();
 
         if (!string.IsNullOrEmpty(filterAccount))
@@ -560,6 +566,35 @@
         await LoadNextBatch();
     }
 
+    private async Task LoadFilters()
+    {
+        await LocalStorageManager.IfNotInitializeKeysAsync("Transactions");
+
+        filterViewType = await LocalStorageManager.GetItemAsync<ViewType>("filterViewType", ViewType.AllTransactions);
+        dateFrom = await LocalStorageManager.GetItemAsync<DateTime?>("dateFrom", null);
+        dateTo = await LocalStorageManager.GetItemAsync<DateTime?>("dateTo", null);
+        amountFrom = await LocalStorageManager.GetItemAsync<double?>("amountFrom", null);
+        amountTo = await LocalStorageManager.GetItemAsync<double?>("amountTo", null);
+        filterCategory = await LocalStorageManager.GetItemAsync<string?>("filterCategory", string.Empty);
+        filterDescription = await LocalStorageManager.GetItemAsync<string?>("filterDescription", string.Empty);
+        filterAccount = await LocalStorageManager.GetItemAsync<string?>("filterAccount", account);
+    }
+
+    private async Task SaveFilters()
+    {
+        if (LocalStorageManager.IsReady("Transactions"))
+        {
+            await LocalStorageManager.SetItemAsync("filterViewType", filterViewType);
+            await LocalStorageManager.SetItemAsync("dateFrom", dateFrom);
+            await LocalStorageManager.SetItemAsync("dateTo", dateTo);
+            await LocalStorageManager.SetItemAsync("amountFrom", amountFrom);
+            await LocalStorageManager.SetItemAsync("amountTo", amountTo);
+            await LocalStorageManager.SetItemAsync("filterCategory", filterCategory);
+            await LocalStorageManager.SetItemAsync("filterDescription", filterDescription);
+            await LocalStorageManager.SetItemAsync("filterAccount", filterAccount);
+        }
+    }
+
     private async Task ClearFilters()
     {
         dateFrom = null;
@@ -646,5 +681,6 @@
         dateFrom = new DateTime(baseYear, 1, 1);
         dateTo = new DateTime(baseYear, 12, 31);
         await ApplyFilters();
-    }
+    }    
+
 }

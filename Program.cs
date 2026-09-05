@@ -6,6 +6,7 @@ using RationesCurare.Components;
 using RationesCurare.Data;
 using RationesCurare.Functions;
 using ApexCharts;
+using Blazored.LocalStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +58,9 @@ builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddScoped<LocalStorageManager>();
 
 builder.Services.AddApexCharts();
 
