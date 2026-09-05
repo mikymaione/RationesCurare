@@ -282,6 +282,12 @@
     {
         await SaveFilters();
 
+        if (filterViewType != ViewType.AllTransactions)
+        {
+            cashFlowItems.Clear();
+            breakdownItems.Clear();
+        }
+
         var query = Db.Movimentis.AsQueryable();
 
         if (!string.IsNullOrEmpty(filterAccount))
