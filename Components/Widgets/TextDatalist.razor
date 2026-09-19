@@ -63,10 +63,9 @@
         Value = $"{e.Value}";
         activeIndex = -1;
 
-        if (string.IsNullOrEmpty(Value) || Value.Length < 3)
-            return;
+        if (!string.IsNullOrEmpty(Value) && Value.Length > 2)
+            showDropdown = true;
 
-        showDropdown = true;
         await ValueChanged.InvokeAsync(Value);
     }
 
