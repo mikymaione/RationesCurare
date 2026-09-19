@@ -626,3 +626,8 @@ tr.mobile-only {
         /* Prende tutto lo spazio rimanente */
     }
 }
+
+.datalist-dropdown {
+    max-height: 200px;
+    overflow-y: auto;
+}
