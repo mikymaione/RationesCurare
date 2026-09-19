@@ -120,6 +120,15 @@
                 await SelectItem(list[activeIndex]);
             }
         }
+        else if (e.Key == "Tab")
+        {
+            if (showDropdown)
+            {
+                // Se l'utente ha usato le frecce prende l'attivo, altrimenti prende il primo (indice 0)
+                var idx = activeIndex >= 0 ? activeIndex : 0;
+                await SelectItem(list[idx]);
+            }
+        }
         else if (e.Key == "Escape")
         {
             showDropdown = false;
