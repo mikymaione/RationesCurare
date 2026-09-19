@@ -209,6 +209,7 @@
         string.IsNullOrEmpty(account)
             ? "Transactions"
             : $"Transactions of {account}";
+
     string TheSubTitle =>
         string.IsNullOrEmpty(account)
             ? "Content"
@@ -583,7 +584,9 @@
         amountTo = await LocalStorageManager.GetItemAsync<double?>("amountTo", null);
         filterCategory = await LocalStorageManager.GetItemAsync<string?>("filterCategory", string.Empty);
         filterDescription = await LocalStorageManager.GetItemAsync<string?>("filterDescription", string.Empty);
-        filterAccount = await LocalStorageManager.GetItemAsync<string?>("filterAccount", account);
+        filterAccount = string.IsNullOrEmpty(account)
+            ? await LocalStorageManager.GetItemAsync<string?>("filterAccount", account)
+            : account;
     }
 
     private async Task SaveFilters()
