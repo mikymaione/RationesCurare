@@ -568,9 +568,9 @@
         breakdownItems.Clear();
 
         hasMoreItems = true;
-
-        await CalculateTotal();
+        
         await LoadNextBatch();
+        await CalculateTotal();
     }
 
     private async Task LoadFilters()
@@ -619,9 +619,9 @@
         breakdownItems.Clear();
 
         hasMoreItems = true;
-
-        await CalculateTotal();
+        
         await LoadNextBatch();
+        await CalculateTotal();
     }
 
     private void Detail(int id) 
