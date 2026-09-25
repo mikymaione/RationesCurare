@@ -24,59 +24,57 @@
 
 <h2>Sign Up</h2>
 
-<form @onsubmit="HandleSignUp">
-    <div class="form-group bottomspace">
-        <label class="form-group" for="eNickName">NickName</label>
-        <input id="eNickName" @bind="nickName" placeholder="Your display name" type="text" required />
-    </div>
+<div class="form-group bottomspace">
+    <label class="form-group" for="eNickName">NickName</label>
+    <input id="eNickName" @bind="nickName" placeholder="Your display name" type="text" required />
+</div>
 
-    <div class="form-group bottomspace">
-        <label class="form-group" for="eUtente">Email</label>
-        <input id="eUtente" @bind="email" placeholder="Used for login and no advertising" type="email" required />
-    </div>
+<div class="form-group bottomspace">
+    <label class="form-group" for="eUtente">Email</label>
+    <input id="eUtente" @bind="email" placeholder="Used for login and no advertising" type="email" required />
+</div>
 
-    <div class="form-group bottomspace">
-        <label class="form-group" for="ePsw">Password</label>
-        <input id="ePsw" @bind="password" placeholder="Non-changeable and non-recoverable" type="password" required />
-        <small class="mytextcolor giustificato" style="display: block; margin-top: 4px;">
-            Since the password will be used to encrypt your database and there is no possibility of recovery, we recommend that you save the password in your browser's password manager.
-        </small>
-    </div>
+<div class="form-group bottomspace">
+    <label class="form-group" for="ePsw">Password</label>
+    <input id="ePsw" @bind="password" placeholder="Non-changeable and non-recoverable" type="password" required />
+    <small class="mytextcolor giustificato" style="display: block; margin-top: 4px;">
+        Since the password will be used to encrypt your database and there is no possibility of recovery, we recommend that you save the password in your browser's password manager.
+    </small>
+</div>
 
-    <div class="form-group bottomspace">
-        <label class="form-group" for="eCurrency">Currency</label>
-        <select id="eCurrency" @value="selectedCurrency" @onchange="OnCurrencyChanged" required>
-            <option value="">Select currency...</option>
-            @foreach (var valuta in GestioneValute.Currencies)
-            {
-                <option value="@valuta.Code">@valuta.Description</option>
-            }
-        </select>
-    </div>
+<div class="form-group bottomspace">
+    <label class="form-group" for="eCurrency">Currency</label>
+    <select id="eCurrency" @value="selectedCurrency" @onchange="OnCurrencyChanged" required>
+        <option value="">Select currency...</option>
+        @foreach (var valuta in GestioneValute.Currencies)
+        {
+            <option value="@valuta.Code">@valuta.Description</option>
+        }
+    </select>
+</div>
 
-    <div class="form-group bottomspace">
-        <label class="form-group" for="eLanguage">Language</label>
-        <select id="eLanguage" @bind="selectedLanguage" required>
-            <option value="">Select language...</option>
-            @foreach (var lingua in listaLingue)
-            {
-                <option value="@lingua.Code">@lingua.Description</option>
-            }
-        </select>
-    </div>
+<div class="form-group bottomspace">
+    <label class="form-group" for="eLanguage">Language</label>
+    <select id="eLanguage" @bind="selectedLanguage" required>
+        <option value="">Select language...</option>
+        @foreach (var lingua in listaLingue)
+        {
+            <option value="@lingua.Code">@lingua.Description</option>
+        }
+    </select>
+</div>
 
-    <div class="bottomspace">
-        <button type="submit">Sign Up</button>
-        <a href="/signin"><button type="button">Go Back</button></a>
-    </div>
+<div class="bottomspace">
+    <WaitButton Text="Sign Up" WaitText="Signing up..." DoAction="HandleSignUp" />
+    <a href="/signin"><button type="button">Go Back</button></a>
+</div>
 
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <div>
-            <em>@errorMessage</em>
-        </div>
-    }
-</form>
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div>
+        <em>@errorMessage</em>
+    </div>
+}
 
 @code {
     private string nickName = "";

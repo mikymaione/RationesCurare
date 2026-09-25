@@ -26,88 +26,86 @@ else
     <h2>Edit recurring transaction #@id</h2>
 }
 
-<form @onsubmit="SaveTransaction">
-    <div class="form-group bottomspace">
-        <label for="amount">Transaction amount</label>
-        <input type="number" id="amount" @bind="Soldi" step="0.01" min="-10000000" max="10000000" required placeholder="Transaction amount in money" />
-    </div>
+<div class="form-group bottomspace">
+    <label for="amount">Transaction amount</label>
+    <input type="number" id="amount" @bind="Soldi" step="0.01" min="-10000000" max="10000000" required placeholder="Transaction amount in money" />
+</div>
 
-    <div class="form-group bottomspace">
-        <label for="description">Description</label>
-        <TextDatalist @bind-value="Descrizione" Items="descriptionsList" OnSelected="OnDescriptionBlur" Placeholder="Operation Description" Required="true" />
-    </div>
+<div class="form-group bottomspace">
+    <label for="description">Description</label>
+    <TextDatalist @bind-value="Descrizione" Items="descriptionsList" OnSelected="OnDescriptionBlur" Placeholder="Operation Description" Required="true" />
+</div>
 
-    <div class="form-group bottomspace">
-        <label for="category">Category</label>
-        <TextDatalist @bind-value="MacroArea" Items="categoriesList" Placeholder="Category to which the transaction belongs" Required="true" />
-    </div>
+<div class="form-group bottomspace">
+    <label for="category">Category</label>
+    <TextDatalist @bind-value="MacroArea" Items="categoriesList" Placeholder="Category to which the transaction belongs" Required="true" />
+</div>
 
-    <div class="form-group bottomspace">
-        <label for="account">From account</label>
-        <select id="account" @bind="Tipo" required>
-            <option value="">«select account»</option>
-            @foreach (var acc in accountsList)
-            {
-                <option value="@acc">@GB.ToProperCase(acc)</option>
-            }
-        </select>
-    </div>
-
-    <div class="form-group bottomspace">
-        <label for="periodicity">Periodicity</label>
-        <select id="periodicity" @bind="TipoGiorniMese" required>
-            <option value="G">Everyday</option>
-            <option value="M">Every month</option>
-            <option value="B">Every two months</option>
-            <option value="T">Every three months</option>
-            <option value="Q">Every four months</option>
-            <option value="S">Every six months</option>
-            <option value="A">Every year</option>
-        </select>
-    </div>
-
-    @if (TipoGiorniMese == "G")
-    {
-        <div class="form-group bottomspace">
-            <label for="numeroGiorni">Every how many days</label>
-            <input type="number" id="numeroGiorni" @bind="NumeroGiorni" step="1" min="1" max="3650" required placeholder="How often does it repeat?" />
-        </div>
-    }
-
-    <div class="form-group bottomspace">
-        <label for="startingDay">Starting from the day</label>
-        <input type="date" id="startingDay" @bind="Data" required />
-    </div>
-
-    <div class="form-group bottomspace">
-        <input id="hasExpiration" type="checkbox" @bind="hasExpiration" @bind:after="@HasExpirationChanged" />
-        <label for="hasExpiration">Enable expiration</label>
-        <br />
-        <input type="date" id="expiration" @bind="Scadenza" required disabled="@(!hasExpiration)" />
-    </div>
-
-    <div class="form-group bottomspace">
-        <label for="author">Author</label>
-        <input type="text" id="author" @bind="Nome" maxlength="255" autocomplete="on" required placeholder="Author of the transaction" />
-    </div>
-
-    <div class="divSpaceBetween">
-        <button type="submit">Save</button>
-        @if (id > -1)
+<div class="form-group bottomspace">
+    <label for="account">From account</label>
+    <select id="account" @bind="Tipo" required>
+        <option value="">«select account»</option>
+        @foreach (var acc in accountsList)
         {
-            <button type="button" @onclick="DeleteTransaction">Delete</button>
+            <option value="@acc">@GB.ToProperCase(acc)</option>
         }
+    </select>
+</div>
+
+<div class="form-group bottomspace">
+    <label for="periodicity">Periodicity</label>
+    <select id="periodicity" @bind="TipoGiorniMese" required>
+        <option value="G">Everyday</option>
+        <option value="M">Every month</option>
+        <option value="B">Every two months</option>
+        <option value="T">Every three months</option>
+        <option value="Q">Every four months</option>
+        <option value="S">Every six months</option>
+        <option value="A">Every year</option>
+    </select>
+</div>
+
+@if (TipoGiorniMese == "G")
+{
+    <div class="form-group bottomspace">
+        <label for="numeroGiorni">Every how many days</label>
+        <input type="number" id="numeroGiorni" @bind="NumeroGiorni" step="1" min="1" max="3650" required placeholder="How often does it repeat?" />
     </div>
-    
-    @if (Soldi.HasValue && Soldi != 0)
+}
+
+<div class="form-group bottomspace">
+    <label for="startingDay">Starting from the day</label>
+    <input type="date" id="startingDay" @bind="Data" required />
+</div>
+
+<div class="form-group bottomspace">
+    <input id="hasExpiration" type="checkbox" @bind="hasExpiration" @bind:after="@HasExpirationChanged" />
+    <label for="hasExpiration">Enable expiration</label>
+    <br />
+    <input type="date" id="expiration" @bind="Scadenza" required disabled="@(!hasExpiration)" />
+</div>
+
+<div class="form-group bottomspace">
+    <label for="author">Author</label>
+    <input type="text" id="author" @bind="Nome" maxlength="255" autocomplete="on" required placeholder="Author of the transaction" />
+</div>
+
+<div class="divSpaceBetween">
+    <WaitButton Text="Save" WaitText="Saving..." DoAction="SaveTransaction" />
+    @if (id > -1)
     {
-        <h3>Summary</h3>
-        @if (!string.IsNullOrEmpty(Tipo))
-        {
-            <p>@GB.ToMoney(Soldi) @GB.MoneyDirection(Soldi.GetValueOrDefault(), isTransfer: false) @Tipo</p>
-        }
+        <WaitButton Text="Delete" WaitText="Deleting..." DoAction="DeleteTransaction" />
     }
-</form>
+</div>
+
+@if (Soldi.HasValue && Soldi != 0)
+{
+    <h3>Summary</h3>
+    @if (!string.IsNullOrEmpty(Tipo))
+    {
+        <p>@GB.ToMoney(Soldi) @GB.MoneyDirection(Soldi.GetValueOrDefault(), isTransfer: false) @Tipo</p>
+    }
+}
 
 @code {
 

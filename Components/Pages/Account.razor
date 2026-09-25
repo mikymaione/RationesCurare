@@ -3,6 +3,7 @@
 
 @using Microsoft.AspNetCore.Authorization
 @using RationesCurare.Data
+@using RationesCurare.Components.Widgets
 
 @attribute [Authorize]
 
@@ -38,10 +39,10 @@ else
     </div>
 
     <div class="divSpaceBetween">
-        <button type="submit">Save</button>
+        <WaitButton Text="Save" WaitText="Saving..." DoAction="SaveAccount" />
         @if (!NewRecord)
         {
-            <button type="button"@onclick="DeleteAccount">Delete</button>
+            <WaitButton Text="Delete" WaitText="Deleting..." DoAction="DeleteAccount" />
         }
     </div>
 </form>

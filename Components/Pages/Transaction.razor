@@ -26,82 +26,80 @@ else
     <h2>Edit transaction #@id</h2>
 }
 
-<form @onsubmit="SaveTransaction">
-    <div class="form-group bottomspace">
-        <label for="fromAccount">From account</label>
-        <select id="fromAccount" @bind="fromAccount" required>
-            <option value="">«select account»</option>
-            @foreach (var acc in accounts)
-            {
-                <option value="@acc">@GB.ToProperCase(acc)</option>
-            }
-        </select>
-    </div>
-
-    <div class="form-group bottomspace">
-        <label for="toAccount">To account</label>
-        <select id="toAccount" @bind="toAccount">
-            <option value="">«no account»</option>
-            @foreach (var acc in accounts)
-            {
-                <option value="@acc">@GB.ToProperCase(acc)</option>
-            }
-        </select>
-    </div>
-
-    <div class="form-group bottomspace">
-        <label for="amount">Transaction amount</label>
-        <input type="number" id="amount" @bind="amount" step="0.01" min="-10000000" max="10000000" required placeholder="Transaction amount in money" />
-    </div>
-
-    <div class="form-group bottomspace">
-        <label for="dateEdit">Date</label>
-        <input type="datetime-local" id="dateEdit" @bind="date" required placeholder="Date the transaction was performed" />
-    </div>
-
-    <div class="form-group bottomspace">
-        <label for="description">Description</label>
-        <TextDatalist @bind-Value="description" Items="descriptions" OnSelected="OnDescriptionBlur" Placeholder="Operation Description" Required="@(!IsGiroconto)" />
-    </div>
-
-    <div class="form-group bottomspace">
-        <label for="category">Category</label>
-        <TextDatalist @bind-Value="category" Items="categories" Placeholder="Category to which the transaction belongs" Required="@(!IsGiroconto)" />
-    </div>    
-
-    <div class="form-group bottomspace">
-        <label for="author">Author</label>
-        <input type="text" id="author" @bind="author" maxlength="255" autocomplete="on" required placeholder="Author of the transaction" />
-    </div>
-
-    <div class="divSpaceBetween">
-        <button type="submit">Save</button>
-        @if (id > -1)
+<div class="form-group bottomspace">
+    <label for="fromAccount">From account</label>
+    <select id="fromAccount" @bind="fromAccount" required>
+        <option value="">«select account»</option>
+        @foreach (var acc in accounts)
         {
-            <button type="button" @onclick="DeleteTransaction">Delete</button>
+            <option value="@acc">@GB.ToProperCase(acc)</option>
         }
-    </div>
-    
-    @if (amount.HasValue && amount != 0)
+    </select>
+</div>
+
+<div class="form-group bottomspace">
+    <label for="toAccount">To account</label>
+    <select id="toAccount" @bind="toAccount">
+        <option value="">«no account»</option>
+        @foreach (var acc in accounts)
+        {
+            <option value="@acc">@GB.ToProperCase(acc)</option>
+        }
+    </select>
+</div>
+
+<div class="form-group bottomspace">
+    <label for="amount">Transaction amount</label>
+    <input type="number" id="amount" @bind="amount" step="0.01" min="-10000000" max="10000000" required placeholder="Transaction amount in money" />
+</div>
+
+<div class="form-group bottomspace">
+    <label for="dateEdit">Date</label>
+    <input type="datetime-local" id="dateEdit" @bind="date" required placeholder="Date the transaction was performed" />
+</div>
+
+<div class="form-group bottomspace">
+    <label for="description">Description</label>
+    <TextDatalist @bind-Value="description" Items="descriptions" OnSelected="OnDescriptionBlur" Placeholder="Operation Description" Required="@(!IsGiroconto)" />
+</div>
+
+<div class="form-group bottomspace">
+    <label for="category">Category</label>
+    <TextDatalist @bind-Value="category" Items="categories" Placeholder="Category to which the transaction belongs" Required="@(!IsGiroconto)" />
+</div>    
+
+<div class="form-group bottomspace">
+    <label for="author">Author</label>
+    <input type="text" id="author" @bind="author" maxlength="255" autocomplete="on" required placeholder="Author of the transaction" />
+</div>
+
+<div class="divSpaceBetween">
+    <WaitButton Text="Save" WaitText="Saving..." DoAction="SaveTransaction" />
+    @if (id > -1)
     {
-        <h3>Summary</h3>
-        @if (!string.IsNullOrEmpty(fromAccount) && !string.IsNullOrEmpty(toAccount))
-        {
-            <p>@GB.ToMoney(amount) @GB.MoneyDirection(amount.GetValueOrDefault(), isTransfer: true) @fromAccount</p>
-            <p>@GB.ToMoney(-amount) @GB.MoneyDirection(-amount.GetValueOrDefault(), isTransfer: true) @toAccount</p>
-        }
-        else if (!string.IsNullOrEmpty(fromAccount))
-        {
-            <p>@GB.ToMoney(amount) @GB.MoneyDirection(amount.GetValueOrDefault(), isTransfer: false) @fromAccount</p>
-        }
+        <WaitButton Text="Delete" WaitText="Deleting..." DoAction="DeleteTransaction" />
     }
+</div>
 
-    @if (!string.IsNullOrEmpty(error))
+@if (amount.HasValue && amount != 0)
+{
+    <h3>Summary</h3>
+    @if (!string.IsNullOrEmpty(fromAccount) && !string.IsNullOrEmpty(toAccount))
     {
-        <h3 class="mytextcolor">Error</h3>
-        <p class="mytextcolor giustificato">@error</p>
+        <p>@GB.ToMoney(amount) @GB.MoneyDirection(amount.GetValueOrDefault(), isTransfer: true) @fromAccount</p>
+        <p>@GB.ToMoney(-amount) @GB.MoneyDirection(-amount.GetValueOrDefault(), isTransfer: true) @toAccount</p>
     }
-</form>
+    else if (!string.IsNullOrEmpty(fromAccount))
+    {
+        <p>@GB.ToMoney(amount) @GB.MoneyDirection(amount.GetValueOrDefault(), isTransfer: false) @fromAccount</p>
+    }
+}
+
+@if (!string.IsNullOrEmpty(error))
+{
+    <h3 class="mytextcolor">Error</h3>
+    <p class="mytextcolor giustificato">@error</p>
+}
 
 @code {
 
@@ -206,7 +204,7 @@ else
     private async Task SaveTransaction()
     {
         error = string.Empty;
-        
+
         // Start an explicit transaction
         using var transaction = await Db.Database.BeginTransactionAsync();
 

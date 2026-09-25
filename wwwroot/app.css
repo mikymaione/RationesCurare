@@ -24,6 +24,14 @@ html {
     font-size: x-large;
 }
 
+.nopointer {
+    cursor: initial !important;
+}
+
+.small {
+    font-size: small;
+}
+
 .copyright {
     text-align: justify;
     text-justify: inter-character;

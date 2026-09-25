@@ -1,0 +1,53 @@
+@using Microsoft.AspNetCore.Components
+
+@if (isBusy)
+{
+    <button class="nopointer">
+        <span class="small googleIcon">hourglass_top</span>@WaitText
+    </button>
+}
+else
+{
+    <button @onclick="@HandleClick">
+        @Text
+    </button>
+}
+
+@code {
+
+    [EditorRequired]
+    [Parameter]
+    public string Text { get; set; }
+
+    [EditorRequired]
+    [Parameter]
+    public string WaitText { get; set; }
+
+    [Parameter]
+    public EventCallback DoAction { get; set; }
+
+
+    private bool isBusy;
+
+    private async Task HandleClick()
+    {
+        if (isBusy)
+            return;
+        
+        isBusy = true;
+
+        try
+        {
+            if (DoAction.HasDelegate)
+                await DoAction.InvokeAsync();
+        }
+        catch
+        {
+            isBusy = false;
+            throw;
+        }
+
+        isBusy = false;
+    }
+
+}
