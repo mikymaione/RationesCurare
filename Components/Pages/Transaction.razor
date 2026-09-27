@@ -93,6 +93,7 @@ else
     {
         <p>@GB.ToMoney(amount) @GB.MoneyDirection(amount.GetValueOrDefault(), isTransfer: false) @fromAccount</p>
     }
+    <p>@(string.IsNullOrEmpty(category) ? string.Empty : $"{category}:") @description</p>
 }
 
 @if (!string.IsNullOrEmpty(error))
