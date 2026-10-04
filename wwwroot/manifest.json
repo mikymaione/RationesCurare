@@ -32,13 +32,13 @@
 		},
 		{
 			"src": "/favicon/screenshotsM/content.png",
-			"sizes": "780x600",
+			"sizes": "375x667",
 			"type": "image/png",
 			"form_factor": "narrow"
 		},
 		{
 			"src": "/favicon/screenshotsM/transaction.png",
-			"sizes": "780x600",
+			"sizes": "375x667",
 			"type": "image/png",
 			"form_factor": "narrow"
 		},
