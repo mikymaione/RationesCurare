@@ -203,7 +203,7 @@
 
     private AccountBalanceTrendChart? accountBalanceTrendChart;
     private ExpenseBreakdownChart? expenseBreakdownChart;
-    private CashFlowChart? cashFlowChart;
+    private CashFlowChart? cashFlowChart;    
 
     string TheTitle =>
         string.IsNullOrEmpty(account)
@@ -246,6 +246,8 @@
     private List<string> categories = new();
     private List<string> descriptions = new();
     private List<string> accounts = new();
+
+    private bool loading;
 
     public void Dispose() =>
         dotNetRef?.Dispose();
@@ -563,14 +565,21 @@
 
     private async Task ApplyFilters()
     {
-        items.Clear();
-        cashFlowItems.Clear();
-        breakdownItems.Clear();
+        if (!loading)
+        {
+            loading = true;
 
-        hasMoreItems = true;
-        
-        await LoadNextBatch();
-        await CalculateTotal();
+            items.Clear();
+            cashFlowItems.Clear();
+            breakdownItems.Clear();
+
+            hasMoreItems = true;
+            
+            await LoadNextBatch();
+            await CalculateTotal();
+
+            loading = false;
+        }
     }
 
     private async Task LoadFilters()
@@ -606,32 +615,44 @@
 
     private async Task ClearFilters()
     {
-        dateFrom = null;
-        dateTo = null;
-        amountFrom = null;
-        amountTo = null;
-        filterCategory = "";
-        filterDescription = "";
-        filterAccount = account;
+        if (!loading)
+        {
+            loading = true;
 
-        items.Clear();
-        cashFlowItems.Clear();
-        breakdownItems.Clear();
+            dateFrom = null;
+            dateTo = null;
+            amountFrom = null;
+            amountTo = null;
+            filterCategory = "";
+            filterDescription = "";
+            filterAccount = account;
 
-        hasMoreItems = true;
-        
-        await LoadNextBatch();
-        await CalculateTotal();
+            items.Clear();
+            cashFlowItems.Clear();
+            breakdownItems.Clear();
+
+            hasMoreItems = true;
+            
+            await LoadNextBatch();
+            await CalculateTotal();
+
+            loading = false;
+        }
     }
 
     private void Detail(int id) 
     {
-        // Se stiamo creando una nuova transazione (id == -1) e abbiamo un account selezionato, lo passiamo in query string
-        var qsAccount = id == -1 && !string.IsNullOrEmpty(account)
-            ? $"&defaultAccount={System.Web.HttpUtility.UrlEncode(account)}"
-            : string.Empty;
+        if (!loading)
+        {
+            loading = true;
 
-        NavigationManager.NavigateTo($"/transactions/{id}?returnUrl={System.Web.HttpUtility.UrlEncode(NavigationManager.Uri)}{qsAccount}");
+            // Se stiamo creando una nuova transazione (id == -1) e abbiamo un account selezionato, lo passiamo in query string
+            var qsAccount = id == -1 && !string.IsNullOrEmpty(account)
+                ? $"&defaultAccount={System.Web.HttpUtility.UrlEncode(account)}"
+                : string.Empty;
+
+            NavigationManager.NavigateTo($"/transactions/{id}?returnUrl={System.Web.HttpUtility.UrlEncode(NavigationManager.Uri)}{qsAccount}");
+        }
     }
 
     private void NewTransaction() =>

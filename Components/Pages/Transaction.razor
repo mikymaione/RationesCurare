@@ -122,6 +122,7 @@ else
     private string? defaultAccountFromQuery;
 
     private string error = string.Empty;
+    private bool loading;
 
     private bool IsGiroconto =>
         !string.IsNullOrEmpty(fromAccount)
@@ -204,6 +205,10 @@ else
 
     private async Task SaveTransaction()
     {
+        if (loading)
+            return;
+
+        loading = true;
         error = string.Empty;
 
         // Start an explicit transaction
@@ -277,10 +282,16 @@ else
             await transaction.RollbackAsync();
             error = $"{ex.Message}: {ex.InnerException?.Message}";
         }
+
+        loading = false;
     }
 
     private async Task DeleteTransaction()
     {
+        if (loading)
+            return;
+
+        loading = true;
         error = string.Empty;
 
         if (id == null || id < 0)
@@ -339,6 +350,8 @@ else
             await transaction.RollbackAsync();
             error = $"{ex.Message}: {ex.InnerException?.Message}";
         }
+
+        loading = false;
     }
 
     private async Task OnDescriptionBlur()

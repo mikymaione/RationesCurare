@@ -50,13 +50,13 @@
     </table>
 }
 
-<input class="myBtn googleIcon fsXXL" @onclick="NewTransaction" type="submit" title="New transaction"
-       value="local_atm" />
+<input class="myBtn googleIcon fsXXL" @onclick="NewTransaction" type="submit" title="New transaction" value="local_atm" />
 
 @code {
 
     private List<Balance>? items;
     private double total;
+    private bool loading;
 
     protected override async Task OnInitializedAsync()
     {
@@ -78,10 +78,22 @@
             .SumAsync();
     }
 
-    private void Detail(string account) =>
-        NavigationManager.NavigateTo($"/transactions/{Uri.EscapeDataString(account)}");
+    private void Detail(string account)
+    {
+        if (!loading)
+        {
+            loading = true;
+            NavigationManager.NavigateTo($"/transactions/{Uri.EscapeDataString(account)}");   
+        }        
+    }
 
-    private void NewTransaction() =>
-        NavigationManager.NavigateTo($"/transactions/-1?returnUrl={System.Web.HttpUtility.UrlEncode(NavigationManager.Uri)}");
+    private void NewTransaction()
+    {
+        if (!loading)
+        {
+            loading = true;
+            NavigationManager.NavigateTo($"/transactions/-1?returnUrl={System.Web.HttpUtility.UrlEncode(NavigationManager.Uri)}");
+        }
+    }
 
 }

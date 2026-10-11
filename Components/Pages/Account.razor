@@ -55,6 +55,9 @@ else
     private string? Nome;
     private string? Nascondi;
     
+    private bool loading;
+
+
     private bool NascondiBool
     {
         get => Nascondi == "true";
@@ -88,6 +91,11 @@ else
 
     private async Task SaveAccount()
     {
+        if (loading)
+            return;
+
+        loading = true;
+        
         var a = NewRecord
             ? new()
             : await Db.Casses.FindAsync(account)            

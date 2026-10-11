@@ -87,15 +87,23 @@
 <input class="myBtn googleIcon fsXXL" @onclick="NewRecurringTransaction" type="submit" title="New recurring transaction" value="update" />
 
 @code {
+
     private List<MovimentiTempo>? items;
+    private bool loading;
 
     protected override async Task OnInitializedAsync() =>
         items = await Db.MovimentiTempos
             .OrderBy(x => x.GiornoDelMese)
             .ToListAsync();
 
-    private void Detail(int id) =>
-        NavigationManager.NavigateTo($"/recurring/{id}");
+    private void Detail(int id)
+    {
+        if (!loading)
+        {
+            loading = true;
+            NavigationManager.NavigateTo($"/recurring/{id}");
+        }
+    }
 
     private void NewRecurringTransaction() =>
         Detail(-1);

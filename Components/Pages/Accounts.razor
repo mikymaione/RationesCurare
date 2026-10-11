@@ -52,6 +52,7 @@
 @code {
 
     private List<Casse>? items;
+    private bool loading;
 
     protected override async Task OnInitializedAsync() =>
         items = await Db.Casses
@@ -59,8 +60,14 @@
             .ToListAsync();
     
 
-    private void Detail(string nome) =>
-        NavigationManager.NavigateTo($"/accounts/{nome}");
+    private void Detail(string nome)
+    {
+        if (!loading)
+        {
+            loading = true;
+            NavigationManager.NavigateTo($"/accounts/{nome}");
+        }
+    }
 
     private void NewAccount() =>
         Detail("-1");
