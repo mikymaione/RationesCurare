@@ -228,10 +228,15 @@
 
     // Filter variables
     private ViewType filterViewType = ViewType.AllTransactions;
+
     private DateTime? dateFrom;
     private DateTime? dateTo;
+    private DateTime? dateTo235959 =>
+        dateTo?.AddDays(1).AddTicks(-1); // Adjust dateTo to include the entire day
+    
     private double? amountFrom;
     private double? amountTo;
+    
     private string? filterCategory;
     private string? filterDescription;
     private string? filterAccount;
@@ -239,6 +244,7 @@
     // Min/Max values from database
     private DateTime? minDate;
     private DateTime? maxDate;
+
     private double? minAmount;
     private double? maxAmount;
 
@@ -299,8 +305,8 @@
         if (dateFrom.HasValue)
             query = query.Where(m => m.Data >= dateFrom);
 
-        if (dateTo.HasValue)
-            query = query.Where(m => m.Data <= dateTo);
+        if (dateTo235959.HasValue)
+            query = query.Where(m => m.Data <= dateTo235959);
 
         if (amountFrom.HasValue)
             query = query.Where(m => m.Soldi >= amountFrom);
@@ -540,8 +546,8 @@
         if (dateFrom.HasValue)
             query = query.Where(m => m.Data >= dateFrom);
 
-        if (dateTo.HasValue)
-            query = query.Where(m => m.Data <= dateTo);
+        if (dateTo235959.HasValue)
+            query = query.Where(m => m.Data <= dateTo235959);
 
         if (amountFrom.HasValue)
             query = query.Where(m => m.Soldi >= amountFrom);
